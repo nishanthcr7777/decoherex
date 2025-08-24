@@ -1,3 +1,88 @@
+Backend to Frontend Integration in Decoherex
+
+I've successfully set up and tested the integration between the frontend and backend components of the Decoherex application. Here's a summary of the key integration points and functionality:
+
+Running Services
+
+Frontend: Running on http://localhost:5173/ (React with TypeScript, Vite, and TailwindCSS)
+
+Backend: Running on http://localhost:8000 (FastAPI with MongoDB)
+
+API Integration Points
+
+REST API Endpoints
+
+Root endpoint (/) - Returns basic API information
+
+Health check (/health) - Monitors backend health status
+
+Jobs management (/jobs) - CRUD operations for quantum computing jobs
+
+Backends information (/backends) - Information about quantum computing backends
+
+Backend-specific endpoints:
+
+Status (/backends/{id}/status) - Real-time status of quantum backends
+
+Queue (/backends/{id}/queue) - Queue information for specific backends
+
+Metrics (/backends/{id}/metrics) - Performance metrics for backends
+
+WebSocket Connections
+
+Job updates (ws://localhost:8000/ws/job-updates) - Real-time updates for job status, progress, and logs
+
+Backend status (ws://localhost:8000/ws/backend-status) - Real-time updates for backend status changes
+
+Key Features Tested
+
+Job Management
+
+Successfully created a new quantum job via API
+
+Retrieved job details using job ID
+
+Job tracking with real-time updates via WebSockets
+
+Backend Monitoring
+
+Retrieved backend status information
+
+Accessed queue information for backends
+
+Obtained performance metrics for backends
+
+Real-time Communication
+
+WebSocket connections for job updates
+
+WebSocket connections for backend status changes
+
+Ping/pong mechanism to keep connections alive
+
+Frontend Implementation
+
+The frontend implements these integrations through:
+
+API Service - Handles REST API calls to the backend
+
+WebSocket Service - Manages WebSocket connections for real-time updates
+
+Component Integration - Components like JobTracking and Backends consume these services
+
+Backend Implementation
+
+The backend provides:
+
+FastAPI Routes - REST API endpoints for CRUD operations
+
+WebSocket Managers - Connection managers for real-time updates
+
+CORS Configuration - Configured to allow requests from the frontend
+
+The application demonstrates a well-structured integration between frontend and backend, with proper separation of concerns and real-time communication capabilities for quantum computing job management and backend monitoring.
+
+
 # Decoherex FastAPI Backend
 
 A modern, fast backend API built with FastAPI for the Decoherex application.
@@ -93,3 +178,4 @@ For production deployment:
 5. Configure SSL/TLS certificates
 6. Set up proper database connections
 7. Implement rate limiting and security headers
+
