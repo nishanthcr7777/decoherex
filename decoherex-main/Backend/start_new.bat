@@ -1,0 +1,9 @@
+@echo off
+echo Starting Decoherex FastAPI Backend (New Structure)...
+echo.
+echo Installing dependencies...
+pip install -r requirements.txt
+echo.
+echo Starting server...
+python run.py
+pause
