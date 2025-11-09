@@ -34,7 +34,9 @@ env/
 .uv/
 uv.lock
 
-# Replit
+*.pkl
+*.pickle
+ai_model/backend_recommender.pkl
 .replit
 .local/
 
