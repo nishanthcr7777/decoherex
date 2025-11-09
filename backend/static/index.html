@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quantum Job Dashboard</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🔮 Quantum Job Dashboard</h1>
+            <p>Real-time IBM Quantum job submission and monitoring</p>
+        </header>
+
+        <!-- API Token Setup Section -->
+        <div id="token-setup" class="section" style="display: none;">
+            <h2>⚙️ Setup API Token</h2>
+            <p>To use this dashboard, you need an IBM Quantum API token.</p>
+            <ol>
+                <li>Visit <a href="https://quantum.ibm.com/" target="_blank">IBM Quantum Platform</a></li>
+                <li>Create a free account (if you don't have one)</li>
+                <li>Go to your account settings and copy your API token</li>
+                <li>Paste it below and click "Save Token"</li>
+            </ol>
+            <form id="token-form">
+                <input type="password" id="api-token" placeholder="Enter your IBM Quantum API token" required>
+                <button type="submit">Save Token</button>
+            </form>
+            <div id="token-message" class="message"></div>
+        </div>
+
+        <!-- KPIs Section -->
+        <div id="kpis-section" class="section">
+            <h2>📈 Key Performance Indicators</h2>
+            <div class="kpi-grid">
+                <div class="kpi-card">
+                    <h3>Queued Jobs</h3>
+                    <p id="queued-jobs-count">0</p>
+                </div>
+                <div class="kpi-card">
+                    <h3>Pending Jobs</h3>
+                    <p id="pending-jobs-count">0</p>
+                </div>
+                <div class="kpi-card">
+                    <h3>Version</h3>
+                    <p id="version-display">N/A</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Job Submission Form -->
+        <div id="job-form-section" class="section" style="display: none;">
+            <h2>📤 Submit Quantum Job</h2>
+            <form id="job-form">
+                <div class="form-group">
+                    <label for="job-name">Job Name (optional):</label>
+                    <input type="text" id="job-name" name="job_name" placeholder="e.g., My First Quantum Job">
+                </div>
+
+                <div class="form-group">
+                    <label for="backend">Backend:</label>
+                    <select id="backend" name="backend_name" required>
+                        <option value="">Select a backend...</option>
+                        <option value="ibm_torino">IBM Torino</option>
+                        <option value="ibm_fez">IBM Fez</option>
+                        <option value="ibm_marrakesh">IBM Marrakesh</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="circuit">Circuit:</label>
+                    <select id="circuit" name="circuit_type" required>
+                        <option value="">Select a circuit...</option>
+                        <option value="superposition">Superposition (1 qubit)</option>
+                        <option value="bell_state">Bell State (2 qubits)</option>
+                        <option value="quantum_random">Quantum Random (1 qubit)</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="shots">Shots:</label>
+                    <input type="number" id="shots" name="shots" value="1024" min="1" max="10000" required>
+                </div>
+
+                <button type="submit">Submit Job</button>
+            </form>
+            <div id="submit-message" class="message"></div>
+        </div>
+
+        <!-- Jobs Table -->
+        <div id="jobs-section" class="section" style="display: none;">
+            <h2>📊 Job Queue</h2>
+            <div class="status-indicator">
+                <span id="connection-status" class="status-dot disconnected"></span>
+                <span id="connection-text">Disconnected</span>
+            </div>
+            <div class="table-wrapper">
+                <table id="jobs-table">
+                    <thead>
+                        <tr>
+                            <th>Job Name</th>
+                            <th>Job ID</th>
+                            <th>Backend</th>
+                            <th>Circuit</th>
+                            <th>Status</th>
+                            <th>Progress</th>
+                            <th>Submitted At</th>
+                        </tr>
+                    </thead>
+                    <tbody id="jobs-tbody">
+                        <tr>
+                            <td colspan="7" class="no-jobs">No jobs yet. Submit your first quantum job above!</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <footer>
+            <p>Built with FastAPI, Qiskit, and WebSockets | IBM Quantum Platform</p>
+        </footer>
+    </div>
+
+    <script src="/static/app.js"></script>
+</body>
+</html>

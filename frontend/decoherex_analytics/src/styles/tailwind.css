@@ -1,0 +1,117 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Core Colors */
+    --color-background: #0f172a; /* slate-900 */
+    --color-foreground: #f8fafc; /* slate-50 */
+    --color-border: #334155; /* slate-700 */
+    --color-input: #1e293b; /* slate-800 */
+    --color-ring: #06b6d4; /* cyan-500 */
+    
+    /* Card Colors */
+    --color-card: #1e293b; /* slate-800 */
+    --color-card-foreground: #f8fafc; /* slate-50 */
+    --color-popover: #1e293b; /* slate-800 */
+    --color-popover-foreground: #f8fafc; /* slate-50 */
+    
+    /* Muted Colors */
+    --color-muted: #334155; /* slate-700 */
+    --color-muted-foreground: #94a3b8; /* slate-400 */
+    
+    /* Primary Colors */
+    --color-primary: #071029; /* custom deep navy */
+    --color-primary-foreground: #f8fafc; /* slate-50 */
+    
+    /* Secondary Colors */
+    --color-secondary: #1e3a8a; /* blue-800 */
+    --color-secondary-foreground: #f8fafc; /* slate-50 */
+    
+    /* Accent Colors */
+    --color-accent: #06b6d4; /* cyan-500 */
+    --color-accent-foreground: #0f172a; /* slate-900 */
+    
+    /* State Colors */
+    --color-success: #10b981; /* emerald-500 */
+    --color-success-foreground: #f8fafc; /* slate-50 */
+    
+    --color-warning: #f59e0b; /* amber-500 */
+    --color-warning-foreground: #0f172a; /* slate-900 */
+    
+    --color-error: #ef4444; /* red-500 */
+    --color-error-foreground: #f8fafc; /* slate-50 */
+    
+    --color-destructive: #ef4444; /* red-500 */
+    --color-destructive-foreground: #f8fafc; /* slate-50 */
+    
+    /* Surface Colors */
+    --color-surface: #1e293b; /* slate-800 */
+    --color-surface-foreground: #f8fafc; /* slate-50 */
+    
+    /* Text Colors */
+    --color-text-primary: #f8fafc; /* slate-50 */
+    --color-text-secondary: #94a3b8; /* slate-400 */
+    
+    /* Glass Morphism */
+    --glass-bg: rgba(0, 0, 0, 0.2); /* black/20 */
+    --glass-border: rgba(51, 65, 85, 0.5); /* slate-700/50 */
+  }
+  
+  * {
+    @apply border-border;
+  }
+  
+  body {
+    @apply bg-background text-foreground font-sans;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+  
+  /* Glass Morphism Utilities */
+  .glass-card {
+    @apply bg-slate-800/50 border border-slate-700/50;
+  }
+  
+  /* Animation Utilities */
+  .pulse-status {
+    animation: pulse-status 2s ease-in-out infinite;
+  }
+  
+  @keyframes pulse-status {
+    0%, 100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.5;
+    }
+  }
+  
+  /* Shimmer Loading Effect */
+  .shimmer {
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+  }
+  
+  @keyframes shimmer {
+    0% {
+      background-position: -200% 0;
+    }
+    100% {
+      background-position: 200% 0;
+    }
+  }
+  
+  /* Hide scrollbar utility */
+  .scrollbar-hide {
+    -ms-overflow-style: none;  /* Internet Explorer 10+ */
+    scrollbar-width: none;  /* Firefox */
+  }
+  
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;  /* Safari and Chrome */
+  }
+}

@@ -1,0 +1,53 @@
+# Python
+__pycache__/
+**/__pycache__/
+*.py[cod]
+*$py.class
+.Python
+build/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+sdist/
+var/
+wheels/
+*.egg-info/
+*.egg
+
+# Virtual Environment
+.pythonlibs/
+venv/
+ENV/
+env/
+.venv/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# UV
+.uv/
+uv.lock
+
+# Replit
+.replit
+.local/
+
+# Environment files
+*.env
+qiskit-ibm.json
+
+# Node / Frontend
+node_modules/
+frontend/**/node_modules/
+frontend/**/dist/
+*.log
+
+# Misc
+.DS_Store
+Thumbs.db
