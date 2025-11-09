@@ -10,7 +10,9 @@ __pycache__/
 venv/
 
 # Secrets
-
+*.pkl
+*.pickle
+ai_model/backend_recommender.pkl
 
 
 backend/.local/
