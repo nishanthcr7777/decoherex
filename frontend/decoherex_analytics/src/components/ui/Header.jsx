@@ -29,6 +29,12 @@ const Header = () => {
       path: '/performance-analytics-insights-dashboard',
       icon: 'BarChart3',
       description: 'Historical performance insights and capacity planning analytics'
+    },
+    {
+      label: 'Quantum Lab',
+      path: '/quantum-lab',
+      icon: 'Cpu',
+      description: 'AI-assisted circuit generation and simulation'
     }
   ];
 

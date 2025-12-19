@@ -5,3 +5,11 @@ qiskit>=2.2.1
 qiskit-ibm-runtime>=0.42.0
 uvicorn[standard]>=0.37.0
 websockets>=15.0.1
+qiskit-aer
+matplotlib
+pylatexenc
+pandas
+joblib
+scikit-learn
+httpx
+groq

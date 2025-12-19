@@ -12,13 +12,32 @@ from qiskit.transpiler.preset_passmanagers import generate_preset_pass_manager
 from qiskit_ibm_runtime import QiskitRuntimeService, SamplerV2 as Sampler
 import uuid
 import logging
+import io
+import base64
+import matplotlib.pyplot as plt
+from qiskit_aer import AerSimulator
+from qiskit import transpile
+from qiskit.visualization import circuit_drawer
+from groq import Groq
 
 # Load token from .env if available
 load_dotenv()
 IBM_TOKEN = os.getenv("IBM_QUANTUM_API_TOKEN")
+GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 service: Optional[QiskitRuntimeService] = None
 api_token_saved = False
 print(f"DEBUG: IBM_TOKEN from .env: {IBM_TOKEN}")
+
+# Initialize Groq Client
+groq_client = None
+if GROQ_API_KEY:
+    try:
+        groq_client = Groq(api_key=GROQ_API_KEY)
+        logging.info("Groq API client initialized.")
+    except Exception as e:
+        logging.error(f"Failed to initialize Groq client: {e}")
+else:
+    logging.warning("GROQ_API_KEY not found. AI generation will fallback to rule-based.")
 if IBM_TOKEN:
     try:
         service = QiskitRuntimeService(channel="ibm_quantum_platform", token=IBM_TOKEN)
@@ -499,6 +518,225 @@ async def websocket_endpoint(websocket: WebSocket):
     finally:
         if websocket in active_connections:
             active_connections.remove(websocket)
+
+# ----------------------------
+# 8️⃣ Quantum Lab API (AI & Simulation)
+# ----------------------------
+
+class GenerateRequest(BaseModel):
+    prompt: str
+
+class SimulateRequest(BaseModel):
+    code: str
+
+@app.post("/api/ai/generate")
+async def generate_circuit_code(request: GenerateRequest):
+    """
+    Generates Qiskit code from a natural language prompt using Groq API.
+    Fallback to rule-based if API key is missing.
+    """
+    prompt = request.prompt.lower()
+    code = ""
+    
+    # Check if Groq is available
+    if groq_client:
+        try:
+            model_name = os.getenv("GROQ_MODEL", "llama-3.3-70b-versatile")
+            logging.info(f"Using Groq model: {model_name}")
+            
+            completion = groq_client.chat.completions.create(
+                messages=[
+                    {
+                        "role": "system",
+                        "content":""" You are a quantum computing expert specializing in Qiskit.
+
+Task:
+Generate ONLY valid, correct Python code that constructs a QuantumCircuit.
+
+STRICT RULES:
+1. The code MUST define a variable named `qc` of type QuantumCircuit.
+2. Return ONLY raw Python code. Do NOT use markdown, backticks, or explanations.
+3. Include all required imports explicitly (e.g., `from qiskit import QuantumCircuit`).
+4. **DO NOT import or use `execute`, `Aer`, or `BasicAer`. these are deprecated.**
+5. **DO NOT use `qc.mct()`. Use `qc.mcx()` for multi-controlled X gates.**
+6. **DO NOT use deprecated gates `u1`, `u2`, `u3`. Use `p`, `sx`, or `u` instead.**
+7. **DO NOT run the circuit. Just build the circuit object `qc`.**
+8. Do NOT simulate classical logic using loops over basis states.
+9. All quantum operations must be unitary and reversible.
+10. If implementing a known algorithm (Grover, QFT, etc.), follow the canonical structure exactly.
+11. Grover-specific rules (if applicable):
+   - Initialize with H gates.
+   - Oracle must phase flip marked states.
+   - Diffusion: H -> X -> mcx -> X -> H.
+12. End with `qc.measure_all()` to ensure the circuit produces results, UNLESS the user explicitly asks for no measurements.
+13. Keep the circuit minimal, correct, and executable in Qiskit 1.0+.
+
+If you are uncertain, output the simplest correct circuit that satisfies the request.
+"""
+                    },
+                    {
+                        "role": "user",
+                        "content": request.prompt
+                    }
+                ],
+                model=model_name,
+                temperature=0.1,
+            )
+            code = completion.choices[0].message.content.strip()
+            
+            # Cleanup markdown using regex to ensure only code is returned
+            import re
+            match = re.search(r"```(?:python)?\n?(.*?)```", code, re.DOTALL)
+            if match:
+                code = match.group(1).strip()
+            else:
+                # If no markdown blocks, assume the whole text is code but strip distinct markdown-like artifacts manually if any
+                code = code.replace("```python", "").replace("```", "").strip()
+            
+
+            return {
+                "code": code,
+                "model_used": model_name
+            }
+            
+        except Exception as e:
+            logging.error(f"Groq API Error: {e}")
+            # Fallback to rule-based if API fails
+            pass
+
+    # Fallback Rule-Based Logic
+    fallback_model = "Rule-Based (Fallback)"
+    if "bell" in prompt:
+        code = """from qiskit import QuantumCircuit
+
+# Bell State
+qc = QuantumCircuit(2, 2)
+qc.h(0)
+qc.cx(0, 1)
+qc.measure([0, 1], [0, 1])"""
+    elif "ghz" in prompt:
+        code = """from qiskit import QuantumCircuit
+
+# GHZ State (3 qubits)
+qc = QuantumCircuit(3, 3)
+qc.h(0)
+qc.cx(0, 1)
+qc.cx(1, 2)
+qc.measure([0, 1, 2], [0, 1, 2])"""
+    elif "teleport" in prompt:
+        code = """from qiskit import QuantumCircuit
+
+# Quantum Teleportation
+qc = QuantumCircuit(3, 3)
+# Entanglement
+qc.h(1)
+qc.cx(1, 2)
+# Prepare payload
+qc.x(0) 
+qc.h(0)
+# Teleport
+qc.cx(0, 1)
+qc.h(0)
+qc.measure([0, 1], [0, 1])
+qc.cx(1, 2)
+qc.cz(0, 2)
+qc.measure(2, 2)"""
+    elif "fourier" in prompt or "qft" in prompt:
+        code = """from qiskit import QuantumCircuit
+import numpy as np
+
+# QFT (2 qubits)
+qc = QuantumCircuit(2, 2)
+qc.h(0)
+qc.cp(np.pi/2, 1, 0)
+qc.h(1)
+qc.swap(0, 1)
+qc.measure([0, 1], [0, 1])"""
+    elif "grover" in prompt:
+        code = """from qiskit import QuantumCircuit
+
+# Grover's Algorithm (2 qubits)
+qc = QuantumCircuit(2, 2)
+qc.h([0, 1])
+qc.cz(0, 1) # Oracle
+qc.h([0, 1])
+qc.x([0, 1])
+qc.cz(0, 1)
+qc.x([0, 1])
+qc.h([0, 1])
+qc.measure([0, 1], [0, 1])"""
+    else:
+        # Fallback / Template
+        code = """from qiskit import QuantumCircuit
+
+# Standard Superposition
+qc = QuantumCircuit(1, 1)
+qc.h(0)
+qc.measure(0, 0)"""
+
+    return {
+        "code": code, 
+        "model_used": fallback_model,
+        "note": "AI generation failed or key missing. Returning template."
+    }
+
+@app.post("/api/simulate")
+async def simulate_circuit(request: SimulateRequest):
+    """
+    Executes Qiskit code on a local Aer simulator.
+    WARNING: Uses exec() - use with caution in production.
+    """
+    try:
+        # Create a local scope for execution
+        local_scope = {}
+        
+        # SANITIZE CODE: Remove legacy imports that might cause errors
+        sanitized_code = request.code
+        # Remove legacy imports
+        sanitized_code = sanitized_code.replace("from qiskit import execute", "")
+        sanitized_code = sanitized_code.replace("from qiskit import Aer", "")
+        sanitized_code = sanitized_code.replace("from qiskit.providers.aer import Aer", "")
+        sanitized_code = sanitized_code.replace("from qiskit import BasicAer", "")
+        
+        # Execute the code to get the 'qc' object
+        # We wrap in try-exec to catch code-level errors from AI
+        exec(sanitized_code, {}, local_scope)
+        
+        if 'qc' not in local_scope:
+            return {"error": "Code must define a variable named 'qc' (QuantumCircuit)."}
+        
+        qc = local_scope['qc']
+        
+        # SAFETY: Ensure measurements exist
+        if qc.num_clbits == 0:
+            qc.measure_all()
+        
+        # 1. Simulate
+        simulator = AerSimulator()
+        # Transpile for simulator
+        transpiled_qc = transpile(qc, simulator)
+        job = simulator.run(transpiled_qc, shots=1024)
+        result = job.result()
+        try:
+            counts = result.get_counts()
+        except Exception:
+            # Fallback if get_counts fails (e.g. no measurements even after measure_all?)
+            counts = {"error": "No counts generated. Circuit might be empty."}
+        
+        # 2. Generate Diagram
+        img_buf = io.BytesIO()
+        qc.draw(output='mpl', filename=None).savefig(img_buf, format='png')
+        img_buf.seek(0)
+        img_b64 = base64.b64encode(img_buf.read()).decode('utf-8')
+        
+        return {
+            "counts": counts,
+            "diagram": f"data:image/png;base64,{img_b64}"
+        }
+        
+    except Exception as e:
+        print(f"Simulation Error: {e}")
+        return {"error": str(e)}
 
 # Mount static files
 static_dir = os.path.join(os.path.dirname(__file__), "..", "frontend", "decoherex_analytics", "build")
