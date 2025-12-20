@@ -561,7 +561,8 @@ STRICT RULES:
 4. **DO NOT import or use `execute`, `Aer`, or `BasicAer`. these are deprecated.**
 5. **DO NOT use `qc.mct()`. Use `qc.mcx()` for multi-controlled X gates.**
 6. **DO NOT use deprecated gates `u1`, `u2`, `u3`. Use `p`, `sx`, or `u` instead.**
-7. **DO NOT run the circuit. Just build the circuit object `qc`.**
+7. **DO NOT import `RX`, `RY`, `RZ` directly from `qiskit.circuit.library`. Use `RXGate`, `RYGate`, `RZGate` or simply `qc.rx()`, `qc.ry()`, `qc.rz()` methods.**
+8. **DO NOT run the circuit. Just build the circuit object `qc`.**
 8. Do NOT simulate classical logic using loops over basis states.
 9. All quantum operations must be unitary and reversible.
 10. If implementing a known algorithm (Grover, QFT, etc.), follow the canonical structure exactly.
@@ -693,6 +694,15 @@ async def simulate_circuit(request: SimulateRequest):
         sanitized_code = sanitized_code.replace("from qiskit import Aer", "")
         sanitized_code = sanitized_code.replace("from qiskit.providers.aer import Aer", "")
         sanitized_code = sanitized_code.replace("from qiskit import BasicAer", "")
+        
+        # Patch deprecated usage of RX, RY, RZ imports
+        sanitized_code = sanitized_code.replace("from qiskit.circuit.library import RX", "from qiskit.circuit.library import RXGate as RX")
+        sanitized_code = sanitized_code.replace("from qiskit.circuit.library import RY", "from qiskit.circuit.library import RYGate as RY")
+        sanitized_code = sanitized_code.replace("from qiskit.circuit.library import RZ", "from qiskit.circuit.library import RZGate as RZ")
+        sanitized_code = sanitized_code.replace("from qiskit.circuit.library import X", "from qiskit.circuit.library import XGate as X")
+        sanitized_code = sanitized_code.replace("from qiskit.circuit.library import Y", "from qiskit.circuit.library import YGate as Y")
+        sanitized_code = sanitized_code.replace("from qiskit.circuit.library import Z", "from qiskit.circuit.library import ZGate as Z")
+        sanitized_code = sanitized_code.replace("from qiskit.circuit.library import H", "from qiskit.circuit.library import HGate as H")
         
         # 1. EXECUTE IN ISOLATED SCOPE
         local_scope = {}
