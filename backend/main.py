@@ -366,7 +366,8 @@ async def get_recent_jobs():
 async def submit_job(
     job_name: str = Form(""),
     backend_name: str = Form(...),
-    circuit_type: str = Form(...),
+    circuit_type: Optional[str] = Form(None),
+    custom_code: Optional[str] = Form(None),
     shots: int = Form(1024)
 ):
     """Submit a quantum job to IBM Quantum."""
@@ -377,7 +378,36 @@ async def submit_job(
     
     try:
         # Create the circuit
-        circuit = get_predefined_circuit(circuit_type)
+        circuit = None
+        
+        if custom_code:
+            # SANITIZE AND EXECUTE CUSTOM CODE
+            sanitized_code = custom_code
+            sanitized_code = sanitized_code.replace("from qiskit.providers.aer import Aer", "")
+            sanitized_code = sanitized_code.replace("from qiskit import BasicAer", "")
+            # Patch deprecated usage of RX, RY, RZ imports
+            sanitized_code = sanitized_code.replace("from qiskit.circuit.library import RX", "from qiskit.circuit.library import RXGate as RX")
+            sanitized_code = sanitized_code.replace("from qiskit.circuit.library import RY", "from qiskit.circuit.library import RYGate as RY")
+            sanitized_code = sanitized_code.replace("from qiskit.circuit.library import RZ", "from qiskit.circuit.library import RZGate as RZ")
+            sanitized_code = sanitized_code.replace("from qiskit.circuit.library import X", "from qiskit.circuit.library import XGate as X")
+            sanitized_code = sanitized_code.replace("from qiskit.circuit.library import Y", "from qiskit.circuit.library import YGate as Y")
+            sanitized_code = sanitized_code.replace("from qiskit.circuit.library import Z", "from qiskit.circuit.library import ZGate as Z")
+            sanitized_code = sanitized_code.replace("from qiskit.circuit.library import H", "from qiskit.circuit.library import HGate as H")
+
+            local_scope = {}
+            exec(sanitized_code, local_scope, local_scope)
+            
+            if "qc" not in local_scope:
+                raise HTTPException(status_code=400, detail="Custom code must define a 'qc' variable.")
+            
+            circuit = local_scope["qc"]
+            if not isinstance(circuit, QuantumCircuit):
+                 raise HTTPException(status_code=400, detail="'qc' is not a valid QuantumCircuit object.")
+                 
+        elif circuit_type:
+            circuit = get_predefined_circuit(circuit_type)
+        else:
+            raise HTTPException(status_code=400, detail="Either circuit_type or custom_code must be provided.")
         
         # Get the backend
         backend = service.backend(backend_name)
@@ -396,7 +426,7 @@ async def submit_job(
             "job_id": job_id,
             "job_name": job_name if job_name else f"Job-{job_id[:8]}",
             "backend": backend_name,
-            "circuit": get_circuit_description(circuit_type),
+            "circuit": "Custom Code" if custom_code else get_circuit_description(circuit_type),
             "status": "QUEUED",
             "submitted_at": datetime.now().isoformat(),
             "progress": 0,

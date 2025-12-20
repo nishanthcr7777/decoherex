@@ -70,7 +70,7 @@ const QuantumOperationsCommandCenter = () => {
   const [isJobModalOpen, setIsJobModalOpen] = useState(false);
   const [selectedJob, setSelectedJob] = useState(null);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
-  
+
   // Filter states
   const [statusFilter, setStatusFilter] = useState('all');
   const [backendFilter, setBackendFilter] = useState('all');
@@ -408,18 +408,18 @@ const QuantumOperationsCommandCenter = () => {
 
   const handleJobAction = (action, jobId) => {
     console.log(`Action: ${action} on job: ${jobId}`);
-    
+
     switch (action) {
       case 'cancel':
-        setJobs(prevJobs => 
-          prevJobs?.map(job => 
+        setJobs(prevJobs =>
+          prevJobs?.map(job =>
             job?.id === jobId ? { ...job, status: 'failed', error: { code: 'USER_CANCELLED', message: 'Job cancelled by user' } } : job
           )
         );
         break;
       case 'retry':
-        setJobs(prevJobs => 
-          prevJobs?.map(job => 
+        setJobs(prevJobs =>
+          prevJobs?.map(job =>
             job?.id === jobId ? { ...job, status: 'queued', error: null, progress: 0 } : job
           )
         );
@@ -511,7 +511,13 @@ const QuantumOperationsCommandCenter = () => {
       const form = new FormData();
       form.append('job_name', jobData.jobName || '');
       form.append('backend_name', jobData.backend);
-      form.append('circuit_type', jobData.jobType); // mapping assumption
+
+      if (jobData.mode === 'custom' && jobData.customCode) {
+        form.append('custom_code', jobData.customCode);
+      } else {
+        form.append('circuit_type', jobData.jobType);
+      }
+
       form.append('shots', jobData.shots || 1024);
       const resp = await fetch(`${API_BASE}/submit-job`, {
         method: 'POST',
@@ -557,7 +563,7 @@ const QuantumOperationsCommandCenter = () => {
                 </Button>
               </div>
             </div>
-            
+
             {/* Filter Panel */}
             <div className="flex justify-end">
               <FilterPanel
@@ -571,40 +577,40 @@ const QuantumOperationsCommandCenter = () => {
                 setDurationFilter={setDurationFilter}
               />
             </div>
-            
+
             {/* KPI Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 mb-6">
-          {liveJobsKpiData.map((kpi, index) => (
-            <KPICard key={`new-kpi-${index}`} {...kpi} />
-          ))}
-          {Object.entries(kpiData)?.map(([key, data]) => (
-            <KPICard
-              key={key}
-              title={data?.title}
-              value={data?.value}
-              unit={data?.unit}
-              trend={data?.trend}
-              trendValue={data?.trendValue}
-              status={data?.status}
-              sparklineData={data?.sparklineData}
-              icon={data?.icon}
-            />
-          ))}
-        </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 mb-6">
+              {liveJobsKpiData.map((kpi, index) => (
+                <KPICard key={`new-kpi-${index}`} {...kpi} />
+              ))}
+              {Object.entries(kpiData)?.map(([key, data]) => (
+                <KPICard
+                  key={key}
+                  title={data?.title}
+                  value={data?.value}
+                  unit={data?.unit}
+                  trend={data?.trend}
+                  trendValue={data?.trendValue}
+                  status={data?.status}
+                  sparklineData={data?.sparklineData}
+                  icon={data?.icon}
+                />
+              ))}
+            </div>
 
-        {/* Job Lifecycle Flow */}
-        <div className="mb-6">
-          <JobLifecycleFlow jobs={jobs} />
-        </div>
+            {/* Job Lifecycle Flow */}
+            <div className="mb-6">
+              <JobLifecycleFlow jobs={jobs} />
+            </div>
 
-        {/* Live Job Feed */}
-        <div className="mb-8">
-          <LiveJobFeed jobs={jobs} onJobAction={handleJobAction} />
-        </div>
+            {/* Live Job Feed */}
+            <div className="mb-8">
+              <LiveJobFeed jobs={jobs} onJobAction={handleJobAction} />
+            </div>
 
             {/* Job Data Grid */}
-            <JobDataGrid 
-              jobs={jobs} 
+            <JobDataGrid
+              jobs={jobs}
               onJobAction={handleJobAction}
               onExport={handleExport}
               statusFilter={statusFilter}
@@ -632,7 +638,7 @@ const QuantumOperationsCommandCenter = () => {
 
       {/* Token Setup Modal */}
       {!tokenConfigured && (
-        <Modal isOpen={isTokenModalOpen} onClose={() => {}} title="Setup IBM Quantum API Token">
+        <Modal isOpen={isTokenModalOpen} onClose={() => { }} title="Setup IBM Quantum API Token">
           <div className="space-y-4">
             <p>Enter your IBM Quantum API token to enable job submission.</p>
             <Input type="password" placeholder="Token" id="token-input" />
