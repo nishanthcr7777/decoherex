@@ -683,49 +683,59 @@ qc.measure(0, 0)"""
 @app.post("/api/simulate")
 async def simulate_circuit(request: SimulateRequest):
     """
-    Executes Qiskit code on a local Aer simulator.
-    WARNING: Uses exec() - use with caution in production.
+    Executes Qiskit code on a local Aer simulator using a secure(r) scope approach.
     """
     try:
-        # Create a local scope for execution
-        local_scope = {}
-        
         # SANITIZE CODE: Remove legacy imports that might cause errors
         sanitized_code = request.code
-        # Remove legacy imports
         sanitized_code = sanitized_code.replace("from qiskit import execute", "")
         sanitized_code = sanitized_code.replace("from qiskit import Aer", "")
         sanitized_code = sanitized_code.replace("from qiskit.providers.aer import Aer", "")
         sanitized_code = sanitized_code.replace("from qiskit import BasicAer", "")
         
-        # Execute the code to get the 'qc' object
-        # We wrap in try-exec to catch code-level errors from AI
-        exec(sanitized_code, {}, local_scope)
+        # 1. EXECUTE IN ISOLATED SCOPE
+        local_scope = {}
+        # Pass local_scope as both globals and locals to ensure imports are visible
+        exec(sanitized_code, local_scope, local_scope)
         
-        if 'qc' not in local_scope:
-            return {"error": "Code must define a variable named 'qc' (QuantumCircuit)."}
+        if "qc" not in local_scope:
+            return {"error": "Code must define a variable named 'qc'."}
         
-        qc = local_scope['qc']
+        qc = local_scope["qc"]
         
-        # SAFETY: Ensure measurements exist
+        from qiskit import QuantumCircuit
+        if not isinstance(qc, QuantumCircuit):
+            return {"error": "qc is not a valid QuantumCircuit object."}
+        
+        # 2. ENSURE MEASUREMENTS for Aer
         if qc.num_clbits == 0:
             qc.measure_all()
         
-        # 1. Simulate
+        # 3. SIMULATE SAFELY
         simulator = AerSimulator()
-        # Transpile for simulator
-        transpiled_qc = transpile(qc, simulator)
+        # Restrict basis gates to avoid Aer choking on exotic instructions
+        transpiled_qc = transpile(
+            qc, 
+            simulator, 
+            optimization_level=1, 
+            basis_gates=["cx", "sx", "x", "rz", "measure", "h", "z", "y", "id", "barrier", "reset"]
+        )
+        
         job = simulator.run(transpiled_qc, shots=1024)
         result = job.result()
         try:
             counts = result.get_counts()
         except Exception:
-            # Fallback if get_counts fails (e.g. no measurements even after measure_all?)
-            counts = {"error": "No counts generated. Circuit might be empty."}
+             counts = {"error": "No counts generated. Circuit might be empty."}
         
-        # 2. Generate Diagram
+        # 4. GENERATE DIAGRAM ROBUSTLY
         img_buf = io.BytesIO()
-        qc.draw(output='mpl', filename=None).savefig(img_buf, format='png')
+        # qc.draw() returns a Figure in 'mpl' mode
+        fig = qc.draw(output="mpl")
+        fig.savefig(img_buf, format="png", bbox_inches="tight")
+        # Critical: Close the figure to prevent memory leaks/context issues
+        plt.close(fig)
+        
         img_buf.seek(0)
         img_b64 = base64.b64encode(img_buf.read()).decode('utf-8')
         
