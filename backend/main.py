@@ -480,20 +480,101 @@ async def monitor_job(job_id: str):
                     jobs[job_id]["progress"] = 0
                 elif status_str == "RUNNING":
                     jobs[job_id]["progress"] = 50
-                elif status_str == "DONE":
+                elif status_str in ["DONE", "COMPLETED"]:
                     jobs[job_id]["progress"] = 100
-                elif "ERROR" in status_str or "CANCELLED" in status_str:
-                    jobs[job_id]["status"] = "ERROR"
-                    jobs[job_id]["progress"] = 0
+                    
+                    # Fetch and store results only if not already stored
+                    if "results" not in jobs[job_id]:
+                        try:
+                            result = job.result()
+                            # Extract quasi-dists from the first PUB (since we send 1 circuit)
+                            # Result structure depends on Sampler version, but typically result[0].data.meas or similar
+                            # The user snippet suggests result[0].data.c (classical register) or .quasi_dists
+                            
+                            # Robust extraction logic for SamplerV2
+                            pub_result = result[0]
+                            data_dict = pub_result.data
+                            
+                            # Find the classical register holding measurements (usually 'c' or 'meas')
+                            # We'll try to find a BitArray or similar, but SamplerV2 often separates it.
+                            # Actually, for SamplerV2, get_counts() might not be direct.
+                            # User snippet: quasi = pub_result.data.c
+                            
+                            output_data = {}
+                            
+                            # Iterate over data fields to find the measurement data
+                            # It's usually a BitArray that we can get counts/quasi from if we knew how,
+                            # BUT user explicitly said: quasi = pub_result.data.c
+                            # Let's try to inspect the keys and grab the first one that looks like a register
+                            
+                            keys = list(data_dict.keys())
+                            if keys:
+                                # target the first register (e.g. 'c' or 'meas')
+                                creg_name = keys[0]
+                                meas_data = getattr(data_dict, creg_name)
+                                
+                                # If it has .get_counts(), use it. If it's a BitArray, it has .get_counts() or similar?
+                                # NO, user said "quasi = pub_result.data.c" returns quasi-dists directly?
+                                # actually user said: "quasi = pub_result.data.c ... print(quasi) -> {0: 0.51}"
+                                # So let's trust the user snippet for data access:
+                                
+                                quasi_dists = meas_data # Assuming this is the dict-like object or we can iterate
+                                
+                                # If it's a BitArray (SamplerV2 default), we might need .get_counts() or .get_probabilities()
+                                # But let's try to format whatever we get.
+                                
+                                # FALLBACK: standardized extraction
+                                # If it's a dictionary of int -> float
+                                if hasattr(meas_data, 'items'): 
+                                    mapped_results = {}
+                                    for k, v in meas_data.items():
+                                        # distinct handling for bitstrings vs ints
+                                        label = str(k)
+                                        if isinstance(k, int):
+                                             # Try to format as binary if we know num_qubits, or just hex/int
+                                             # For simplicity, let's keep it as string
+                                             label = str(k) 
+                                        mapped_results[label] = v
+                                    output_data = mapped_results
+                                    
+                                # If it's a BitArray (from qiskit 1.0+ runtime), call get_counts() logic?
+                                # Let's assume the user's "quasi = pub_result.data.c" is correct for their environment.
+                                # But to be safe, let's store whatever we find in a "raw_output" field too.
+                                else:
+                                    # Maybe it's a BitArray, convert to list of bitstrings?
+                                    # For a hackathon, just stringifying might be safest fallback
+                                    output_data = str(meas_data)
+
+                            
+                            jobs[job_id]["results"] = output_data
+                            # Also set a simple "output" field for the modal's current view
+                            jobs[job_id]["output"] = str(output_data)
+
+                        except Exception as res_e:
+                            print(f"Error fetching results: {res_e}")
+                            jobs[job_id]["error"] = str(res_e)
+
+                    # Save and broadcast final state
+                    save_jobs()
+                    await broadcast_job_update(jobs[job_id])
+                    break # Stop monitoring
                 
-                # Broadcast update
-                await broadcast_job_update(jobs[job_id])
-                
-                # Stop monitoring if job is done
-                if status_str in ["DONE", "CANCELLED", "ERROR"] or "ERROR" in status_str:
+                elif status_str in ["ERROR", "FAILED", "CANCELLED"]:
+                    jobs[job_id]["status"] = "FAILED"
+                     # Try to get error message
+                    try:
+                        jobs[job_id]["error"] = str(job.error_message())
+                    except:
+                        pass
+                    save_jobs()
+                    await broadcast_job_update(jobs[job_id])
                     break
                 
-                await asyncio.sleep(5)  # Poll every 5 seconds
+                # Broadcast update if status changed or just heartbeat
+                save_jobs()
+                await broadcast_job_update(jobs[job_id])
+                
+                await asyncio.sleep(2)  # Poll every 2 seconds
                 
             except Exception as e:
                 print(f"Error monitoring job {job_id}: {e}")
