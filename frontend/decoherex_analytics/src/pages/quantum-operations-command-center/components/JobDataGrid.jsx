@@ -4,14 +4,14 @@ import Button from '../../../components/ui/Button';
 import Input from '../../../components/ui/Input';
 import Select from '../../../components/ui/Select';
 
-const JobDataGrid = ({ 
-  jobs, 
-  onJobAction, 
-  onExport, 
-  statusFilter, 
-  backendFilter, 
-  jobTypeFilter, 
-  durationFilter 
+const JobDataGrid = ({
+  jobs,
+  onJobAction,
+  onExport,
+  statusFilter,
+  backendFilter,
+  jobTypeFilter,
+  durationFilter
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [sortField, setSortField] = useState('submitted_at');
@@ -24,12 +24,12 @@ const JobDataGrid = ({
 
     // Apply search filter
     if (searchTerm) {
-      filtered = filtered?.filter(job => 
-        job?.id?.toLowerCase()?.includes(searchTerm?.toLowerCase()) ||
+      filtered = filtered?.filter(job =>
+        (job?.job_id || job?.id)?.toLowerCase()?.includes(searchTerm?.toLowerCase()) ||
         job?.type?.toLowerCase()?.includes(searchTerm?.toLowerCase()) ||
         (job?.job_id || job?.id)?.toLowerCase()?.includes(searchTerm?.toLowerCase()) ||
         (job?.circuit || job?.type || '')?.toLowerCase()?.includes(searchTerm?.toLowerCase()) ||
-         job?.backend?.toLowerCase()?.includes(searchTerm?.toLowerCase()) ||
+        job?.backend?.toLowerCase()?.includes(searchTerm?.toLowerCase()) ||
         (job?.job_name && job?.job_name?.toLowerCase()?.includes(searchTerm?.toLowerCase()))
       );
     }
@@ -48,8 +48,8 @@ const JobDataGrid = ({
     if (jobTypeFilter !== 'all') {
       filtered = filtered?.filter(job => {
         const jobType = job?.type?.toLowerCase();
-        return jobType?.includes(jobTypeFilter?.replace('-', ' ')) || 
-               jobType?.includes(jobTypeFilter?.replace('-', '_'));
+        return jobType?.includes(jobTypeFilter?.replace('-', ' ')) ||
+          jobType?.includes(jobTypeFilter?.replace('-', '_'));
       });
     }
 
@@ -122,7 +122,7 @@ const JobDataGrid = ({
     if (selectedJobs?.size === filteredAndSortedJobs?.length) {
       setSelectedJobs(new Set());
     } else {
-      setSelectedJobs(new Set(filteredAndSortedJobs.map(job => job.id)));
+      setSelectedJobs(new Set(filteredAndSortedJobs.map(job => job.job_id || job.id)));
     }
   };
 
@@ -135,7 +135,7 @@ const JobDataGrid = ({
     };
 
     const config = configs?.[status] || configs?.queued;
-    
+
     return (
       <div className={`flex items-center space-x-1 px-2 py-1 rounded-full text-xs font-medium ${config?.color}`}>
         <Icon name={config?.icon} size={12} />
@@ -149,7 +149,7 @@ const JobDataGrid = ({
     const seconds = Math.floor(duration / 1000);
     const minutes = Math.floor(seconds / 60);
     const hours = Math.floor(minutes / 60);
-    
+
     if (hours > 0) return `${hours}h ${minutes % 60}m`;
     if (minutes > 0) return `${minutes}m ${seconds % 60}s`;
     return `${seconds}s`;
@@ -232,7 +232,7 @@ const JobDataGrid = ({
                 />
               </th>
               {/* Job Name */}
-              <th 
+              <th
                 className="text-left p-3 cursor-pointer hover:bg-muted/20 transition-colors"
                 onClick={() => handleSort('job_name')}
               >
@@ -242,7 +242,7 @@ const JobDataGrid = ({
                 </div>
               </th>
               {/* Job ID */}
-              <th 
+              <th
                 className="text-left p-3 cursor-pointer hover:bg-muted/20 transition-colors"
                 onClick={() => handleSort('job_id')}
               >
@@ -252,7 +252,7 @@ const JobDataGrid = ({
                 </div>
               </th>
               {/* Backend */}
-              <th 
+              <th
                 className="text-left p-3 cursor-pointer hover:bg-muted/20 transition-colors"
                 onClick={() => handleSort('backend')}
               >
@@ -262,7 +262,7 @@ const JobDataGrid = ({
                 </div>
               </th>
               {/* Circuit */}
-              <th 
+              <th
                 className="text-left p-3 cursor-pointer hover:bg-muted/20 transition-colors"
                 onClick={() => handleSort('circuit')}
               >
@@ -280,7 +280,7 @@ const JobDataGrid = ({
                 <span className="text-sm font-medium text-muted-foreground">Progress</span>
               </th>
               {/* Submitted At */}
-              <th 
+              <th
                 className="text-left p-3 cursor-pointer hover:bg-muted/20 transition-colors"
                 onClick={() => handleSort('submitted_at')}
               >
@@ -297,15 +297,15 @@ const JobDataGrid = ({
           </thead>
           <tbody>
             {filteredAndSortedJobs?.map((job) => (
-              <tr 
+              <tr
                 key={job?.id || job?.job_id}
                 className="border-b border-border/30 hover:bg-muted/20 transition-colors"
               >
                 <td className="p-3">
                   <input
                     type="checkbox"
-                    checked={selectedJobs?.has(job?.id)}
-                    onChange={() => handleSelectJob(job?.id)}
+                    checked={selectedJobs?.has(job?.job_id || job?.id)}
+                    onChange={() => handleSelectJob(job?.job_id || job?.id)}
                     className="rounded border-border/50 bg-input text-accent focus:ring-accent"
                   />
                 </td>
@@ -332,7 +332,7 @@ const JobDataGrid = ({
                 {/* Progress */}
                 <td className="p-3 w-32">
                   <div className="w-full bg-border rounded-full h-2">
-                    <div className={`h-2 rounded-full bg-accent transition-all`} style={{width: `${job?.progress || (job?.status==='completed'||job?.status==='DONE'?100:0)}%`}} />
+                    <div className={`h-2 rounded-full bg-accent transition-all`} style={{ width: `${job?.progress || (job?.status === 'completed' || job?.status === 'DONE' ? 100 : 0)}%` }} />
                   </div>
                 </td>
                 {/* Submitted At */}
@@ -346,7 +346,7 @@ const JobDataGrid = ({
                       variant="ghost"
                       size="xs"
                       iconName="Eye"
-                      onClick={() => onJobAction('view', job?.id)}
+                      onClick={() => onJobAction('view', job?.job_id || job?.id)}
                       title="View details"
                     />
                     {job?.status === 'failed' && (
@@ -354,7 +354,7 @@ const JobDataGrid = ({
                         variant="ghost"
                         size="xs"
                         iconName="RotateCcw"
-                        onClick={() => onJobAction('retry', job?.id)}
+                        onClick={() => onJobAction('retry', job?.job_id || job?.id)}
                         title="Retry job"
                       />
                     )}
@@ -363,7 +363,7 @@ const JobDataGrid = ({
                         variant="ghost"
                         size="xs"
                         iconName="X"
-                        onClick={() => onJobAction('cancel', job?.id)}
+                        onClick={() => onJobAction('cancel', job?.job_id || job?.id)}
                         title="Cancel job"
                       />
                     )}
@@ -371,7 +371,7 @@ const JobDataGrid = ({
                       variant="ghost"
                       size="xs"
                       iconName="MoreHorizontal"
-                      onClick={() => onJobAction('menu', job?.id)}
+                      onClick={() => onJobAction('menu', job?.job_id || job?.id)}
                       title="More actions"
                     />
                   </div>

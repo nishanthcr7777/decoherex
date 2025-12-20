@@ -15,7 +15,7 @@ const LiveJobFeed = ({ jobs, onJobAction }) => {
 
   useEffect(() => {
     let filtered = jobs;
-    
+
     if (filter !== 'all') {
       filtered = jobs?.filter(job => job?.status === filter);
     }
@@ -39,7 +39,7 @@ const LiveJobFeed = ({ jobs, onJobAction }) => {
     };
 
     const config = configs?.[status] || configs?.queued;
-    
+
     return (
       <div className={`flex items-center space-x-1 px-2 py-1 rounded-full text-xs font-medium ${config?.color}`}>
         <Icon name={config?.icon} size={12} />
@@ -53,7 +53,7 @@ const LiveJobFeed = ({ jobs, onJobAction }) => {
     const seconds = Math.floor(duration / 1000);
     const minutes = Math.floor(seconds / 60);
     const hours = Math.floor(minutes / 60);
-    
+
     if (hours > 0) return `${hours}h ${minutes % 60}m`;
     if (minutes > 0) return `${minutes}m ${seconds % 60}s`;
     return `${seconds}s`;
@@ -63,11 +63,11 @@ const LiveJobFeed = ({ jobs, onJobAction }) => {
     const date = new Date(timestamp);
     const now = new Date();
     const diff = now - date;
-    
+
     if (diff < 60000) return 'Just now';
     if (diff < 3600000) return `${Math.floor(diff / 60000)}m ago`;
     if (diff < 86400000) return `${Math.floor(diff / 3600000)}h ago`;
-    
+
     return date?.toLocaleDateString();
   };
 
@@ -106,7 +106,7 @@ const LiveJobFeed = ({ jobs, onJobAction }) => {
       <div className="flex-1 overflow-y-auto space-y-3">
         {sortedJobs?.map((job) => (
           <div
-            key={job?.id}
+            key={job?.job_id || job?.id}
             className={`
               p-4 bg-surface/30 rounded-lg border transition-all duration-200
               hover:bg-surface/50 cursor-pointer
@@ -117,7 +117,7 @@ const LiveJobFeed = ({ jobs, onJobAction }) => {
               <div className="flex-1">
                 <div className="flex items-center space-x-2 mb-1">
                   <span className="text-sm font-mono text-accent">
-                    #{job?.id?.slice(-8)}
+                    #{(job?.job_id || job?.id)?.slice(-8)}
                   </span>
                   {getStatusBadge(job?.status)}
                 </div>
@@ -139,14 +139,14 @@ const LiveJobFeed = ({ jobs, onJobAction }) => {
                   </span>
                 </div>
               </div>
-              
+
               <div className="text-right">
                 <div className="text-xs text-muted-foreground mb-2">
                   {formatTimestamp(job?.timestamp)}
                 </div>
                 {job?.status === 'running' && (
                   <div className="w-16 bg-muted/30 rounded-full h-1">
-                    <div 
+                    <div
                       className="bg-warning h-1 rounded-full transition-all duration-1000"
                       style={{ width: `${job?.progress || 0}%` }}
                     />
@@ -178,28 +178,28 @@ const LiveJobFeed = ({ jobs, onJobAction }) => {
                 variant="ghost"
                 size="xs"
                 iconName="Eye"
-                onClick={() => onJobAction('view', job?.id)}
+                onClick={() => onJobAction('view', job?.job_id || job?.id)}
               >
                 Details
               </Button>
-              
+
               {job?.status === 'failed' && (
                 <Button
                   variant="outline"
                   size="xs"
                   iconName="RotateCcw"
-                  onClick={() => onJobAction('retry', job?.id)}
+                  onClick={() => onJobAction('retry', job?.job_id || job?.id)}
                 >
                   Retry
                 </Button>
               )}
-              
+
               {(job?.status === 'queued' || job?.status === 'running') && (
                 <Button
                   variant="destructive"
                   size="xs"
                   iconName="X"
-                  onClick={() => onJobAction('cancel', job?.id)}
+                  onClick={() => onJobAction('cancel', job?.job_id || job?.id)}
                 >
                   Cancel
                 </Button>

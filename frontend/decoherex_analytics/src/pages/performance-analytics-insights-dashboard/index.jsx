@@ -12,7 +12,7 @@ import Icon from '../../components/AppIcon';
 import { Card, CardHeader, CardTitle, CardContent } from '../../components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../../components/ui/table';
 import { Badge } from '../../components/ui/badge';
-import Button from '../../components/ui/Button'; // Corrected import
+import Button from '../../components/ui/Button';
 import { RefreshCw } from 'lucide-react';
 
 
@@ -23,11 +23,29 @@ const PerformanceAnalyticsInsightsDashboard = () => {
   const [loadingBackends, setLoadingBackends] = useState(true);
   const [errorBackends, setErrorBackends] = useState(null);
 
+  // REAL DATA STATES
+  const [dashboardData, setDashboardData] = useState(null);
+  const [loadingDashboard, setLoadingDashboard] = useState(true);
+
   const backendControllerRef = useRef(null);
+
+  // FETCH CSV DASHBOARD DATA
+  const fetchDashboardData = async () => {
+    try {
+      setLoadingDashboard(true);
+      const response = await fetch('http://localhost:5001/api/dashboard-data');
+      if (!response.ok) throw new Error('Failed to fetch dashboard data');
+      const data = await response.json();
+      setDashboardData(data);
+    } catch (error) {
+      console.error("Error fetching dashboard data:", error);
+    } finally {
+      setLoadingDashboard(false);
+    }
+  };
 
   const fetchBackends = async () => {
     if (backendControllerRef.current) {
-      console.log('Aborting previous fetch request.');
       backendControllerRef.current.abort();
     }
     backendControllerRef.current = new AbortController();
@@ -36,20 +54,14 @@ const PerformanceAnalyticsInsightsDashboard = () => {
     setLoadingBackends(true);
     setErrorBackends(null);
     try {
-      console.log('Fetching backends...');
       const response = await fetch('http://localhost:5001/backends', { signal: controller.signal });
-      console.log('Backend response:', response);
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       const data = await response.json();
-      console.log('Backend data received:', data);
       setBackends(data);
     } catch (error) {
-      if (error.name === 'AbortError') {
-        console.log('Fetch backends aborted by AbortController.');
-        return;
-      }
+      if (error.name === 'AbortError') return;
       console.error("Error fetching backends:", error);
       setErrorBackends("Failed to load backend statistics.");
     } finally {
@@ -58,29 +70,29 @@ const PerformanceAnalyticsInsightsDashboard = () => {
   };
 
   useEffect(() => {
-    console.log('PerformanceAnalyticsInsightsDashboard: useEffect triggered.');
     fetchBackends();
+    fetchDashboardData();
 
     const backendInterval = setInterval(() => {
-      console.log('PerformanceAnalyticsInsightsDashboard: Interval triggered, fetching backends.');
       fetchBackends();
-    }, 15000); // Refresh every 15 seconds
+    }, 15000);
 
     return () => {
-      console.log('PerformanceAnalyticsInsightsDashboard: Cleanup function called.');
       clearInterval(backendInterval);
       if (backendControllerRef.current) {
-        console.log('PerformanceAnalyticsInsightsDashboard: Aborting ongoing fetch request during cleanup.');
         backendControllerRef.current.abort();
       }
     };
   }, []);
 
-  // Mock KPI data
+  // Compute KPI Data dynamically if possible, or use dashboardData
+  // ADDED ROBUST NULL CHECKS HERE
   const kpiData = [
     {
       title: "Total Job Volume",
-      value: "300",
+      value: (dashboardData?.volume && Array.isArray(dashboardData.volume))
+        ? dashboardData.volume.reduce((acc, curr) => acc + (curr.BellState || 0) + (curr.Grover || 0) + (curr.QAOA || 0) + (curr.QuantumFourier || 0) + (curr.VQE || 0), 0).toString()
+        : "...",
       change: "+8.2%",
       trend: "up",
       icon: "Activity",
@@ -88,7 +100,9 @@ const PerformanceAnalyticsInsightsDashboard = () => {
     },
     {
       title: "Avg Execution Time",
-      value: "2.34s",
+      value: (dashboardData?.trends && Array.isArray(dashboardData.trends) && dashboardData.trends.length > 0)
+        ? `${dashboardData.trends[dashboardData.trends.length - 1]?.avgExecutionTime}ms`
+        : "...",
       change: "-12.5%",
       trend: "down",
       icon: "Clock",
@@ -96,7 +110,9 @@ const PerformanceAnalyticsInsightsDashboard = () => {
     },
     {
       title: "Success Rate",
-      value: "94.7%",
+      value: (dashboardData?.trends && Array.isArray(dashboardData.trends) && dashboardData.trends.length > 0)
+        ? `${dashboardData.trends[dashboardData.trends.length - 1]?.successRate}%`
+        : "...",
       change: "+2.1%",
       trend: "up",
       icon: "CheckCircle",
@@ -104,7 +120,9 @@ const PerformanceAnalyticsInsightsDashboard = () => {
     },
     {
       title: "Backend Utilization",
-      value: "78.3%",
+      value: (dashboardData?.capacity && Array.isArray(dashboardData.capacity) && dashboardData.capacity.length > 0)
+        ? `${dashboardData.capacity[dashboardData.capacity.length - 1]?.current}%`
+        : "...",
       change: "+5.4%",
       trend: "up",
       icon: "Server",
@@ -112,46 +130,18 @@ const PerformanceAnalyticsInsightsDashboard = () => {
     }
   ];
 
-  // Mock performance trends data
-  const performanceTrendsData = Array.from({ length: 30 }, (_, i) => {
-    const date = new Date();
-    date?.setDate(date?.getDate() - (29 - i));
-    return {
-      date: date?.toISOString(),
-      avgExecutionTime: 2000 + Math.random() * 1000 + Math.sin(i * 0.2) * 500,
-      successRate: 90 + Math.random() * 8 + Math.sin(i * 0.1) * 3,
-      errorRate: 2 + Math.random() * 6 + Math.cos(i * 0.15) * 2
-    };
-  });
+  // Map Data from API to Chart Props with Safety Checks
+  const performanceTrendsData = Array.isArray(dashboardData?.trends) ? dashboardData.trends : [];
+  const volumeAnalysisData = Array.isArray(dashboardData?.volume) ? dashboardData.volume : [];
+  const capacityUtilizationData = Array.isArray(dashboardData?.capacity) ? dashboardData.capacity : [];
+  const errorPatternsData = Array.isArray(dashboardData?.errors) ? dashboardData.errors : [];
 
-  // Mock volume analysis data
-  const volumeAnalysisData = Array.from({ length: 30 }, (_, i) => {
-    const date = new Date();
-    date?.setDate(date?.getDate() - (29 - i));
-    return {
-      date: date?.toISOString(),
-      'bell-state': Math.floor(Math.random() * 50) + 20,
-      'ghz': Math.floor(Math.random() * 40) + 15,
-      'random-circuit': Math.floor(Math.random() * 60) + 30,
-      'custom': Math.floor(Math.random() * 30) + 10,
-      'bmit': Math.floor(Math.random() * 25) + 5
-    };
-  });
+  // Use Ranking Data from CSV instead of 'backends' for the generic table if preferred
+  const backendRankingData = Array.isArray(dashboardData?.ranking) ? dashboardData.ranking : [];
 
-  // Mock capacity utilization data
-  const capacityUtilizationData = Array.from({ length: 30 }, (_, i) => {
-    const date = new Date();
-    date?.setDate(date?.getDate() - (29 - i));
-    const current = 60 + Math.random() * 30 + Math.sin(i * 0.2) * 10;
-    return {
-      date: date?.toISOString(),
-      current: Math.max(0, Math.min(100, current)),
-      forecast: Math.max(0, Math.min(100, current + Math.random() * 20 - 10)),
-      capacity: 100
-    };
-  });
+  const performanceGridData = Array.isArray(dashboardData?.jobs) ? dashboardData.jobs : [];
 
-  // Mock execution time distribution data
+  // Mock execution time distribution data (Keep static or derive later if needed)
   const executionTimeDistribution = [
     { range: '0-500ms', frequency: 1250, value: 250 },
     { range: '500ms-1s', frequency: 2100, value: 750 },
@@ -161,103 +151,6 @@ const PerformanceAnalyticsInsightsDashboard = () => {
     { range: '5-10s', frequency: 1200, value: 7500 },
     { range: '10s+', frequency: 397, value: 15000 }
   ];
-
-  // Mock backend ranking data
-  const backendRankingData = [
-    {
-      id: 'quantum-1',
-      name: 'IBM Quantum 1',
-      description: '127 qubits',
-      status: 'online',
-      overallScore: 94,
-      avgExecutionTime: 2340,
-      successRate: 96.2,
-      utilization: 82
-    },
-    {
-      id: 'quantum-2',
-      name: 'Google Sycamore',
-      description: '70 qubits',
-      status: 'online',
-      overallScore: 89,
-      avgExecutionTime: 1890,
-      successRate: 94.8,
-      utilization: 75
-    },
-    {
-      id: 'quantum-3',
-      name: 'IonQ Aria',
-      description: '32 qubits',
-      status: 'maintenance',
-      overallScore: 76,
-      avgExecutionTime: 3200,
-      successRate: 91.3,
-      utilization: 45
-    },
-    {
-      id: 'simulator-1',
-      name: 'Quantum Simulator 1',
-      description: 'High-fidelity',
-      status: 'online',
-      overallScore: 98,
-      avgExecutionTime: 1200,
-      successRate: 99.1,
-      utilization: 88
-    },
-    {
-      id: 'simulator-2',
-      name: 'Quantum Simulator 2',
-      description: 'Noise-aware',
-      status: 'online',
-      overallScore: 92,
-      avgExecutionTime: 1450,
-      successRate: 97.6,
-      utilization: 71
-    }
-  ];
-
-  // Mock detailed performance data
-  const performanceGridData = Array.from({ length: 100 }, (_, i) => {
-    const jobTypes = ['bell-state', 'ghz', 'random-circuit', 'custom', 'bmit'];
-    const backends = ['IBM Quantum 1', 'Google Sycamore', 'IonQ Aria', 'Simulator 1', 'Simulator 2'];
-    const statuses = ['completed', 'failed', 'running', 'queued'];
-    
-    return {
-      jobId: `QJ-${String(i + 1)?.padStart(6, '0')}`,
-      backend: backends?.[Math.floor(Math.random() * backends?.length)],
-      jobType: jobTypes?.[Math.floor(Math.random() * jobTypes?.length)],
-      status: statuses?.[Math.floor(Math.random() * statuses?.length)],
-      executionTime: Math.floor(Math.random() * 10000) + 500,
-      queueTime: Math.floor(Math.random() * 30000) + 1000,
-      successRate: Math.floor(Math.random() * 30) + 70,
-      timestamp: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000)?.toISOString()
-    };
-  });
-
-  // Mock error patterns data
-  const errorPatternsData = Array.from({ length: 30 }, (_, i) => {
-    const date = new Date();
-    date?.setDate(date?.getDate() - (29 - i));
-    
-    const backends = ['IBM Quantum 1', 'Google Sycamore', 'IonQ Aria', 'Simulator 1', 'Simulator 2'];
-    const errorTypes = [
-      'calibration_error', 'gate_error', 'readout_error', 'coherence_error', 
-      'connectivity_error', 'timing_error', 'memory_error', 'network_error'
-    ];
-    
-    const errorCount = Math.floor(Math.random() * 15) + 1;
-    const selectedErrorTypes = errorTypes?.slice(0, Math.floor(Math.random() * 4) + 1);
-    
-    return {
-      date: date?.toISOString(),
-      backend: backends?.[Math.floor(Math.random() * backends?.length)],
-      errorCount: errorCount,
-      errorTypes: selectedErrorTypes,
-      severity: errorCount > 10 ? 'critical' : errorCount > 5 ? 'warning' : 'info'
-    };
-  });
-
-
 
   const tabs = [
     { id: 'trends', label: 'Performance Trends', icon: 'TrendingUp' },
@@ -287,7 +180,6 @@ const PerformanceAnalyticsInsightsDashboard = () => {
             </p>
           </div>
 
-
           {/* KPI Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {kpiData?.map((kpi, index) => (
@@ -311,7 +203,7 @@ const PerformanceAnalyticsInsightsDashboard = () => {
                           flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium
                           transition-all duration-200
                           ${activeTab === tab?.id
-                            ? 'bg-accent/20 text-accent border border-accent/30' :'text-muted-foreground hover:text-foreground hover:bg-muted/50'
+                            ? 'bg-accent/20 text-accent border border-accent/30' : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
                           }
                         `}
                       >
@@ -341,20 +233,26 @@ const PerformanceAnalyticsInsightsDashboard = () => {
 
                 {/* Chart Content */}
                 <div className="h-[400px]">
-                  {activeTab === 'trends' && (
-                    <PerformanceTrendsChart 
-                      data={performanceTrendsData} 
-                      selectedMetric={selectedMetric}
-                    />
-                  )}
-                  {activeTab === 'volume' && (
-                    <VolumeAnalysisChart data={volumeAnalysisData} />
-                  )}
-                  {activeTab === 'capacity' && (
-                    <CapacityUtilizationChart data={capacityUtilizationData} />
-                  )}
-                  {activeTab === 'errors' && (
-                    <ErrorPatternsChart data={errorPatternsData} />
+                  {loadingDashboard ? (
+                    <div className="flex items-center justify-center h-full text-muted-foreground">Loading AI Model Data...</div>
+                  ) : (
+                    <>
+                      {activeTab === 'trends' && (
+                        <PerformanceTrendsChart
+                          data={performanceTrendsData}
+                          selectedMetric={selectedMetric}
+                        />
+                      )}
+                      {activeTab === 'volume' && (
+                        <VolumeAnalysisChart data={volumeAnalysisData} />
+                      )}
+                      {activeTab === 'capacity' && (
+                        <CapacityUtilizationChart data={capacityUtilizationData} />
+                      )}
+                      {activeTab === 'errors' && (
+                        <ErrorPatternsChart data={errorPatternsData} />
+                      )}
+                    </>
                   )}
                 </div>
               </div>
@@ -371,21 +269,23 @@ const PerformanceAnalyticsInsightsDashboard = () => {
             </div>
           </div>
 
-          {/* Full Width Backend Ranking Table */}
+          {/* Full Width Backend Ranking Table - USING CSV DATA */}
           <div className="w-full">
-            <BackendRankingTable data={backendRankingData} />
+            <h3 className="text-xl font-semibold mb-4 text-foreground">Top Performing Backends (Historical Analysis)</h3>
+            {loadingDashboard ? <p>Loading...</p> : <BackendRankingTable data={backendRankingData} />}
           </div>
 
-          {/* Full Width Performance Data Grid */}
+          {/* Full Width Performance Data Grid - USING CSV DATA */}
           <div className="w-full">
-            <PerformanceDataGrid data={performanceGridData} />
+            <h3 className="text-xl font-semibold mb-4 text-foreground">Recent Job Executions</h3>
+            {loadingDashboard ? <p>Loading...</p> : <PerformanceDataGrid data={performanceGridData} />}
           </div>
 
-          {/* Live Backend Statistics */}
+          {/* Live Backend Statistics (Keep original 'backends' usage for Real-Time comparison) */}
           <div className="w-full">
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-lg font-medium">Live Backend Statistics</CardTitle>
+                <CardTitle className="text-lg font-medium">Live Backend Statistics (Real-Time API)</CardTitle>
                 <Button variant="ghost" size="icon" onClick={fetchBackends} disabled={loadingBackends}>
                   <RefreshCw className={loadingBackends ? "animate-spin" : ""} size={20} />
                 </Button>

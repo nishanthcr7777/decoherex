@@ -46,13 +46,13 @@ const JobLifecycleFlow = ({ jobs }) => {
   };
 
   const getJobsByStage = (stageId) => {
-    return jobs?.map(j=>({...j, _normStatus: normalizeStatus(j.status)}))
+    return jobs?.map(j => ({ ...j, _normStatus: normalizeStatus(j.status) }))
       ?.filter(job => job._normStatus === stageId);
   };
 
   useEffect(() => {
     const interval = setInterval(() => {
-      const running = jobs?.filter(j=>normalizeStatus(j.status)==='running');
+      const running = jobs?.filter(j => normalizeStatus(j.status) === 'running');
       setAnimatingJobs(new Set(running.map(j => j.job_id || j.id)));
     }, 1000);
     return () => clearInterval(interval);
@@ -70,9 +70,9 @@ const JobLifecycleFlow = ({ jobs }) => {
       <div className="grid grid-cols-4 gap-4 h-full">
         {stages?.map((stage, index) => {
           const stageJobs = getJobsByStage(stage?.id);
-          
+
           return (
-            <div key={stage?.id} className="flex flex-col">
+            <div key={stage?.id || index} className="flex flex-col">
               {/* Stage Header */}
               <div className={`
                 flex items-center justify-center space-x-2 p-3 rounded-lg mb-4
@@ -88,11 +88,11 @@ const JobLifecycleFlow = ({ jobs }) => {
               <div className="flex-1 space-y-2 overflow-y-auto max-h-96">
                 {stageJobs?.map((job) => (
                   <div
-                    key={job?.id}
+                    key={job?.job_id || job?.id}
                     className={`
                       p-3 bg-surface/50 rounded-lg border border-border/50
                       hover:bg-surface/70 transition-all duration-200 cursor-pointer
-                      ${animatingJobs?.has(job?.id) ? 'animate-pulse' : ''}
+                      ${animatingJobs?.has(job?.job_id || job?.id) ? 'animate-pulse' : ''}
                     `}
                     title={`Job ${job?.id} - ${job?.type} on ${job?.backend}`}
                   >
@@ -104,11 +104,11 @@ const JobLifecycleFlow = ({ jobs }) => {
                         {job?.backend}
                       </span>
                     </div>
-                    
+
                     <div className="text-xs text-foreground mb-1">
                       {job?.type}
                     </div>
-                    
+
                     <div className="flex items-center justify-between text-xs text-muted-foreground">
                       <span>{job?.qubits} qubits</span>
                       <span>{job?.duration || job?.waitTime}</span>
@@ -117,7 +117,7 @@ const JobLifecycleFlow = ({ jobs }) => {
                     {/* Progress bar for running jobs */}
                     {stage?.id === 'running' && (
                       <div className="mt-2 w-full bg-muted/30 rounded-full h-1">
-                        <div 
+                        <div
                           className="bg-warning h-1 rounded-full transition-all duration-1000"
                           style={{ width: `${job?.progress || 0}%` }}
                         />
