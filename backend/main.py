@@ -1099,6 +1099,71 @@ async def get_dashboard_data():
         print(f"Error serving dashboard data: {e}")
         return {"error": str(e)}
 
+# ----------------------------
+# 8️⃣ Chatbot / AI Assistant
+# ----------------------------
+class ChatRequest(BaseModel):
+    message: str
+
+@app.post("/api/chat")
+async def chat_endpoint(request: ChatRequest):
+    """
+    Answer user questions about the system state using Groq AI.
+    """
+    if not groq_client:
+        return {"response": "I'm sorry, my AI brain (Groq) is not connected. Please check the API key."}
+
+    try:
+        user_message = request.message
+        
+        # 1. Summarize system state
+        # Create a lightweight summary of jobs to fit in context
+        job_summary = []
+        for j_id, j_data in jobs.items():
+            job_summary.append({
+                "id": j_id[:8], # Short ID
+                "name": j_data.get("job_name", "Unnamed"),
+                "status": j_data.get("status"),
+                "backend": j_data.get("backend"),
+                "result": j_data.get("results"),
+                "error": j_data.get("error")
+            })
+        
+        # Limit summary size (last 10 jobs)
+        job_summary = job_summary[-10:]
+        
+        system_context = f"""
+        You are 'Qou', the AI Assistant for the Decoherex Quantum Dashboard.
+        Your goal is to help users understand their quantum jobs and the system status.
+        
+        Current System Time: {datetime.now().isoformat()}
+        Recent Jobs Data: {json.dumps(job_summary, indent=2)}
+        
+        Rules:
+        1. Be concise and helpful.
+        2. If a job failed, explain the error if visible.
+        3. If asked about recommendations, suggest checking the Optimization dashboard.
+        4. Do not hallucinate data not present in the context.
+        """
+
+        completion = groq_client.chat.completions.create(
+            messages=[
+                {"role": "system", "content": system_context},
+                {"role": "user", "content": user_message}
+            ],
+            # Use a supported model
+            model="llama-3.3-70b-versatile", 
+            temperature=0.5,
+            max_tokens=300
+        )
+        
+        ai_reply = completion.choices[0].message.content
+        return {"response": ai_reply}
+
+    except Exception as e:
+        logging.error(f"Chat Error: {e}")
+        return {"response": "I encountered a quantum fluctuation while thinking. Please try again."}
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=5001)

@@ -7,15 +7,17 @@ import QuantumOperationsCommandCenter from './pages/quantum-operations-command-c
 import AIBackendOptimizationDashboard from './pages/ai-powered-backend-optimization-dashboard';
 import PerformanceAnalyticsInsightsDashboard from './pages/performance-analytics-insights-dashboard';
 import LiveJobs from './pages/live-jobs';
+
 import QuantumLab from './pages/quantum-lab';
+import QuantumAIChatWidget from './components/QuantumAIChatWidget';
 
 const Routes = () => {
   return (
     <BrowserRouter>
       <ErrorBoundary>
         <ScrollToTop />
+        <QuantumAIChatWidget />
         <RouterRoutes>
-          {/* Define your route here */}
           <Route path="/" element={<AIBackendOptimizationDashboard />} />
           <Route path="/quantum-operations-command-center" element={<QuantumOperationsCommandCenter />} />
           <Route path="/ai-powered-backend-optimization-dashboard" element={<AIBackendOptimizationDashboard />} />
