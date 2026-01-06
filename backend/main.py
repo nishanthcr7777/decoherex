@@ -394,7 +394,11 @@ async def submit_job(
             sanitized_code = sanitized_code.replace("from qiskit.circuit.library import Z", "from qiskit.circuit.library import ZGate as Z")
             sanitized_code = sanitized_code.replace("from qiskit.circuit.library import H", "from qiskit.circuit.library import HGate as H")
 
-            local_scope = {}
+            # Pre-populate scope with common imports to match user expectations
+            local_scope = {
+                "QuantumCircuit": QuantumCircuit,
+                "np": __import__("numpy")
+            }
             exec(sanitized_code, local_scope, local_scope)
             
             if "qc" not in local_scope:
@@ -538,8 +542,10 @@ async def monitor_job(job_id: str):
                                     output_data = mapped_results
                                     
                                 # If it's a BitArray (from qiskit 1.0+ runtime), call get_counts() logic?
-                                # Let's assume the user's "quasi = pub_result.data.c" is correct for their environment.
-                                # But to be safe, let's store whatever we find in a "raw_output" field too.
+                                elif hasattr(meas_data, 'get_counts'):
+                                    # This is a BitArray object (Sampler V2) or similar
+                                    # get_counts() returns a dictionary of bitstrings -> counts
+                                    output_data = meas_data.get_counts()
                                 else:
                                     # Maybe it's a BitArray, convert to list of bitstrings?
                                     # For a hackathon, just stringifying might be safest fallback
@@ -816,7 +822,11 @@ async def simulate_circuit(request: SimulateRequest):
         sanitized_code = sanitized_code.replace("from qiskit.circuit.library import H", "from qiskit.circuit.library import HGate as H")
         
         # 1. EXECUTE IN ISOLATED SCOPE
-        local_scope = {}
+        # Pre-populate scope with common imports to match user expectations
+        local_scope = {
+            "QuantumCircuit": QuantumCircuit,
+            "np": __import__("numpy")
+        }
         # Pass local_scope as both globals and locals to ensure imports are visible
         exec(sanitized_code, local_scope, local_scope)
         
@@ -825,7 +835,6 @@ async def simulate_circuit(request: SimulateRequest):
         
         qc = local_scope["qc"]
         
-        from qiskit import QuantumCircuit
         if not isinstance(qc, QuantumCircuit):
             return {"error": "qc is not a valid QuantumCircuit object."}
         
