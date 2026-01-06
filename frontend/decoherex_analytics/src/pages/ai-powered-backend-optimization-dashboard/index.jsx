@@ -18,53 +18,53 @@ const AIBackendOptimizationDashboard = () => {
   const fetchRecommendations = useCallback(async (currentConstraints) => {
     setLoading(true);
     try {
-        const AI_MODEL_API_BASE = import.meta.env.VITE_API_BASE1 || 'http://127.0.0.1:7777/recommend_backends';
-        console.log("Attempting to fetch recommendations from:", AI_MODEL_API_BASE);
-        console.log("Sending constraints to backend:", currentConstraints);
-        const response = await fetch(AI_MODEL_API_BASE, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(currentConstraints),
-        });
-        console.log("Fetch response:", response);
+      const AI_MODEL_API_BASE = import.meta.env.VITE_API_BASE1 || 'http://127.0.0.1:5001/api/recommend_backends';
+      console.log("Attempting to fetch recommendations from:", AI_MODEL_API_BASE);
+      console.log("Sending constraints to backend:", currentConstraints);
+      const response = await fetch(AI_MODEL_API_BASE, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(currentConstraints),
+      });
+      console.log("Fetch response:", response);
 
-        if (!response.ok) {
-          const errorText = await response.text();
-          throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
-        }
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
+      }
 
-        const data = await response.json();
-        console.log("Received data from backend:", data);
-        console.log("Recommendations array:", data.recommendations);
-        // Ensure data is an array before mapping
-        const recommendationsArray = Array.isArray(data.recommendations) ? data.recommendations : [];
-        // Transform backend data to match frontend RecommendationCard expectations
-        const transformedRecommendations = recommendationsArray.map(backend => {
-          console.log('Raw backend data:', backend); // Log raw backend data
-          return {
-            id: backend.backend_name, // Assuming backend_name can serve as a unique ID
-            name: backend.backend_name, // Map backend_name to name
-            description: backend.processor_desc, // Map processor_desc to description
-            type: backend.job_type === 'quantum_computing' ? 'quantum' : 'classical', // Determine type based on job_type
-            status: 'online', // Assuming all recommended backends are online
-            suitabilityScore: Math.round(backend.suitability * 100), // Convert suitability to percentage
-            predictedWaitTime: backend.wait_time, // Map wait_time to predictedWaitTime
-            successProbability: Math.round(backend.success_rate * 100), // Convert success_rate to percentage
-            queueLength: backend.queue, // Map queue to queueLength
-            aiConfidence: Math.round(backend.ai_confidence * 100), // Convert ai_confidence to percentage
-            features: [
-              `Circuit Depth: ${backend.circuit_depth}`,
-              `Gate Count: ${backend.gate_count}`,
-            ],
-          }; // Closing curly brace for the object
-        }); // Closing parenthesis for the map function
-        setRecommendations(transformedRecommendations);
-      } catch (error) {
-        console.error("Error fetching recommendations:", error);
-        setRecommendations([]);
-      } finally {
+      const data = await response.json();
+      console.log("Received data from backend:", data);
+      console.log("Recommendations array:", data.recommendations);
+      // Ensure data is an array before mapping
+      const recommendationsArray = Array.isArray(data.recommendations) ? data.recommendations : [];
+      // Transform backend data to match frontend RecommendationCard expectations
+      const transformedRecommendations = recommendationsArray.map(backend => {
+        console.log('Raw backend data:', backend); // Log raw backend data
+        return {
+          id: backend.backend_name, // Assuming backend_name can serve as a unique ID
+          name: backend.backend_name, // Map backend_name to name
+          description: backend.processor_desc, // Map processor_desc to description
+          type: backend.job_type === 'quantum_computing' ? 'quantum' : 'classical', // Determine type based on job_type
+          status: 'online', // Assuming all recommended backends are online
+          suitabilityScore: Math.round(backend.suitability * 100), // Convert suitability to percentage
+          predictedWaitTime: backend.wait_time, // Map wait_time to predictedWaitTime
+          successProbability: Math.round(backend.success_rate * 100), // Convert success_rate to percentage
+          queueLength: backend.queue, // Map queue to queueLength
+          aiConfidence: Math.round(backend.ai_confidence * 100), // Convert ai_confidence to percentage
+          features: [
+            `Circuit Depth: ${backend.circuit_depth}`,
+            `Gate Count: ${backend.gate_count}`,
+          ],
+        }; // Closing curly brace for the object
+      }); // Closing parenthesis for the map function
+      setRecommendations(transformedRecommendations);
+    } catch (error) {
+      console.error("Error fetching recommendations:", error);
+      setRecommendations([]);
+    } finally {
       setLoading(false);
     }
   }, []);
@@ -229,7 +229,7 @@ const AIBackendOptimizationDashboard = () => {
                   </div>
                 </div>
                 <p className="text-muted-foreground mt-3">
-                  Our AI recommendation engine analyzes historical job performance, backend characteristics, 
+                  Our AI recommendation engine analyzes historical job performance, backend characteristics,
                   and real-time queue dynamics to provide optimal backend suggestions with confidence scoring.
                 </p>
               </div>

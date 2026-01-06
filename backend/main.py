@@ -198,18 +198,87 @@ import httpx
 
 @app.post("/api/recommend_backends")
 async def api_recommend_backends(job: JobInput):
-    """Proxy endpoint that forwards requests to the AI model server."""
+    """
+    Directly calculate backend recommendations using the loaded Random Forest model.
+    Replaces the external microservice call for better performance and simplicity.
+    """
     try:
-        async with httpx.AsyncClient() as client:
-            response = await client.post(
-                "http://127.0.0.1:7777/recommend_backends",
-                json=job.dict(),
-                timeout=30.0
-            )
-            return response.json()
+        if model is None or encoders is None:
+            # Fallback if model failed to load
+            logging.warning("AI model not loaded. Returning empty recommendations.")
+            return {"recommendations": []}
+
+        # Create a DataFrame from the backend data
+        df = backend_df.copy()
+
+        # Add user job fields to every row (broadcasting)
+        df["circuit_depth"] = job.circuit_depth
+        df["gate_count"] = job.gate_count
+        df["error_tolerance"] = job.error_tolerance
+        df["max_wait_time"] = job.max_wait_time
+
+        # Encode categorical fields using the loaded encoders
+        # We handle single-value encoding by creating a list of the same value for the whole column
+        try:
+            df["job_type_enc"] = encoders["job_type"].transform([job.job_type] * len(df))
+        except ValueError:
+             # Handle unseen labels by defaulting to 0 or a known class
+             df["job_type_enc"] = 0
+             
+        try:
+            df["priority_level_enc"] = encoders["priority_level"].transform([job.priority_level] * len(df))
+        except ValueError:
+            df["priority_level_enc"] = 0
+
+        # Encode backend-specific columns (already present in df, just need encoding)
+        df["backend_name_enc"] = encoders["backend_name"].transform(df["backend_name"])
+        df["processor_desc_enc"] = encoders["processor_desc"].transform(df["processor_desc"])
+
+        # Select features exactly as the model expects
+        feature_cols = [
+            "circuit_depth", "gate_count", "error_tolerance", "max_wait_time",
+            "queue", "success_rate", "wait_time", "avg_error", "avg_noise", "ai_confidence",
+            "job_type_enc", "priority_level_enc", "backend_name_enc", "processor_desc_enc"
+        ]
+
+        # ✅ Vectorized Prediction
+        df["suitability"] = model.predict(df[feature_cols])
+        
+        # Deduplicate by backend name (keep top-performing if duplicates exist)
+        # Sort by suitability descending
+        df = df.sort_values("suitability", ascending=False).drop_duplicates("backend_name")
+
+        # Select Top 3 recommendations
+        top_recs = df.head(3)
+
+        recs = []
+        for _, backend in top_recs.iterrows():
+            recs.append({
+                "circuit_depth": job.circuit_depth,
+                "gate_count": job.gate_count,
+                "error_tolerance": job.error_tolerance,
+                "job_type": job.job_type,
+                "priority_level": job.priority_level,
+                "max_wait_time": job.max_wait_time,
+                "backend_name": backend["backend_name"],
+                "queue": int(backend["queue"]), 
+                "success_rate": float(backend["success_rate"]), 
+                "wait_time": int(backend["wait_time"]), 
+                "status": backend["status"],
+                "avg_error": float(backend["avg_error"]), 
+                "avg_noise": float(backend["avg_noise"]), 
+                "ai_confidence": float(backend["ai_confidence"]), 
+                "processor_desc": backend["processor_desc"],
+                "suitability": round(float(backend["suitability"]), 3), 
+                "prediction_score": round(float(backend["suitability"]), 3)
+            })
+
+        return {"recommendations": recs}
+
     except Exception as e:
-        logging.error(f"Error proxying to AI model server: {e}")
-        raise HTTPException(status_code=500, detail="Failed to get recommendations from AI model server")
+        logging.error(f"Error in AI recommendation: {e}")
+        # Return empty list or basic fallback instead of 500 to keep UI alive
+        return {"recommendations": []}
 
 @app.post("/recommend_backends")
 def recommend_backends(job: JobInput):
