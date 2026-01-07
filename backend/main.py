@@ -1116,34 +1116,54 @@ async def chat_endpoint(request: ChatRequest):
     try:
         user_message = request.message
         
-        # 1. Summarize system state
-        # Create a lightweight summary of jobs to fit in context
+        # 1. Summarize Job History
         job_summary = []
         for j_id, j_data in jobs.items():
             job_summary.append({
-                "id": j_id[:8], # Short ID
+                "id": j_id[:8], 
                 "name": j_data.get("job_name", "Unnamed"),
                 "status": j_data.get("status"),
                 "backend": j_data.get("backend"),
                 "result": j_data.get("results"),
                 "error": j_data.get("error")
             })
-        
-        # Limit summary size (last 10 jobs)
-        job_summary = job_summary[-10:]
-        
+        job_summary = job_summary[-10:] # Last 10 jobs
+
+        # 2. Summarize Backend Health (NEW)
+        # Select key columns for the AI to understand system status
+        backend_context = []
+        if 'backend_df' in globals():
+            # Get latest status for each unique backend
+            # Sort by priority or success_rate to help AI recommend best ones
+            for _, row in backend_df.drop_duplicates('backend_name').iterrows():
+                backend_context.append({
+                    "name": row['backend_name'],
+                    "status": row['status'],
+                    "queue": int(row['queue']),
+                    "success_rate": f"{round(row['success_rate'] * 100, 1)}%",
+                    "pending_jobs": int(row['queue']), # Alias for clarity
+                    "avg_wait": f"{int(row['wait_time'])} sec"
+                })
+
         system_context = f"""
-        You are 'Qou', the AI Assistant for the Decoherex Quantum Dashboard.
+        You are 'Quo', the AI Assistant for the Decoherex Quantum Dashboard.
         Your goal is to help users understand their quantum jobs and the system status.
         
         Current System Time: {datetime.now().isoformat()}
-        Recent Jobs Data: {json.dumps(job_summary, indent=2)}
+        
+        [LIVE SYSTEM STATUS]
+        {json.dumps(backend_context, indent=2)}
+
+        [USER JOB HISTORY]
+        {json.dumps(job_summary, indent=2)}
         
         Rules:
         1. Be concise and helpful.
-        2. If a job failed, explain the error if visible.
-        3. If asked about recommendations, suggest checking the Optimization dashboard.
-        4. Do not hallucinate data not present in the context.
+        2. If asked for recommendations (e.g., "fastest backend", "most reliable"), use the [LIVE SYSTEM STATUS] data.
+           - Example: "IBM Torino is the best choice with 98% success rate."
+        3. If a job failed, verify if that backend has high error rates in status.
+        4. If the user asks for code, provide python/qiskit code blocks.
+        5. Do not hallucinate.
         """
 
         completion = groq_client.chat.completions.create(
@@ -1154,7 +1174,7 @@ async def chat_endpoint(request: ChatRequest):
             # Use a supported model
             model="llama-3.3-70b-versatile", 
             temperature=0.5,
-            max_tokens=300
+            max_tokens=400
         )
         
         ai_reply = completion.choices[0].message.content

@@ -6,7 +6,7 @@ const QuantumAIChatWidget = () => {
     const [messages, setMessages] = useState([
         {
             role: 'assistant',
-            content: "👋 Hi! I'm Qou, your Quantum Assistant. Ask me about your job status or system health!"
+            content: "👋 Hi! I'm Quo, your Quantum Assistant. Ask me about your job status or system health!"
         }
     ]);
     const [inputText, setInputText] = useState('');
@@ -73,7 +73,7 @@ const QuantumAIChatWidget = () => {
                                 <Icon name="Bot" size={18} className="text-white" />
                             </div>
                             <div>
-                                <h3 className="font-semibold text-foreground">Qou AI</h3>
+                                <h3 className="font-semibold text-foreground">Quo AI</h3>
                                 <div className="flex items-center space-x-1">
                                     <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
                                     <span className="text-xs text-muted-foreground">Online</span>

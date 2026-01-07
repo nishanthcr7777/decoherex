@@ -156,7 +156,7 @@ This server is dedicated to serving the AI model for backend optimization recomm
 ```bash
 uvicorn predictor:app --host 0.0.0.0 --port 7777 --reload
 ```
-
+& '.\.venv\Scripts\Activate.ps1'; uvicorn main:app --host 0.0.0.0 --port 5001 --reload
 This will start the AI model server on `http://0.0.0.0:7777`.
 
 ## Running the Frontend

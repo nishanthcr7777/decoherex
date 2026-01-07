@@ -148,5 +148,89 @@
         "submitted_at": "2025-12-18T13:33:07.290400",
         "progress": 0,
         "shots": 1024
+    },
+    "d53agtnp3tbc73am9mf0": {
+        "job_id": "d53agtnp3tbc73am9mf0",
+        "job_name": "Job-d53agtnp",
+        "backend": "ibm_fez",
+        "circuit": "Quantum Fourier Transform (2 qubits)",
+        "status": "QUEUED",
+        "submitted_at": "2025-12-20T19:15:28.024394",
+        "progress": 0,
+        "shots": 1024
+    },
+    "d53ah3jht8fs739uq5l0": {
+        "job_id": "d53ah3jht8fs739uq5l0",
+        "job_name": "Job-d53ah3jh",
+        "backend": "ibm_torino",
+        "circuit": "Bell State (2 qubits)",
+        "status": "DONE",
+        "submitted_at": "2025-12-20T19:15:52.696893",
+        "progress": 100,
+        "shots": 1024
+    },
+    "d53ajs8nsj9s73b0o8c0": {
+        "job_id": "d53ajs8nsj9s73b0o8c0",
+        "job_name": "Job-d53ajs8n",
+        "backend": "ibm_torino",
+        "circuit": "Custom Code",
+        "status": "DONE",
+        "submitted_at": "2025-12-20T19:21:47.672230",
+        "progress": 100,
+        "shots": 1024
+    },
+    "d53am47p3tbc73am9r2g": {
+        "job_id": "d53am47p3tbc73am9r2g",
+        "job_name": "Job-d53am47p",
+        "backend": "ibm_marrakesh",
+        "circuit": "Bell State (2 qubits)",
+        "status": "RUNNING",
+        "submitted_at": "2025-12-20T19:26:34.015792",
+        "progress": 50,
+        "shots": 1024
+    },
+    "d53aml3ht8fs739uqak0": {
+        "job_id": "d53aml3ht8fs739uqak0",
+        "job_name": "Job-d53aml3h",
+        "backend": "ibm_torino",
+        "circuit": "Custom Code",
+        "status": "QUEUED",
+        "submitted_at": "2025-12-20T19:27:42.635069",
+        "progress": 0,
+        "shots": 1024
+    },
+    "d53at3gnsj9s73b0ogm0": {
+        "job_id": "d53at3gnsj9s73b0ogm0",
+        "job_name": "Job-d53at3gn",
+        "backend": "ibm_torino",
+        "circuit": "Custom Code",
+        "status": "DONE",
+        "submitted_at": "2025-12-20T19:41:28.023513",
+        "progress": 100,
+        "shots": 1024,
+        "results": "BitArray(<shape=(), num_shots=1024, num_bits=1>)",
+        "output": "BitArray(<shape=(), num_shots=1024, num_bits=1>)"
+    },
+    "d5e9l5kpe0pc73aijlog": {
+        "job_id": "d5e9l5kpe0pc73aijlog",
+        "job_name": "Job-d5e9l5kp",
+        "backend": "ibm_torino",
+        "circuit": "Quantum Fourier Transform (2 qubits)",
+        "status": "QUEUED",
+        "submitted_at": "2026-01-06T10:46:06.763892",
+        "progress": 0,
+        "shots": 1024
+    },
+    "d5ea7kkpe0pc73aikd7g": {
+        "job_id": "d5ea7kkpe0pc73aikd7g",
+        "job_name": "Job-d5ea7kkp",
+        "backend": "ibm_fez",
+        "circuit": "Custom Code",
+        "status": "DONE",
+        "submitted_at": "2026-01-06T11:25:30.783098",
+        "progress": 100,
+        "shots": 1024,
+        "results": "BitArray(<shape=(), num_shots=1024, num_bits=2>)",
+        "output": "BitArray(<shape=(), num_shots=1024, num_bits=2>)"
     }
 }
