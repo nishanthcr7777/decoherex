@@ -296,50 +296,56 @@ const PerformanceAnalyticsInsightsDashboard = () => {
                 ) : errorBackends ? (
                   <p className="text-red-500">{errorBackends}</p>
                 ) : (
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Backend</TableHead>
-                        <TableHead>Status</TableHead>
-                        <TableHead>Queued Jobs</TableHead>
-                        <TableHead>Pending Jobs</TableHead>
-                        <TableCell>{"1.0.0"}</TableCell>
-                        <TableHead>Qubits</TableHead>
-                        <TableHead>Operational</TableHead>
-                        <TableHead>Processor Type</TableHead>
-                        <TableHead>2Q Error (Best)</TableHead>
-                        <TableHead>2Q Error (Layered)</TableHead>
-                        <TableCell>{"1000 CLOPS"}</TableCell>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {backends.map((backend) => (
-                        <TableRow key={backend.name}>
-                          <TableCell className="font-medium">{backend.name}</TableCell>
-                          <TableCell>
-                            <Badge variant={backend.status === 'active' ? 'default' : 'destructive'}>
-                              {backend.status}
-                            </Badge>
-                          </TableCell>
-                          <TableCell>{backend.total_pending_jobs || 'N/A'}</TableCell>
-                          <TableCell>{backend.total_pending_jobs || 'N/A'}</TableCell>
-                          <TableCell>{backend.version || 'N/A'}</TableCell>
-                          <TableCell>{backend.qubits || 'N/A'}</TableCell>
-                          <TableCell>
-                            <Badge variant={backend.operational ? 'default' : 'destructive'}>
-                              {backend.operational ? 'Yes' : 'No'}
-                            </Badge>
-                          </TableCell>
-                          <TableCell>{backend.processor_type || 'N/A'}</TableCell>
-                          <TableCell>{backend.two_q_error_best || 'N/A'}</TableCell>
-                          <TableCell>{backend.two_q_error_layered || 'N/A'}</TableCell>
-                          <TableCell>
-                            {backend.name === 'ibm_torino' ? '210K CLOPS' : backend.name === 'ibm_brisbane' ? '180K CLOPS' : 'N/A'}
-                          </TableCell>
+                  <div className="overflow-x-auto">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Backend</TableHead>
+                          <TableHead>Status</TableHead>
+                          <TableHead>Queued Jobs</TableHead>
+                          <TableHead>Pending Jobs</TableHead>
+                          <TableHead>Version</TableHead>
+                          <TableHead>Qubits</TableHead>
+                          <TableHead>Operational</TableHead>
+                          <TableHead>Processor Type</TableHead>
+                          <TableHead>2Q Error (Best)</TableHead>
+                          <TableHead>2Q Error (Layered)</TableHead>
+                          <TableHead>CLOPS</TableHead>
                         </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
+                      </TableHeader>
+                      <TableBody>
+                        {backends.map((backend) => (
+                          <TableRow key={backend.name}>
+                            <TableCell className="font-medium">{backend.name}</TableCell>
+                            <TableCell>
+                              <Badge variant={backend.status === 'active' ? 'default' : 'destructive'}>
+                                {backend.status}
+                              </Badge>
+                            </TableCell>
+                            <TableCell>{backend.total_pending_jobs !== undefined ? backend.total_pending_jobs : 'N/A'}</TableCell>
+                            <TableCell>{backend.total_pending_jobs !== undefined ? backend.total_pending_jobs : 'N/A'}</TableCell>
+                            <TableCell>{backend.version || 'N/A'}</TableCell>
+                            <TableCell>{backend.qubits || 'N/A'}</TableCell>
+                            <TableCell>
+                              <Badge variant={backend.operational ? 'default' : 'destructive'}>
+                                {backend.operational ? 'Yes' : 'No'}
+                              </Badge>
+                            </TableCell>
+                            <TableCell>{backend.processor_type || 'N/A'}</TableCell>
+                            <TableCell>
+                              {backend.two_q_error_best ? Number(backend.two_q_error_best).toFixed(6) : 'N/A'}
+                            </TableCell>
+                            <TableCell>
+                              {backend.two_q_error_layered ? Number(backend.two_q_error_layered).toFixed(6) : 'N/A'}
+                            </TableCell>
+                            <TableCell>
+                              {backend.name === 'ibm_torino' ? '210K CLOPS' : backend.name === 'ibm_brisbane' ? '180K CLOPS' : 'N/A'}
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
                 )}
               </CardContent>
             </Card>
