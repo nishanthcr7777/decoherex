@@ -578,24 +578,40 @@ const QuantumOperationsCommandCenter = () => {
               />
             </div>
 
-            {/* KPI Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 mb-6">
-              {liveJobsKpiData.map((kpi, index) => (
-                <KPICard key={`new-kpi-${index}`} {...kpi} />
-              ))}
-              {Object.entries(kpiData)?.map(([key, data]) => (
-                <KPICard
-                  key={key}
-                  title={data?.title}
-                  value={data?.value}
-                  unit={data?.unit}
-                  trend={data?.trend}
-                  trendValue={data?.trendValue}
-                  status={data?.status}
-                  sparklineData={data?.sparklineData}
-                  icon={data?.icon}
-                />
-              ))}
+            {/* KPI Cards - Curated Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+              {/* Using a curated list of important metrics to avoid clutter */}
+              {[
+                { key: 'ActiveJobs', title: 'Active Jobs', icon: 'Activity', fallback: liveJobsKpiData.find(x => x.title === 'Active Jobs') },
+                { key: 'QueueLength', title: 'Queue Length', icon: 'Clock', fallback: liveJobsKpiData.find(x => x.title === 'Queue Length') },
+                { key: 'SuccessRate', title: 'Success Rate', icon: 'CheckCircle', fallback: liveJobsKpiData.find(x => x.title === 'Success Rate') },
+                { key: 'AvgWaitTime', title: 'Avg Wait Time', icon: 'Timer', fallback: liveJobsKpiData.find(x => x.title === 'Avg Wait Time') },
+                { key: 'BackendAvailability', title: 'System Availability', icon: 'Server', fallback: liveJobsKpiData.find(x => x.title === 'Backend Availability') },
+                { key: 'ErrorRate', title: 'Error Rate', icon: 'AlertTriangle', fallback: liveJobsKpiData.find(x => x.title === 'Error Rate') },
+                { key: 'PendingJobs', title: 'Global Pending', icon: 'Loader', fallback: { value: '0', unit: '', change: '' } }
+              ].map((metric) => {
+                const apiData = kpiData[metric.key];
+                // If API data exists and is valid, use it. Otherwise fallback.
+                // Prefer API data even if 0.
+                const useApi = apiData && apiData.value !== 'N/A' && apiData.value !== undefined;
+
+                const displayData = useApi ? apiData : metric.fallback;
+                if (!displayData || displayData.value === 'N/A') return null;
+
+                return (
+                  <KPICard
+                    key={metric.key}
+                    title={metric.title}
+                    value={displayData.value}
+                    unit={displayData.unit}
+                    trend={displayData.changeType || displayData.trend || 'neutral'}
+                    trendValue={displayData.change || displayData.trendValue}
+                    status={displayData.status || (displayData.changeType === 'increase' ? 'success' : 'neutral')}
+                    sparklineData={displayData.sparklineData || [50, 50, 50, 50, 50]}
+                    icon={metric.icon}
+                  />
+                );
+              })}
             </div>
 
             {/* Job Lifecycle Flow */}

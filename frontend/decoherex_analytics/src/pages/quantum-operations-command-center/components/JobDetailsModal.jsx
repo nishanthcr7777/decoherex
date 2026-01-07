@@ -28,7 +28,7 @@ const JobDetailsModal = ({ job, open, onClose }) => {
     } else {
       outputDisplay = job.results;
     }
-  } else if (['queued', 'pending', 'running'].includes(statusLower)) {
+  } else if (['queued', 'pending', 'running'].includes((job.status || '').toLowerCase())) {
     outputDisplay = <span className="text-muted-foreground italic">Waiting for results...</span>;
   } else if (job.output) {
     // Fallback or simple output
