@@ -70,7 +70,6 @@ const AIBackendOptimizationDashboard = () => {
   }, []);
 
   useEffect(() => {
-    // Initial fetch of recommendations when the component mounts
     fetchRecommendations({
       circuit_depth: 10,
       gate_count: 25,
@@ -81,12 +80,9 @@ const AIBackendOptimizationDashboard = () => {
     });
   }, [fetchRecommendations]);
 
-  // Simulate real-time updates
   useEffect(() => {
     const interval = setInterval(() => {
       setLastUpdated(new Date());
-      // Simulate minor fluctuations in metrics
-      // In real implementation, this would be WebSocket updates
     }, 10000);
 
     return () => clearInterval(interval);
