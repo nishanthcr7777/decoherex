@@ -21,13 +21,29 @@ from qiskit import transpile
 from qiskit.visualization import circuit_drawer
 from groq import Groq
 
+from supabase import create_client, Client
+
 # Load token from .env if available
 load_dotenv()
 IBM_TOKEN = os.getenv("IBM_QUANTUM_API_TOKEN")
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
+SUPABASE_URL = os.getenv("SUPABASE_URL")
+SUPABASE_KEY = os.getenv("SUPABASE_KEY")
+
 service: Optional[QiskitRuntimeService] = None
 api_token_saved = False
 print(f"DEBUG: IBM_TOKEN from .env: {IBM_TOKEN}")
+
+# Initialize Supabase Client
+supabase: Optional[Client] = None
+if SUPABASE_URL and SUPABASE_KEY:
+    try:
+        supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
+        logging.info("Supabase client initialized.")
+    except Exception as e:
+        logging.error(f"Failed to initialize Supabase client: {e}")
+else:
+    logging.warning("SUPABASE_URL or SUPABASE_KEY missing. Database features will fail.")
 
 # Initialize Groq Client
 groq_client = None
@@ -39,6 +55,7 @@ if GROQ_API_KEY:
         logging.error(f"Failed to initialize Groq client: {e}")
 else:
     logging.warning("GROQ_API_KEY not found. AI generation will fallback to rule-based.")
+
 if IBM_TOKEN:
     try:
         service = QiskitRuntimeService(channel="ibm_quantum_platform", token=IBM_TOKEN)
@@ -99,28 +116,23 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# In-memory job storage
-JOBS_FILE = "jobs.json"
-jobs: Dict[str, dict] = {}
+# Active WebSocket connections
 active_connections: List[WebSocket] = []
 
-# IBM Quantum Service instance
-def load_jobs():
-    global jobs
-    if os.path.exists(JOBS_FILE):
-        with open(JOBS_FILE, "r") as f:
-            jobs = json.load(f)
-            logging.info(f"Loaded {len(jobs)} jobs from {JOBS_FILE}")
-    else:
-        logging.info(f"No {JOBS_FILE} found. Starting with empty jobs.")
+# No longer using local JSON file for jobs
+JOBS_FILE = "jobs.json" 
+# jobs: Dict[str, dict] = {} # Removed in favor of DB
 
-def save_jobs():
-    with open(JOBS_FILE, "w") as f:
-        json.dump(jobs, f, indent=4)
-        logging.info(f"Saved {len(jobs)} jobs to {JOBS_FILE}")
-
-# Load jobs on startup
-load_jobs()
+# Helper to fetch simple job dict from DB if needed
+def get_job_from_db(job_id: str):
+    if not supabase: return None
+    try:
+        resp = supabase.table("jobs").select("*").eq("job_id", job_id).execute()
+        if resp.data:
+             return resp.data[0]
+    except Exception as e:
+        logging.error(f"DB Fetch Error: {e}")
+    return None
 
 def get_predefined_circuit(circuit_type: str) -> QuantumCircuit:
     """Create predefined quantum circuits."""
@@ -422,14 +434,23 @@ async def get_kpis():
 
 @app.get("/jobs/recent")
 async def get_recent_jobs():
-    """Retrieve the 20 most recent jobs from the in-memory storage."""
-    logging.info(f"Attempting to retrieve recent jobs. Current jobs store: {jobs}")
-    print(f"DEBUG: Attempting to retrieve recent jobs. Current jobs store: {jobs}")
-    # Sort jobs by creation_date in descending order and take the top 20
-    recent_jobs = sorted(jobs.values(), key=lambda x: x["submitted_at"], reverse=True)[:20]
-    logging.info(f"Returning recent jobs: {recent_jobs}")
-    print(f"DEBUG: Returning recent jobs: {recent_jobs}")
-    return recent_jobs
+    """Retrieve the 20 most recent jobs from Supabase."""
+    logging.info("Attempting to retrieve recent jobs from DB.")
+    if not supabase: return []
+    
+    try:
+        response = supabase.table("jobs").select("*").order("created_at", desc=True).limit(20).execute()
+        jobs_list = response.data
+        
+        # Normalize fields for frontend (frontend expects 'submitted_at')
+        for j in jobs_list:
+            if "submitted_at" not in j:
+                j["submitted_at"] = j.get("created_at")
+        
+        return jobs_list
+    except Exception as e:
+        logging.error(f"Error fetching jobs from DB: {e}")
+        return []
 
 @app.post("/submit-job")
 async def submit_job(
@@ -440,7 +461,7 @@ async def submit_job(
     shots: int = Form(1024)
 ):
     """Submit a quantum job to IBM Quantum."""
-    global service, jobs
+    global service # jobs dict removed
     
     if not service:
         raise HTTPException(status_code=400, detail="API token not configured. Please save your token first.")
@@ -494,22 +515,30 @@ async def submit_job(
         job = sampler.run([isa_circuit], shots=shots)
         job_id = job.job_id()
         
-        # Store job info
+        # Store job info in Supabase
         job_info = {
             "job_id": job_id,
             "job_name": job_name if job_name else f"Job-{job_id[:8]}",
             "backend": backend_name,
-            "circuit": "Custom Code" if custom_code else get_circuit_description(circuit_type),
+            "circuit_type": "Custom Code" if custom_code else get_circuit_description(circuit_type),
             "status": "QUEUED",
-            "submitted_at": datetime.now().isoformat(),
+            "created_at": datetime.now().isoformat(),
             "progress": 0,
             "shots": shots
         }
-        jobs[job_id] = job_info
-        save_jobs() # Save jobs after a new job is submitted
+        
+        if supabase:
+            try:
+                supabase.table("jobs").insert(job_info).execute()
+                logging.info(f"Job {job_id} saved to DB.")
+            except Exception as e:
+                logging.error(f"Failed to save job to DB: {e}")
         
         # Broadcast to all connected clients
-        await broadcast_job_update(job_info)
+        # Adapt job_info for frontend (add submitted_at alias)
+        frontend_job = job_info.copy()
+        frontend_job["submitted_at"] = frontend_job["created_at"]
+        await broadcast_job_update(frontend_job)
         
         # Start monitoring this job
         asyncio.create_task(monitor_job(job_id))
@@ -522,19 +551,24 @@ async def submit_job(
 @app.get("/jobs")
 async def get_jobs():
     """Get all jobs sorted by submission time."""
-    sorted_jobs = sorted(
-        jobs.values(),
-        key=lambda x: x["submitted_at"],
-        reverse=True
-    )
-    # Return only last 20 jobs
-    return {"jobs": sorted_jobs[:20]}
+    logging.info("Retrieving all jobs from DB.")
+    if not supabase: return {"jobs": []}
+    try:
+        response = supabase.table("jobs").select("*").order("created_at", desc=True).limit(20).execute()
+        jobs_list = response.data
+        for j in jobs_list:
+            if "submitted_at" not in j:
+                j["submitted_at"] = j.get("created_at")
+        return {"jobs": jobs_list}
+    except Exception as e:
+        logging.error(f"Error fetching jobs: {e}")
+        return {"jobs": []}
 
 async def monitor_job(job_id: str):
-    """Monitor a job's status and update it."""
-    global service, jobs
+    """Monitor a job's status and update it in Supabase."""
+    global service
     
-    if job_id not in jobs or service is None:
+    if not service or not supabase:
         return
     
     try:
@@ -545,124 +579,115 @@ async def monitor_job(job_id: str):
                 status = job.status()
                 status_str = str(status) if status else "UNKNOWN"
                 
-                # Update job info
-                jobs[job_id]["status"] = status_str
+                # Prepare update payload
+                update_data = {"status": status_str}
                 
                 # Update progress based on status
                 if status_str == "QUEUED":
-                    jobs[job_id]["progress"] = 0
+                    update_data["progress"] = 0
                 elif status_str == "RUNNING":
-                    jobs[job_id]["progress"] = 50
+                    update_data["progress"] = 50
                 elif status_str in ["DONE", "COMPLETED"]:
-                    jobs[job_id]["progress"] = 100
+                    update_data["progress"] = 100
                     
                     # Fetch and store results only if not already stored
-                    if "results" not in jobs[job_id]:
-                        try:
-                            result = job.result()
-                            # Extract quasi-dists from the first PUB (since we send 1 circuit)
-                            # Result structure depends on Sampler version, but typically result[0].data.meas or similar
-                            # The user snippet suggests result[0].data.c (classical register) or .quasi_dists
+                    # We can check DB first if needed, but for now we trust the flow
+                    try:
+                        result = job.result()
+                        # Extract quasi-dists from the first PUB (since we send 1 circuit)
+                        pub_result = result[0]
+                        data_dict = pub_result.data
+                        
+                        output_data = {}
+                        
+                        # Iterate over data fields to find the measurement data
+                        keys = list(data_dict.keys())
+                        if keys:
+                            # target the first register (e.g. 'c' or 'meas')
+                            creg_name = keys[0]
+                            meas_data = getattr(data_dict, creg_name)
                             
-                            # Robust extraction logic for SamplerV2
-                            pub_result = result[0]
-                            data_dict = pub_result.data
-                            
-                            # Find the classical register holding measurements (usually 'c' or 'meas')
-                            # We'll try to find a BitArray or similar, but SamplerV2 often separates it.
-                            # Actually, for SamplerV2, get_counts() might not be direct.
-                            # User snippet: quasi = pub_result.data.c
-                            
-                            output_data = {}
-                            
-                            # Iterate over data fields to find the measurement data
-                            # It's usually a BitArray that we can get counts/quasi from if we knew how,
-                            # BUT user explicitly said: quasi = pub_result.data.c
-                            # Let's try to inspect the keys and grab the first one that looks like a register
-                            
-                            keys = list(data_dict.keys())
-                            if keys:
-                                # target the first register (e.g. 'c' or 'meas')
-                                creg_name = keys[0]
-                                meas_data = getattr(data_dict, creg_name)
-                                
-                                # If it has .get_counts(), use it. If it's a BitArray, it has .get_counts() or similar?
-                                # NO, user said "quasi = pub_result.data.c" returns quasi-dists directly?
-                                # actually user said: "quasi = pub_result.data.c ... print(quasi) -> {0: 0.51}"
-                                # So let's trust the user snippet for data access:
-                                
-                                quasi_dists = meas_data # Assuming this is the dict-like object or we can iterate
-                                
-                                # If it's a BitArray (SamplerV2 default), we might need .get_counts() or .get_probabilities()
-                                # But let's try to format whatever we get.
-                                
-                                # FALLBACK: standardized extraction
-                                # If it's a dictionary of int -> float
-                                if hasattr(meas_data, 'items'): 
-                                    mapped_results = {}
-                                    for k, v in meas_data.items():
-                                        # distinct handling for bitstrings vs ints
-                                        label = str(k)
-                                        if isinstance(k, int):
-                                             # Try to format as binary if we know num_qubits, or just hex/int
-                                             # For simplicity, let's keep it as string
-                                             label = str(k) 
-                                        mapped_results[label] = v
-                                    output_data = mapped_results
-                                    
-                                # If it's a BitArray (from qiskit 1.0+ runtime), call get_counts() logic?
-                                elif hasattr(meas_data, 'get_counts'):
-                                    # This is a BitArray object (Sampler V2) or similar
-                                    # get_counts() returns a dictionary of bitstrings -> counts
-                                    output_data = meas_data.get_counts()
-                                else:
-                                    # Maybe it's a BitArray, convert to list of bitstrings?
-                                    # For a hackathon, just stringifying might be safest fallback
-                                    output_data = str(meas_data)
+                            # Standardize output to string or simple dict
+                            if hasattr(meas_data, 'items'): 
+                                mapped_results = {}
+                                for k, v in meas_data.items():
+                                    label = str(k)
+                                    mapped_results[label] = v
+                                output_data = mapped_results
+                            elif hasattr(meas_data, 'get_counts'):
+                                output_data = meas_data.get_counts()
+                            else:
+                                output_data = str(meas_data)
 
-                            
-                            jobs[job_id]["results"] = output_data
-                            # Also set a simple "output" field for the modal's current view
-                            jobs[job_id]["output"] = str(output_data)
+                        # Save results as JSONB (dict) or string if needed
+                        # Supabase 'results' is jsonb
+                        if isinstance(output_data, str):
+                             update_data["results"] = {"raw": output_data}
+                        else:
+                             update_data["results"] = output_data
+                        
+                        # Also set a simple "output" field logic if needed? 
+                        # Migration plan didn't specify 'output' column, just 'results'.
+                        # Frontend might look for 'results' or 'output'.
+                        # We stick to 'results' column.
 
-                        except Exception as res_e:
-                            print(f"Error fetching results: {res_e}")
-                            jobs[job_id]["error"] = str(res_e)
+                    except Exception as res_e:
+                        print(f"Error fetching results: {res_e}")
+                        update_data["error_message"] = str(res_e)
+
 
                     # Save and broadcast final state
-                    save_jobs()
-                    await broadcast_job_update(jobs[job_id])
+                    supabase.table("jobs").update(update_data).eq("job_id", job_id).execute()
+                    
+                    # Broadcast needs full object
+                    # We can re-fetch or construct it. Constructing is cheaper.
+                    # Getting the original job details is hard without fetching.
+                    # Let's simple-fetch the updated row to be safe.
+                    full_job = get_job_from_db(job_id)
+                    if full_job:
+                        full_job["submitted_at"] = full_job.get("created_at") # polyfill
+                        await broadcast_job_update(full_job)
+                    
                     break # Stop monitoring
                 
                 elif status_str in ["ERROR", "FAILED", "CANCELLED"]:
-                    jobs[job_id]["status"] = "FAILED"
+                    update_data["status"] = "FAILED"
                      # Try to get error message
                     try:
-                        jobs[job_id]["error"] = str(job.error_message())
+                        update_data["error_message"] = str(job.error_message())
                     except:
                         pass
-                    save_jobs()
-                    await broadcast_job_update(jobs[job_id])
+                    
+                    supabase.table("jobs").update(update_data).eq("job_id", job_id).execute()
+                    
+                    full_job = get_job_from_db(job_id)
+                    if full_job:
+                        full_job["submitted_at"] = full_job.get("created_at")
+                        await broadcast_job_update(full_job)
                     break
                 
                 # Broadcast update if status changed or just heartbeat
-                save_jobs()
-                await broadcast_job_update(jobs[job_id])
+                # Only update DB if status changed? Or just update timestamp?
+                # For simplicity, just update status
+                supabase.table("jobs").update(update_data).eq("job_id", job_id).execute()
+                
+                # Ideally we only broadcast on change
+                # But kept logic similar to before
+                full_job = get_job_from_db(job_id)
+                if full_job:
+                    full_job["submitted_at"] = full_job.get("created_at")
+                    await broadcast_job_update(full_job)
                 
                 await asyncio.sleep(2)  # Poll every 2 seconds
                 
             except Exception as e:
                 print(f"Error monitoring job {job_id}: {e}")
-                jobs[job_id]["status"] = "ERROR"
-                jobs[job_id]["progress"] = 0
-                await broadcast_job_update(jobs[job_id])
+                supabase.table("jobs").update({"status": "ERROR", "progress": 0}).eq("job_id", job_id).execute()
                 break
     
     except Exception as e:
         print(f"Failed to get job {job_id}: {e}")
-        if job_id in jobs:
-            jobs[job_id]["status"] = "ERROR"
-            await broadcast_job_update(jobs[job_id])
+        supabase.table("jobs").update({"status": "ERROR"}).eq("job_id", job_id).execute()
 
 async def broadcast_job_update(job_info: dict):
     """Broadcast job update to all connected WebSocket clients."""
@@ -687,10 +712,19 @@ async def websocket_endpoint(websocket: WebSocket):
     active_connections.append(websocket)
     
     try:
-        # Send current jobs on connection
+        # Send current jobs on connection from DB
+        if supabase:
+            response = supabase.table("jobs").select("*").order("created_at", desc=True).limit(20).execute()
+            jobs_list = response.data
+            # Polyfill for frontend
+            for j in jobs_list:
+                j["submitted_at"] = j.get("created_at")
+        else:
+            jobs_list = []
+
         initial_data = {
             "type": "initial_jobs",
-            "data": list(jobs.values())
+            "data": jobs_list
         }
         await websocket.send_text(json.dumps(initial_data))
         
@@ -1117,17 +1151,28 @@ async def chat_endpoint(request: ChatRequest):
         user_message = request.message
         
         # 1. Summarize Job History
+        # 1. Summarize Job History
         job_summary = []
-        for j_id, j_data in jobs.items():
-            job_summary.append({
-                "id": j_id[:8], 
-                "name": j_data.get("job_name", "Unnamed"),
-                "status": j_data.get("status"),
-                "backend": j_data.get("backend"),
-                "result": j_data.get("results"),
-                "error": j_data.get("error")
-            })
-        job_summary = job_summary[-10:] # Last 10 jobs
+        if supabase:
+             try:
+                # Fetch only necessary columns for context window optimization
+                res = supabase.table("jobs").select("job_id,job_name,status,backend,results,error_message").order("created_at", desc=True).limit(10).execute()
+                for j in res.data:
+                    job_summary.append({
+                        "id": j.get("job_id", "")[:8], 
+                        "name": j.get("job_name", "Unnamed"),
+                        "status": j.get("status"),
+                        "backend": j.get("backend"),
+                        "result": j.get("results"), 
+                        "error": j.get("error_message")
+                    })
+             except Exception as db_e:
+                logging.error(f"Failed to fetch context jobs: {db_e}")
+                job_summary = [] # Fallback
+        
+        job_summary = job_summary[::-1] # Reverse to show oldest to newest in context if preferred, or keep as is.
+        # Actually latest first is usually better for "status", but conversationally "recent context" 
+        # usually implies chronological order. Let's keep it simply list.
 
         # 2. Summarize Backend Health (NEW)
         # Select key columns for the AI to understand system status
