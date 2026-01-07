@@ -548,6 +548,72 @@ async def submit_job(
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to submit job: {str(e)}")
 
+# --------------------------------------------------------------------------------
+# BACKGROUND METRICS LOGGER (Supabase Expansion)
+# --------------------------------------------------------------------------------
+async def log_backend_metrics():
+    """Fetches current backend status and logs it to Supabase history table."""
+    logging.info("⏳ Starting scheduled backend metrics logging...")
+    if not service or not supabase:
+        logging.warning("Skipping metrics logging: Service or Supabase not ready.")
+        return
+
+    try:
+        backends = service.backends()
+        metrics_batch = []
+        timestamp = datetime.now().isoformat()
+
+        for backend in backends:
+            try:
+                status = backend.status()
+                props = backend.properties()
+                conf = backend.configuration()
+                
+                # Safe property extraction
+                gates = props.to_dict().get("gates", []) if props else []
+                two_q_err = gates[0].get("parameters", [{}])[0].get("value") if gates else None
+                
+                clops = getattr(backend.target, "clops", None)
+                if clops is None and conf:
+                    clops = getattr(conf, "clops", None)
+
+                metrics_batch.append({
+                    "timestamp": timestamp,
+                    "backend_name": backend.name,
+                    "status": status.status_msg,
+                    "queue_length": status.pending_jobs, # Use pending_jobs as proxy for queue
+                    "pending_jobs": status.pending_jobs,
+                    "qubits": backend.num_qubits if hasattr(backend, 'num_qubits') else 0,
+                    "error_rate": two_q_err,
+                    "clops": float(clops) if clops else 0.0,
+                    "operational": bool(status.operational)
+                })
+            except Exception as b_err:
+                logging.error(f"Error processing backend {backend.name} for logs: {b_err}")
+                continue
+
+        if metrics_batch:
+            response = supabase.table("backend_metrics_history").insert(metrics_batch).execute()
+            logging.info(f"✅ Logged {len(metrics_batch)} backend snapshots to Supabase.")
+        
+    except Exception as e:
+        logging.error(f"❌ Failed to log backend metrics: {e}")
+
+async def schedule_backend_logging():
+    """Runs the logger loop forever."""
+    while True:
+        await asyncio.sleep(60) # Wait 60 seconds (Initial delay)
+        await log_backend_metrics()
+        await asyncio.sleep(300) # Log every 5 minutes
+
+@app.on_event("startup")
+async def startup_event():
+    """Initialize resources on startup."""
+    logging.info("Application starting up...")
+    
+    # Start background tasks
+    asyncio.create_task(schedule_backend_logging())
+
 @app.get("/jobs")
 async def get_jobs():
     """Get all jobs sorted by submission time."""
