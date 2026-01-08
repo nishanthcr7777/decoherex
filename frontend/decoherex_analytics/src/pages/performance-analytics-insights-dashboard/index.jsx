@@ -29,10 +29,10 @@ const PerformanceAnalyticsInsightsDashboard = () => {
 
   const backendControllerRef = useRef(null);
 
-  // FETCH CSV DASHBOARD DATA
-  const fetchDashboardData = async () => {
+  // FETCH CSV/DB DASHBOARD DATA
+  const fetchDashboardData = async (silent = false) => {
     try {
-      setLoadingDashboard(true);
+      if (!silent) setLoadingDashboard(true);
       const response = await fetch('http://localhost:5001/api/dashboard-data');
       if (!response.ok) throw new Error('Failed to fetch dashboard data');
       const data = await response.json();
@@ -40,7 +40,7 @@ const PerformanceAnalyticsInsightsDashboard = () => {
     } catch (error) {
       console.error("Error fetching dashboard data:", error);
     } finally {
-      setLoadingDashboard(false);
+      if (!silent) setLoadingDashboard(false);
     }
   };
 
@@ -71,14 +71,20 @@ const PerformanceAnalyticsInsightsDashboard = () => {
 
   useEffect(() => {
     fetchBackends();
-    fetchDashboardData();
+    fetchDashboardData(false); // Initial load with spinner
 
     const backendInterval = setInterval(() => {
       fetchBackends();
     }, 15000);
 
+    // Auto-refresh dashboard data every 30 seconds (silent)
+    const dashboardInterval = setInterval(() => {
+      fetchDashboardData(true);
+    }, 30000);
+
     return () => {
       clearInterval(backendInterval);
+      clearInterval(dashboardInterval);
       if (backendControllerRef.current) {
         backendControllerRef.current.abort();
       }
@@ -286,9 +292,15 @@ const PerformanceAnalyticsInsightsDashboard = () => {
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-lg font-medium">Live Backend Statistics (Real-Time API)</CardTitle>
-                <Button variant="ghost" size="icon" onClick={fetchBackends} disabled={loadingBackends}>
-                  <RefreshCw className={loadingBackends ? "animate-spin" : ""} size={20} />
-                </Button>
+                <div className="flex items-center space-x-2">
+                  <div className="flex items-center space-x-1 px-2 py-1 bg-green-500/10 text-green-500 rounded-full text-xs animate-pulse border border-green-500/20">
+                    <div className="w-1.5 h-1.5 rounded-full bg-green-500"></div>
+                    <span className="font-medium">Live Updates</span>
+                  </div>
+                  <Button variant="ghost" size="icon" onClick={() => fetchBackends()} disabled={loadingBackends}>
+                    <RefreshCw className={loadingBackends ? "animate-spin" : ""} size={20} />
+                  </Button>
+                </div>
               </CardHeader>
               <CardContent>
                 {loadingBackends ? (

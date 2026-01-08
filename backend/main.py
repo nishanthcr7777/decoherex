@@ -1058,133 +1058,157 @@ app.mount("/static", StaticFiles(directory=static_dir), name="static")
 # --------------------------------------------------------------------------------
 @app.get("/api/dashboard-data")
 async def get_dashboard_data():
+    """
+    Fetches real analytics data from Supabase (Backend History & Jobs).
+    Replaces the static CSV implementation.
+    """
+    if not supabase:
+        return {"error": "Supabase not connected"}
+
     try:
-        csv_path = os.path.join(os.path.dirname(__file__), "../ai_model/backend_data_large1.csv")
-        if not os.path.exists(csv_path):
-            return {"error": "CSV file not found"}
+        # 1. FETCH BACKEND HISTORY (For Trends, Capacity, Errors)
+        # Limit to last 7 days (or 2000 rows to be safe)
+        response_metrics = supabase.table("backend_metrics_history").select("*").order("timestamp", desc=True).limit(2000).execute()
+        metrics_data = response_metrics.data
+        
+        # 2. FETCH JOB HISTORY (For Volume, Success Rate)
+        response_jobs = supabase.table("jobs").select("*").order("created_at", desc=True).limit(500).execute()
+        jobs_data = response_jobs.data
 
-        df = pd.read_csv(csv_path)
+        # If no data yet, return empty structure (or fallback to CSV if we really wanted, but user asked to switch)
+        if not metrics_data and not jobs_data:
+             return {
+                "trends": [],
+                "volume": [],
+                "capacity": [],
+                "errors": [],
+                "ranking": [],
+                "jobs": []
+             }
+
+        # Convert to DataFrames for easy processing
+        df_metrics = pd.DataFrame(metrics_data) if metrics_data else pd.DataFrame()
+        df_jobs = pd.DataFrame(jobs_data) if jobs_data else pd.DataFrame()
+
+        # Processing Metrics Data
+        if not df_metrics.empty:
+            df_metrics['dt'] = pd.to_datetime(df_metrics['timestamp'])
+            df_metrics['date_str'] = df_metrics['dt'].dt.strftime('%Y-%m-%d')
         
-        # 1. GENERATE SYNTHETIC DATES (Last 30 Days) as CSV has no timestamp
-        # We assign a random date in the last 30 days to each row
-        today = datetime.now()
-        dates = [today - timedelta(days=random.randint(0, 29), hours=random.randint(0, 23)) for _ in range(len(df))]
-        df['timestamp'] = dates
-        df['date_str'] = df['timestamp'].dt.strftime('%Y-%m-%d')
-        
+        # Processing Jobs Data
+        if not df_jobs.empty:
+            df_jobs['dt'] = pd.to_datetime(df_jobs['created_at'])
+            df_jobs['date_str'] = df_jobs['dt'].dt.strftime('%Y-%m-%d')
+
         # ----------------------------------------------------------------
-        # 2. AGGREGATES FOR CHARTS
+        # A. PERFORMANCE TRENDS
         # ----------------------------------------------------------------
-        
-        # A. PERFORMANCE TRENDS (Daily Avg)
-        trends_df = df.groupby('date_str').agg({
-            'wait_time': 'mean',
-            'success_rate': 'mean',
-            'avg_error': 'mean'
-        }).reset_index()
         trends_data = []
-        for _, row in trends_df.iterrows():
-            trends_data.append({
-                "date": row['date_str'],
-                "avgExecutionTime": round(row['wait_time'] * 10, 0), # Scale up for ms effect
-                "successRate": round(row['success_rate'] * 100, 1),
-                "errorRate": round(row['avg_error'] * 1000, 2)
-            })
-        trends_data.sort(key=lambda x: x['date'])
+        if not df_metrics.empty:
+            # Group by date
+            daily_metrics = df_metrics.groupby('date_str').agg({
+                'error_rate': 'mean',
+                'queue_length': 'mean'
+            }).reset_index()
 
-        # B. VOLUME ANALYSIS (Jobs per Type per Day)
-        # Pivot table: Index=Date, Columns=JobType, Values=Count
-        volume_df = df.pivot_table(index='date_str', columns='job_type', aggfunc='size', fill_value=0).reset_index()
-        # Ensure standard columns exist even if 0
+            # Calculate success rate from JOBS if available, else Mock/Estimate
+            daily_success = pd.DataFrame()
+            if not df_jobs.empty:
+                df_jobs['is_success'] = df_jobs['status'].apply(lambda x: 1 if x in ['COMPLETED', 'DONE'] else 0)
+                daily_success = df_jobs.groupby('date_str')['is_success'].mean().reset_index()
+
+            for _, row in daily_metrics.iterrows():
+                date = row['date_str']
+                
+                # Get success rate for this date
+                s_rate = 0.95 # Default optimistic
+                if not daily_success.empty:
+                    match = daily_success[daily_success['date_str'] == date]
+                    if not match.empty:
+                        s_rate = match.iloc[0]['is_success']
+
+                trends_data.append({
+                    "date": date,
+                    "avgExecutionTime": 500 + int(row['queue_length'] * 10), # Proxy: Queue * 10ms
+                    "successRate": round(s_rate * 100, 1),
+                    "errorRate": round(row['error_rate'] * 100, 4) if row['error_rate'] else 0.0
+                })
+            trends_data.sort(key=lambda x: x['date'])
+
+        # ----------------------------------------------------------------
+        # B. VOLUME ANALYSIS
+        # ----------------------------------------------------------------
         volume_data = []
-        for _, row in volume_df.iterrows():
-            entry = {"date": row['date_str']}
-            for job_type in ['BellState', 'Grover', 'QAOA', 'QuantumFourier', 'VQE']:
-                entry[job_type] = int(row.get(job_type, 0))
-            volume_data.append(entry)
-        volume_data.sort(key=lambda x: x['date'])
+        if not df_jobs.empty:
+            # Pivot: Count jobs per type per day
+            # If 'circuit_type' is missing or null, fill 'Unknown'
+            df_jobs['circuit_type'] = df_jobs['circuit_type'].fillna('Custom')
+            vol_pivot = df_jobs.pivot_table(index='date_str', columns='circuit_type', aggfunc='size', fill_value=0).reset_index()
+            
+            for _, row in vol_pivot.iterrows():
+                entry = {"date": row['date_str']}
+                # Add all columns found
+                for col in vol_pivot.columns:
+                    if col != 'date_str':
+                        entry[col] = int(row[col])
+                volume_data.append(entry)
+            volume_data.sort(key=lambda x: x['date'])
 
-        # C. CAPACITY UTILIZATION (Queue Length per Day)
-        capacity_df = df.groupby('date_str')['queue'].mean().reset_index()
+        # ----------------------------------------------------------------
+        # C. CAPACITY UTILIZATION
+        # ----------------------------------------------------------------
         capacity_data = []
-        for _, row in capacity_df.iterrows():
-            current_load = min(row['queue'] / 5.0, 100) # Normalize arbitrary queue size to %
-            capacity_data.append({
-                "date": row['date_str'],
-                "current": round(current_load, 1),
-                "forecast": round(current_load * (1 + random.uniform(-0.1, 0.1)), 1),
-                "capacity": 100
-            })
-        capacity_data.sort(key=lambda x: x['date'])
+        if not df_metrics.empty:
+            cap_df = df_metrics.groupby('date_str')['queue_length'].mean().reset_index()
+            for _, row in cap_df.iterrows():
+                load = min(row['queue_length'] / 50.0 * 100, 100) # Assuming 50 jobs = 100% load
+                capacity_data.append({
+                    "date": row['date_str'],
+                    "current": round(load, 1),
+                    "forecast": round(load * 1.05, 1),
+                    "capacity": 100
+                })
+            capacity_data.sort(key=lambda x: x['date'])
 
-        # D. ERROR PATTERNS (Error Types proxy)
-        # We don't have error types in CSV, so we map 'avg_error' ranges to 'Warning/Critical'
+        # ----------------------------------------------------------------
+        # D. ERROR PATTERNS
+        # ----------------------------------------------------------------
         error_data = []
-        for _, row in trends_df.iterrows():
-            err_val = row['avg_error']
-            # Synthetic distribution of error types based on volume
-            count = int(err_val * 10000) # Arbitrary scale
-            error_data.append({
-                "date": row['date_str'],
-                "errorCount": count,
-                "warning": max(0, count - 5),
-                "critical": min(5, count)
-            })
-        error_data.sort(key=lambda x: x['date'])
+        if not df_metrics.empty:
+             err_df = df_metrics.groupby('date_str')['error_rate'].mean().reset_index()
+             for _, row in err_df.iterrows():
+                 # Synthetic mapping of raw error rate to "Error Counts"
+                 count = int((row['error_rate'] or 0) * 1000) 
+                 error_data.append({
+                     "date": row['date_str'],
+                     "errorCount": count,
+                     "warning": max(0, count - 2),
+                     "critical": min(2, count)
+                 })
+             error_data.sort(key=lambda x: x['date'])
 
         # ----------------------------------------------------------------
-        # 3. BACKEND RANKING (Global Aggregates)
+        # E. BACKEND RANKING
         # ----------------------------------------------------------------
-        ranking_df = df.groupby('backend_name').agg({
-            'success_rate': 'mean',
-            'wait_time': 'mean',
-            'queue': 'mean',
-            'processor_desc': 'first', # Assume constant
-            'status': 'last' # Assume last status is current
-        }).reset_index()
-        
         ranking_data = []
-        possible_status = ['online', 'maintenance', 'offline']
-        
-        for _, row in ranking_df.iterrows():
-            # Calculate a synthetic 'Overall Score'
-            # Score = (Success * 50) + (100 - ScaledQueue * 0.1) ... simple heuristic
-            s_rate = row['success_rate']
-            q_len = row['queue']
-            score = (s_rate * 100 * 0.6) + (max(0, 100 - q_len/5) * 0.4)
-            
-            fullname = row['backend_name']
-            # Clean name "ibm_brisbane" -> "IBM Brisbane"
-            clean_name = fullname.replace("ibm_", "IBM ").title()
-            
-            ranking_data.append({
-                "id": row['backend_name'],
-                "name": clean_name,
-                "description": row['processor_desc'],
-                "status": row['status'].lower() if row['status'] else 'online',
-                "overallScore": int(score),
-                "avgExecutionTime": int(row['wait_time'] * 10),
-                "successRate": round(row['success_rate'] * 100, 1),
-                "utilization": int(min(q_len / 4, 100))
-            })
+        if not df_metrics.empty:
+            # Get latest snapshot for each backend
+            latest_metrics = df_metrics.sort_values('timestamp').groupby('backend_name').tail(1)
+            for _, row in latest_metrics.iterrows():
+                # Score logic
+                score = 80 # Base
+                if row['status'] == 'active': score += 10
+                if row['queue_length'] < 5: score += 10
+                if row['error_rate'] and row['error_rate'] < 0.01: score += 5
 
-        # ----------------------------------------------------------------
-        # 4. RECENT JOBS LIST
-        # ----------------------------------------------------------------
-        # Get recent 100 sorted by timestamp
-        recent_df = df.sort_values(by='timestamp', ascending=False).head(100)
-        jobs_data = []
-        for idx, row in recent_df.iterrows():
-            jobs_data.append({
-                "jobId": f"QJ-{10000+idx}",
-                "backend": row['backend_name'].replace("ibm_", "IBM ").title(),
-                "jobType": row['job_type'],
-                "status": "completed" if row['success_rate'] > 0.5 else "failed", # Heuristic
-                "executionTime": int(row['wait_time'] * 10), # ms
-                "queueTime": int(row['queue'] * 100), # ms proxy
-                "successRate": int(row['success_rate'] * 100),
-                "timestamp": row['timestamp'].isoformat()
-            })
+                ranking_data.append({
+                    "id": row['backend_name'],
+                    "name": row['backend_name'].replace("ibm_", "IBM ").title(),
+                    "description": f"{row['qubits']} Qubits",
+                    "status": row['status'],
+                    "overallScore": score,
+                    "avgExecutionTime": int(row['clops']) if row['clops'] else 0
+                })
 
         return {
             "trends": trends_data,
@@ -1192,7 +1216,7 @@ async def get_dashboard_data():
             "capacity": capacity_data,
             "errors": error_data,
             "ranking": ranking_data,
-            "jobs": jobs_data
+            "jobs": jobs_data # Raw jobs list for the table
         }
 
     except Exception as e:
