@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
 import Icon from '../../../components/AppIcon';
 import Button from '../../../components/ui/Button';
 
@@ -78,31 +79,44 @@ const LiveJobFeed = ({ jobs, onJobAction }) => {
         </div>
       </div>
 
-      {/* Filters */}
-      <div className="flex space-x-2 mb-6 p-1 rounded-xl border border-slate-700/50 bg-transparent relative z-10">
-        {filters.map((opt) => {
-          const isActive = filter === opt.id;
-          return (
-            <button
-              key={opt.id}
-              onClick={() => setFilter(opt.id)}
-              className={`
-                  flex items-center space-x-2 px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider border
-                  transition-all duration-300 flex-1 justify-center relative overflow-hidden group
-                  ${isActive
-                  ? 'text-foreground border-accent/50 bg-accent/20'
-                  : 'text-muted-foreground hover:text-foreground border-transparent hover:border-slate-600/50 hover:bg-white/5'
-                }
-                `}
-            >
-              <span className="relative z-10 flex items-center gap-2">
-                <Icon name={opt.icon} size={14} className={isActive ? 'text-white' : ''} />
-                {opt.label}
-              </span>
-            </button>
-          );
-        })}
-      </div>
+      {/* Tab navigation */}
+      <motion.nav
+        className="flex mb-6 p-1 rounded-xl border border-slate-700/50 bg-slate-800/30 relative z-10"
+        initial={false}
+        transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+      >
+        <div className="relative flex flex-1 rounded-lg overflow-visible">
+          {filters.map((opt) => {
+            const isActive = filter === opt.id;
+            return (
+              <motion.button
+                key={opt.id}
+                onClick={() => setFilter(opt.id)}
+                className="relative flex items-center justify-center space-x-2 px-4 py-2.5 rounded-lg text-xs font-bold uppercase tracking-wider flex-1 min-w-0 z-[1]"
+                whileTap={{ scale: 0.98 }}
+                transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+              >
+                {isActive && (
+                  <motion.div
+                    layoutId="liveFeedTabIndicator"
+                    className="absolute inset-0 rounded-lg bg-accent/20 border border-accent/50 shadow-[0_0_12px_rgba(6,182,212,0.15)]"
+                    transition={{ type: 'spring', stiffness: 380, damping: 30 }}
+                    style={{ zIndex: 0 }}
+                  />
+                )}
+                <span
+                  className={`relative z-10 flex items-center gap-2 transition-colors duration-200 ${
+                    isActive ? 'text-foreground' : 'text-muted-foreground hover:text-foreground'
+                  }`}
+                >
+                  <Icon name={opt.icon} size={14} className={isActive ? 'text-accent' : ''} />
+                  {opt.label}
+                </span>
+              </motion.button>
+            );
+          })}
+        </div>
+      </motion.nav>
 
       {/* Quantum Job List */}
       <div className="flex-1 overflow-y-auto space-y-4 pr-2 custom-scrollbar relative z-10">

@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
+import { motion } from 'framer-motion';
 import Icon from '../../../components/AppIcon';
 import Input from '../../../components/ui/Input';
 import Select from '../../../components/ui/Select';
@@ -84,34 +85,41 @@ const JobConstraintPanel = ({ onConstraintsChange, isRefreshing }) => {
           </div>
         </div>
         
-        <div className="flex items-center space-x-2 flex-shrink-0">
+        <div className="flex items-center gap-2 flex-shrink-0 flex-wrap">
           {isRefreshing && (
-            <div className="flex items-center space-x-2 text-accent">
+            <motion.div
+              className="flex items-center gap-2 text-accent px-3 py-2 rounded-lg bg-accent/10 border border-accent/20"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+            >
               <Icon name="RefreshCw" size={14} className="sm:w-4 sm:h-4 animate-spin" />
               <span className="text-xs sm:text-sm font-medium">Updating...</span>
-            </div>
+            </motion.div>
           )}
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleReset}
-            iconName="RotateCcw"
-            iconPosition="left"
-            className="text-xs sm:text-sm px-3 sm:px-4"
-          >
-            <span className="hidden sm:inline">Reset</span>
-            <span className="sm:hidden">R</span>
-          </Button>
-          <Button
-            size="sm"
-            onClick={handleSubmit}
-            iconName="Check"
-            iconPosition="left"
-            className="text-xs sm:text-sm px-3 sm:px-4"
-          >
-            <span className="hidden sm:inline">Submit</span>
-            <span className="sm:hidden">S</span>
-          </Button>
+          <motion.div whileTap={{ scale: 0.98 }} transition={{ type: 'spring', stiffness: 400, damping: 25 }}>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleReset}
+              iconName="RotateCcw"
+              iconPosition="left"
+              className="rounded-xl border border-slate-600/60 bg-transparent hover:bg-slate-700/50 hover:border-slate-500 text-muted-foreground hover:text-foreground h-9 min-h-9 px-4 gap-2 font-medium transition-colors w-[7.25rem] min-w-[7.25rem]"
+            >
+              Reset
+            </Button>
+          </motion.div>
+          <motion.div whileTap={{ scale: 0.98 }} transition={{ type: 'spring', stiffness: 400, damping: 25 }}>
+            <Button
+              size="sm"
+              onClick={handleSubmit}
+              iconName="Check"
+              iconPosition="left"
+              className="rounded-xl border border-transparent bg-accent text-accent-foreground hover:bg-accent/90 shadow-md shadow-accent/20 h-9 min-h-9 px-4 gap-2 font-medium transition-all hover:shadow-accent/30 w-[7.25rem] min-w-[7.25rem]"
+            >
+              Submit
+            </Button>
+          </motion.div>
         </div>
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
