@@ -74,9 +74,11 @@ const JobSubmissionModal = ({ isOpen, onClose, onSubmit }) => {
           Submit Quantum Job
         </span>
       }
+      contentClassName="bg-slate-800/70 border border-slate-700/50 backdrop-blur-sm rounded-xl shadow-xl w-full max-w-lg p-6 flex flex-col max-h-[70vh]"
+      bodyClassName="overflow-y-auto scrollbar-hide min-h-0"
     >
       {/* Mode Tabs */}
-      <div className="flex border-b border-border -mx-6 px-6 mb-4">
+      <div className="flex border-b border-slate-700/50 -mx-6 px-6 mb-4">
         <button
           type="button"
           onClick={() => setSubmissionMode('template')}
@@ -119,7 +121,7 @@ const JobSubmissionModal = ({ isOpen, onClose, onSubmit }) => {
             onChange={(v) => handleInputChange('backend', v)}
             placeholder="Select a backend..."
           />
-          {errors.backend && <p className="text-sm text-error">{errors.backend}</p>}
+          {errors.backend && <p className="text-sm text-destructive">{errors.backend}</p>}
         </div>
 
         {submissionMode === 'template' ? (
@@ -131,21 +133,21 @@ const JobSubmissionModal = ({ isOpen, onClose, onSubmit }) => {
               onChange={(v) => handleInputChange('jobType', v)}
               placeholder="Select a circuit..."
             />
-            {errors.jobType && <p className="text-sm text-error">{errors.jobType}</p>}
+            {errors.jobType && <p className="text-sm text-destructive">{errors.jobType}</p>}
           </div>
         ) : (
           <div className="space-y-1">
             <label className="text-sm font-medium text-foreground">Custom Qiskit Code</label>
             <div className="text-xs text-muted-foreground mb-1">
-              Must define <code className="px-1 py-0.5 rounded bg-muted text-accent">qc = QuantumCircuit(...)</code>
+              Must define <code className="px-1 py-0.5 rounded bg-slate-700/50 text-accent">qc = QuantumCircuit(...)</code>
             </div>
             <textarea
-              className="w-full min-h-[140px] p-3 rounded-lg font-mono text-sm border border-border bg-input text-foreground focus:outline-none focus:ring-0 focus:border-border focus:shadow-none resize-y"
+              className="w-full min-h-[140px] p-3 rounded-lg font-mono text-sm border border-slate-700/50 bg-slate-800/50 text-foreground focus:outline-none focus:ring-0 focus:border-slate-600/60 focus:shadow-none resize-y overflow-y-auto scrollbar-hide"
               placeholder={`from qiskit import QuantumCircuit\n\nqc = QuantumCircuit(2)\nqc.h(0)\nqc.cx(0, 1)\nqc.measure_all()`}
               value={formData.customCode}
               onChange={(e) => handleInputChange('customCode', e.target.value)}
             />
-            {errors.customCode && <p className="text-sm text-error">{errors.customCode}</p>}
+            {errors.customCode && <p className="text-sm text-destructive">{errors.customCode}</p>}
           </div>
         )}
 
@@ -159,21 +161,15 @@ const JobSubmissionModal = ({ isOpen, onClose, onSubmit }) => {
             onChange={(e) => handleInputChange('shots', parseInt(e.target.value) || 0)}
             className="focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-input"
           />
-          {errors.shots && <p className="text-sm text-error">{errors.shots}</p>}
+          {errors.shots && <p className="text-sm text-destructive">{errors.shots}</p>}
         </div>
 
-        <div className="flex justify-end pt-4 gap-3">
-          <button
-            type="button"
-            onClick={onClose}
-            className="px-4 py-2 rounded-md text-sm font-medium border border-border bg-background hover:bg-muted transition-colors"
-          >
-            Cancel
-          </button>
+        <div className="flex justify-end pt-4">
           <button
             type="submit"
-            className="px-4 py-2 rounded-md text-sm font-medium bg-accent text-accent-foreground hover:bg-accent/90 transition-colors"
+            className="flex items-center gap-2 px-4 py-2.5 rounded-2xl text-sm font-medium bg-accent text-accent-foreground hover:bg-accent/90 transition-all focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-transparent"
           >
+            <Icon name="Plus" size={16} className="flex-shrink-0" />
             Submit Job
           </button>
         </div>

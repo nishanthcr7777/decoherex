@@ -5,7 +5,7 @@ import { cn } from "../../utils/cn";
 import Button from "./Button";
 import Input from "./Input";
 
-const DROPDOWN_MAX_HEIGHT = 240; // max-h-60 = 15rem
+const DROPDOWN_MAX_HEIGHT = 176; // max-h-44 = 11rem — shorter, scrollable list
 const VIEWPORT_PADDING = 8;
 
 const Select = React.forwardRef(({
@@ -217,7 +217,7 @@ const Select = React.forwardRef(({
                 {isOpen && (
                     <div
                         className={cn(
-                            "absolute z-50 w-full left-0 glass-card text-foreground rounded-md shadow-lg backdrop-blur-sm",
+                            "absolute z-50 w-full left-0 bg-slate-800/70 border border-slate-700/50 text-foreground rounded-md shadow-lg backdrop-blur-sm",
                             dropUp ? "bottom-full mb-1" : "top-full mt-1"
                         )}
                     >
@@ -235,7 +235,7 @@ const Select = React.forwardRef(({
                             </div>
                         )}
 
-                        <div className="py-1 max-h-60 overflow-y-auto scrollbar-hide">
+                        <div className="py-1 max-h-44 overflow-y-auto scrollbar-hide">
                             {filteredOptions?.length === 0 ? (
                                 <div className="px-3 py-2 text-sm text-muted-foreground">
                                     {searchTerm ? 'No options found' : 'No options available'}

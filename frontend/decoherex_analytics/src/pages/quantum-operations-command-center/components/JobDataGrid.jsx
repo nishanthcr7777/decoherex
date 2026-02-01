@@ -342,6 +342,7 @@ const JobDataGrid = ({
                       iconName="Eye"
                       onClick={() => onJobAction('view', job?.job_id || job?.id)}
                       title="View details"
+                      className="active:bg-transparent active:shadow-[0_0_12px_rgba(6,182,212,0.5)] active:ring-2 active:ring-accent/50 active:ring-offset-1"
                     />
                     {job?.status === 'failed' && (
                       <Button
@@ -350,6 +351,7 @@ const JobDataGrid = ({
                         iconName="RotateCcw"
                         onClick={() => onJobAction('retry', job?.job_id || job?.id)}
                         title="Retry job"
+                        className="active:bg-transparent active:shadow-[0_0_12px_rgba(6,182,212,0.5)] active:ring-2 active:ring-accent/50 active:ring-offset-1"
                       />
                     )}
                     <Button
@@ -358,6 +360,7 @@ const JobDataGrid = ({
                       iconName="MoreHorizontal"
                       onClick={() => onJobAction('menu', job?.job_id || job?.id)}
                       title="More actions"
+                      className="active:bg-transparent active:shadow-[0_0_12px_rgba(6,182,212,0.5)] active:ring-2 active:ring-accent/50 active:ring-offset-1"
                     />
                   </div>
                 </td>
