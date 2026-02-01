@@ -1,25 +1,7 @@
 import React from 'react';
 import Icon from '../../../components/AppIcon';
 
-const RecommendationCard = ({ backend, rank, isSelected, onClick }) => {
-  const getRankIcon = (rank) => {
-    switch (rank) {
-      case 1: return 'Trophy';
-      case 2: return 'Medal';
-      case 3: return 'Award';
-      default: return 'Star';
-    }
-  };
-
-  const getRankColor = (rank) => {
-    switch (rank) {
-      case 1: return 'text-yellow-400';
-      case 2: return 'text-slate-300';
-      case 3: return 'text-amber-600';
-      default: return 'text-muted-foreground';
-    }
-  };
-
+const RecommendationCard = ({ backend, isSelected, onClick }) => {
   const getConfidenceColor = (confidence) => {
     if (confidence >= 90) return 'text-success';
     if (confidence >= 70) return 'text-warning';
@@ -43,10 +25,6 @@ const RecommendationCard = ({ backend, rank, isSelected, onClick }) => {
         }
       `}
     >
-      {/* Rank Badge */}
-      <div className="absolute -top-2 -right-2 sm:-top-3 sm:-right-3 w-7 h-7 sm:w-8 sm:h-8 bg-background border-2 border-slate-700 rounded-full flex items-center justify-center">
-        <Icon name={getRankIcon(rank)} size={14} className={`sm:w-4 sm:h-4 ${getRankColor(rank)}`} />
-      </div>
       {/* Header */}
       <div className="flex items-start justify-between mb-3 sm:mb-4 gap-2">
         <div className="flex items-center space-x-2 sm:space-x-3 min-w-0 flex-1">

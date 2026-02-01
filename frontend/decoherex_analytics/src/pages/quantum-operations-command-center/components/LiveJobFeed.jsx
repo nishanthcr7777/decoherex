@@ -69,12 +69,7 @@ const LiveJobFeed = ({ jobs, onJobAction }) => {
     <div className="h-full flex flex-col glass-card p-6 rounded-2xl relative overflow-hidden">
 
       <div className="flex items-center justify-between mb-6 relative z-10">
-        <div className="flex items-center space-x-3">
-          <div className="p-2 bg-accent/10 rounded-lg border border-accent/20">
-            <Icon name="Activity" size={20} className="text-accent" />
-          </div>
-          <h2 className="text-xl font-bold text-foreground tracking-tight">Live Feed</h2>
-        </div>
+        <h2 className="text-xl font-bold text-foreground tracking-tight">Live Feed</h2>
         <div className="flex items-center space-x-2 px-3 py-1 rounded-full border border-slate-700/50 bg-transparent">
           <div className="w-2 h-2 bg-success rounded-full animate-pulse" />
           <span className="text-xs font-semibold text-success tracking-wide">
