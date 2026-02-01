@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 
 const LOAD_DURATION_MS = 2400;
-const PROGRESS_INTERVAL_MS = 30;
 
 const logoStyle = {
   fontFamily: "Inter, system-ui, sans-serif",
@@ -11,22 +10,11 @@ const logoStyle = {
 };
 
 const LoadingWizard = ({ onComplete }) => {
-  const [progress, setProgress] = useState(0);
   const [isExiting, setIsExiting] = useState(false);
 
   useEffect(() => {
-    const step = (100 / LOAD_DURATION_MS) * PROGRESS_INTERVAL_MS;
-    const interval = setInterval(() => {
-      setProgress((prev) => {
-        const next = Math.min(prev + step, 100);
-        if (next >= 100) {
-          clearInterval(interval);
-          setIsExiting(true);
-        }
-        return next;
-      });
-    }, PROGRESS_INTERVAL_MS);
-    return () => clearInterval(interval);
+    const timer = setTimeout(() => setIsExiting(true), LOAD_DURATION_MS);
+    return () => clearTimeout(timer);
   }, []);
 
   return (
@@ -56,43 +44,30 @@ const LoadingWizard = ({ onComplete }) => {
         />
 
         <div className="relative z-10 flex flex-col items-center gap-12 px-6">
-          {/* Big DecohereX */}
+          {/* Big DecohereX — letter-by-letter fade-in + slight upward motion */}
           {!isExiting && (
             <motion.h1
-              className="font-sans font-bold tracking-tight text-foreground"
+              className="font-sans font-bold tracking-tight text-foreground flex justify-center"
               style={logoStyle}
-              initial={{ opacity: 0, scale: 0.92, letterSpacing: "0.2em" }}
-              animate={{
-                opacity: 1,
-                scale: 1,
-                letterSpacing: "0.02em",
-              }}
-              transition={{
-                duration: 0.7,
-                ease: [0.4, 0, 0.2, 1],
-              }}
+              aria-label="DecohereX"
             >
-              DecohereX
+              {"DecohereX".split("").map((char, i) => (
+                <motion.span
+                  key={`${char}-${i}`}
+                  className="inline-block"
+                  initial={{ opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{
+                    duration: 0.4,
+                    ease: [0.4, 0, 0.2, 1],
+                    delay: i * 0.055,
+                  }}
+                >
+                  {char}
+                </motion.span>
+              ))}
             </motion.h1>
           )}
-
-          <motion.div
-            className="w-full max-w-xs overflow-hidden rounded-full bg-muted/80 sm:max-w-sm"
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3, duration: 0.4 }}
-            style={{ height: "6px" }}
-          >
-            <motion.div
-              className="h-full rounded-full bg-accent"
-              initial={{ width: "0%" }}
-              animate={{ width: `${progress}%` }}
-              transition={{ duration: 0.15, ease: "linear" }}
-              style={{
-                boxShadow: "0 0 12px rgba(6, 182, 212, 0.5)",
-              }}
-            />
-          </motion.div>
 
           <motion.div
             className="flex gap-1.5"
