@@ -39,9 +39,8 @@ const RecommendationCard = ({ backend, rank, isSelected, onClick }) => {
         relative p-4 sm:p-6 rounded-xl sm:rounded-2xl border-2 transition-all duration-300 cursor-pointer
         ${isSelected 
           ? 'bg-accent/10 border-accent shadow-lg shadow-accent/20' 
-          : 'bg-card/50 border-slate-700/50 hover:border-accent/50 hover:bg-accent/5'
+          : 'glass-card border-slate-700/50 hover:border-accent/50 hover:bg-accent/5'
         }
-        backdrop-blur-sm
       `}
     >
       {/* Rank Badge */}

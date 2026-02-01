@@ -72,7 +72,7 @@ const JobConstraintPanel = ({ onConstraintsChange, isRefreshing }) => {
   };
 
   return (
-    <div className="bg-card/50 backdrop-blur-sm border border-slate-700/50 rounded-xl sm:rounded-2xl p-4 sm:p-6">
+    <div className="glass-card p-4 sm:p-6 rounded-xl sm:rounded-2xl">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4 sm:mb-6">
         <div className="flex items-center space-x-2 sm:space-x-3">
           <div className="w-7 h-7 sm:w-8 sm:h-8 bg-accent/20 rounded-lg flex items-center justify-center flex-shrink-0">

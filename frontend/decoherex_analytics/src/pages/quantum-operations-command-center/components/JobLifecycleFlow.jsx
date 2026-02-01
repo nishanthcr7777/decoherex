@@ -59,7 +59,7 @@ const JobLifecycleFlow = ({ jobs }) => {
   }, [jobs]);
 
   return (
-    <div className="bg-card/50 backdrop-blur-sm border border-slate-700/50 rounded-xl sm:rounded-2xl p-4 sm:p-6">
+    <div className="glass-card p-4 sm:p-6 rounded-xl sm:rounded-2xl">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-0 mb-4 sm:mb-6">
         <h2 className="text-base sm:text-lg font-semibold text-foreground">Job Lifecycle Flow</h2>
         <div className="flex items-center space-x-2">

@@ -107,6 +107,7 @@ const JobSubmissionModal = ({ isOpen, onClose, onSubmit }) => {
             placeholder="e.g., My First Quantum Job"
             value={formData.jobName}
             onChange={(e) => handleInputChange('jobName', e.target.value)}
+            className="focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-input"
           />
         </div>
 
@@ -139,7 +140,7 @@ const JobSubmissionModal = ({ isOpen, onClose, onSubmit }) => {
               Must define <code className="px-1 py-0.5 rounded bg-muted text-accent">qc = QuantumCircuit(...)</code>
             </div>
             <textarea
-              className="w-full min-h-[140px] p-3 rounded-lg font-mono text-sm border border-border bg-input text-foreground focus:ring-2 focus:ring-accent outline-none resize-y"
+              className="w-full min-h-[140px] p-3 rounded-lg font-mono text-sm border border-border bg-input text-foreground focus:outline-none focus:ring-0 focus:border-border focus:shadow-none resize-y"
               placeholder={`from qiskit import QuantumCircuit\n\nqc = QuantumCircuit(2)\nqc.h(0)\nqc.cx(0, 1)\nqc.measure_all()`}
               value={formData.customCode}
               onChange={(e) => handleInputChange('customCode', e.target.value)}
@@ -156,6 +157,7 @@ const JobSubmissionModal = ({ isOpen, onClose, onSubmit }) => {
             max={10000}
             value={formData.shots}
             onChange={(e) => handleInputChange('shots', parseInt(e.target.value) || 0)}
+            className="focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-input"
           />
           {errors.shots && <p className="text-sm text-error">{errors.shots}</p>}
         </div>

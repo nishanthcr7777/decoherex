@@ -23,7 +23,7 @@ const BackendComparisonMatrix = ({ backends, selectedBackends, onBackendSelect }
   };
 
   return (
-    <div className="bg-card/50 backdrop-blur-sm border border-slate-700/50 rounded-2xl p-6">
+    <div className="glass-card p-6 rounded-2xl">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center space-x-3">
           <div className="w-8 h-8 bg-secondary/20 rounded-lg flex items-center justify-center">
@@ -124,7 +124,7 @@ const BackendComparisonMatrix = ({ backends, selectedBackends, onBackendSelect }
               </ResponsiveContainer>
             </div>
           ) : (
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto scrollbar-hide">
               <table className="w-full">
                 <thead>
                   <tr className="border-b border-slate-700/50">

@@ -75,11 +75,11 @@ const QuantumLab = () => {
                             </p>
                         </div>
 
-                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 min-h-[calc(100vh-14rem)]">
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 min-h-[calc(100vh-14rem)] overflow-x-auto scrollbar-hide">
                     {/* Left Panel: Input & Code */}
                     <div className="flex flex-col space-y-4 sm:space-y-6">
                         {/* AI Input */}
-                        <div className="bg-card/50 backdrop-blur-sm border border-slate-700/50 p-4 sm:p-6 rounded-xl sm:rounded-2xl">
+                        <div className="glass-card p-4 sm:p-6 rounded-xl sm:rounded-2xl">
                             <label className="text-xs sm:text-sm font-medium text-foreground mb-2 block">
                                 Describe your circuit
                             </label>
@@ -89,7 +89,7 @@ const QuantumLab = () => {
                                     value={prompt}
                                     onChange={(e) => setPrompt(e.target.value)}
                                     placeholder="e.g., Create a Bell State..."
-                                    className="flex-1 bg-input border border-slate-700/50 rounded-lg px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm text-foreground focus:ring-2 focus:ring-accent focus:border-accent outline-none transition-all"
+                                    className="flex-1 bg-input border border-slate-700/50 rounded-lg px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm text-foreground focus:outline-none transition-all"
                                     onKeyDown={(e) => e.key === 'Enter' && handleGenerate()}
                                 />
                                 <button
@@ -110,7 +110,7 @@ const QuantumLab = () => {
                         </div>
 
                         {/* Code Editor */}
-                        <div className="flex-1 min-h-[300px] sm:min-h-0 bg-card/50 backdrop-blur-sm border border-slate-700/50 rounded-xl sm:rounded-2xl overflow-hidden flex flex-col">
+                        <div className="flex-1 min-h-[300px] sm:min-h-0 glass-card rounded-xl sm:rounded-2xl overflow-hidden flex flex-col">
                             <div className="bg-muted/30 px-3 sm:px-4 py-2 border-b border-slate-700/50 flex justify-between items-center">
                                 <span className="text-[10px] sm:text-xs font-mono text-muted-foreground">main.py</span>
                                 <div className="flex space-x-1.5 sm:space-x-2">
@@ -122,7 +122,7 @@ const QuantumLab = () => {
                             <textarea
                                 value={code}
                                 onChange={(e) => setCode(e.target.value)}
-                                className="flex-1 bg-transparent p-3 sm:p-4 font-mono text-xs sm:text-sm text-accent resize-none focus:outline-none leading-relaxed placeholder:text-muted-foreground"
+                                className="flex-1 bg-transparent p-3 sm:p-4 font-mono text-xs sm:text-sm text-accent resize-none focus:outline-none focus:border-transparent focus:ring-0 focus:shadow-none leading-relaxed placeholder:text-muted-foreground overflow-y-auto scrollbar-hide"
                                 spellCheck={false}
                                 placeholder="# Generated code will appear here"
                             />
@@ -148,7 +148,7 @@ const QuantumLab = () => {
                     {/* Right Panel: Visualization & Results */}
                     <div className="flex flex-col space-y-4 sm:space-y-6">
                         {/* Circuit Diagram */}
-                        <div className="flex-1 min-h-[250px] sm:min-h-0 bg-card/50 backdrop-blur-sm border border-slate-700/50 rounded-xl sm:rounded-2xl p-4 sm:p-6 flex flex-col">
+                        <div className="flex-1 min-h-[250px] sm:min-h-0 glass-card p-4 sm:p-6 rounded-xl sm:rounded-2xl flex flex-col">
                             <h3 className="text-xs sm:text-sm font-medium text-foreground mb-3 sm:mb-4 flex items-center gap-2">
                                 <Icon name="Activity" size={16} className="text-accent" />
                                 Circuit Topology
@@ -167,7 +167,7 @@ const QuantumLab = () => {
                         </div>
 
                         {/* Simulation Results */}
-                        <div className="flex-1 min-h-[250px] sm:min-h-0 bg-card/50 backdrop-blur-sm border border-slate-700/50 rounded-xl sm:rounded-2xl p-4 sm:p-6 flex flex-col">
+                        <div className="flex-1 min-h-[250px] sm:min-h-0 glass-card p-4 sm:p-6 rounded-xl sm:rounded-2xl flex flex-col">
                             <h3 className="text-xs sm:text-sm font-medium text-foreground mb-3 sm:mb-4 flex items-center gap-2">
                                 <Icon name="BarChart" size={16} className="text-accent" />
                                 <span className="hidden sm:inline">Simulation Results (Counts)</span>

@@ -160,7 +160,7 @@ const AIBackendOptimizationDashboard = () => {
                 <span className="text-sm sm:text-base text-muted-foreground">Loading recommendations...</span>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 overflow-x-auto scrollbar-hide">
                 {topRecommendations?.map((backend, index) => (
                   <RecommendationCard
                     key={`${backend?.id}-${index}`}
@@ -175,9 +175,9 @@ const AIBackendOptimizationDashboard = () => {
           </div>
 
           {/* Main Content Grid */}
-          <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 sm:gap-8 mb-6 sm:mb-8">
+          <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 sm:gap-8 mb-6 sm:mb-8 overflow-x-auto scrollbar-hide">
             {/* Backend Comparison Matrix - 2 columns */}
-            <div className="xl:col-span-2">
+            <div className="xl:col-span-2 min-w-0">
               <BackendComparisonMatrix
                 backends={recommendations}
                 selectedBackends={selectedBackendsForComparison}
@@ -197,7 +197,7 @@ const AIBackendOptimizationDashboard = () => {
           </div>
 
           {/* AI Model Information */}
-          <div className="bg-card/30 backdrop-blur-sm border border-slate-700/50 rounded-xl sm:rounded-2xl p-4 sm:p-6">
+          <div className="glass-card p-4 sm:p-6 rounded-xl sm:rounded-2xl">
             <div className="flex flex-col sm:flex-row items-start space-y-4 sm:space-y-0 sm:space-x-4">
               <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-accent to-secondary rounded-lg sm:rounded-xl flex items-center justify-center flex-shrink-0">
                 <Icon name="Cpu" size={20} className="sm:w-6 sm:h-6 text-primary-foreground" />

@@ -66,7 +66,7 @@ const LiveJobFeed = ({ jobs, onJobAction }) => {
   };
 
   return (
-    <div className="h-full flex flex-col bg-card/50 backdrop-blur-sm border border-slate-700/50 rounded-2xl p-6 relative overflow-hidden">
+    <div className="h-full flex flex-col glass-card p-6 rounded-2xl relative overflow-hidden">
 
       <div className="flex items-center justify-between mb-6 relative z-10">
         <div className="flex items-center space-x-3">

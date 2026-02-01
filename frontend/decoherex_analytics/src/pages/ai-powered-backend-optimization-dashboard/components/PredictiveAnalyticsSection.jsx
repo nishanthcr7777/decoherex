@@ -71,7 +71,7 @@ const PredictiveAnalyticsSection = ({ constraints }) => {
   };
 
   return (
-    <div className="bg-card/50 backdrop-blur-sm border border-slate-700/50 rounded-2xl p-6">
+    <div className="glass-card p-6 rounded-2xl">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center space-x-3">
           <div className="w-8 h-8 bg-warning/20 rounded-lg flex items-center justify-center">

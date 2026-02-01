@@ -159,9 +159,10 @@ const Select = React.forwardRef(({
                     id={selectId}
                     type="button"
                     className={cn(
-                        "flex h-10 w-full items-center justify-between rounded-md border border-slate-700/50 bg-slate-800/50 text-foreground px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
+                        "flex h-10 w-full items-center justify-between rounded-md border border-slate-700/50 bg-slate-800/50 text-foreground px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 transition-colors",
                         error && "border-destructive focus:ring-destructive",
-                        !hasValue && "text-muted-foreground"
+                        !hasValue && "text-muted-foreground",
+                        isOpen && "border-slate-600/60 bg-slate-800/70"
                     )}
                     onClick={handleToggle}
                     disabled={disabled}
@@ -216,7 +217,7 @@ const Select = React.forwardRef(({
                 {isOpen && (
                     <div
                         className={cn(
-                            "absolute z-50 w-full left-0 bg-slate-800 text-foreground border border-slate-700/50 rounded-md shadow-lg",
+                            "absolute z-50 w-full left-0 glass-card text-foreground rounded-md shadow-lg backdrop-blur-sm",
                             dropUp ? "bottom-full mb-1" : "top-full mt-1"
                         )}
                     >
@@ -228,7 +229,7 @@ const Select = React.forwardRef(({
                                         placeholder="Search options..."
                                         value={searchTerm}
                                         onChange={handleSearchChange}
-                                        className="pl-8 bg-slate-800 border-slate-700/50"
+                                        className="pl-8 bg-slate-800/50 border-slate-700/50"
                                     />
                                 </div>
                             </div>

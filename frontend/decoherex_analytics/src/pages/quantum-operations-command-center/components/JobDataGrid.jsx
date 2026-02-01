@@ -128,19 +128,19 @@ const JobDataGrid = ({
 
   const getStatusBadge = (status) => {
     const configs = {
-      queued: { color: 'border-slate-500/50 bg-slate-600/20 text-slate-200', icon: 'Clock' },
-      running: { color: 'border-amber-500/50 bg-amber-500/20 text-amber-200', icon: 'Play' },
-      completed: { color: 'border-emerald-500/50 bg-emerald-500/20 text-emerald-200', icon: 'CheckCircle' },
-      failed: { color: 'border-red-500/50 bg-red-500/20 text-red-200', icon: 'XCircle' }
+      queued: { color: 'bg-muted/20 text-muted-foreground', icon: 'Clock' },
+      running: { color: 'bg-warning/20 text-warning', icon: 'Play' },
+      completed: { color: 'bg-success/20 text-success', icon: 'CheckCircle' },
+      failed: { color: 'bg-error/20 text-error', icon: 'XCircle' }
     };
 
     const config = configs?.[status] || configs?.queued;
 
     return (
-      <div className={`flex items-center space-x-1 px-2 py-1 rounded-full text-xs font-medium border ${config?.color}`}>
+      <span className={`inline-flex items-center space-x-1 px-2 py-1 rounded-full text-xs font-medium ${config?.color}`}>
         <Icon name={config?.icon} size={12} />
         <span className="capitalize">{status}</span>
-      </div>
+      </span>
     );
   };
 
@@ -165,7 +165,7 @@ const JobDataGrid = ({
   };
 
   return (
-    <div className="bg-card/50 backdrop-blur-sm border border-slate-700/50 rounded-2xl p-6">
+    <div className="glass-card p-6 rounded-2xl">
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-lg font-semibold text-foreground">Job Management</h2>
         <div className="flex items-center space-x-3">
@@ -222,125 +222,119 @@ const JobDataGrid = ({
       <div className="overflow-x-auto">
         <table className="w-full">
           <thead>
-            <tr className="border-b border-border/50">
-              <th className="text-left p-3">
+            <tr className="border-b border-slate-700/50">
+              <th className="text-left py-3 px-2">
                 <input
                   type="checkbox"
                   checked={selectedJobs?.size === filteredAndSortedJobs?.length && filteredAndSortedJobs?.length > 0}
                   onChange={handleSelectAll}
-                  className="rounded border-border/50 bg-input text-accent focus:ring-accent"
+                  className="rounded border-border/50 bg-input text-accent focus:ring-2 focus:ring-ring"
                 />
               </th>
               {/* Job Name */}
               <th
-                className="text-left p-3 cursor-pointer hover:bg-muted/20 transition-colors"
+                className="text-left py-3 px-2 text-sm font-medium text-muted-foreground cursor-pointer hover:text-foreground transition-colors"
                 onClick={() => handleSort('job_name')}
               >
                 <div className="flex items-center space-x-2">
-                  <span className="text-sm font-medium text-muted-foreground">Job Name</span>
-                  <Icon name={getSortIcon('job_name')} size={14} className="text-muted-foreground" />
+                  <span>Job Name</span>
+                  <Icon name={getSortIcon('job_name')} size={14} />
                 </div>
               </th>
               {/* Job ID */}
               <th
-                className="text-left p-3 cursor-pointer hover:bg-muted/20 transition-colors"
+                className="text-left py-3 px-2 text-sm font-medium text-muted-foreground cursor-pointer hover:text-foreground transition-colors"
                 onClick={() => handleSort('job_id')}
               >
                 <div className="flex items-center space-x-2">
-                  <span className="text-sm font-medium text-muted-foreground">Job ID</span>
-                  <Icon name={getSortIcon('job_id')} size={14} className="text-muted-foreground" />
+                  <span>Job ID</span>
+                  <Icon name={getSortIcon('job_id')} size={14} />
                 </div>
               </th>
               {/* Backend */}
               <th
-                className="text-left p-3 cursor-pointer hover:bg-muted/20 transition-colors"
+                className="text-left py-3 px-2 text-sm font-medium text-muted-foreground cursor-pointer hover:text-foreground transition-colors"
                 onClick={() => handleSort('backend')}
               >
                 <div className="flex items-center space-x-2">
-                  <span className="text-sm font-medium text-muted-foreground">Backend</span>
-                  <Icon name={getSortIcon('backend')} size={14} className="text-muted-foreground" />
+                  <span>Backend</span>
+                  <Icon name={getSortIcon('backend')} size={14} />
                 </div>
               </th>
               {/* Circuit */}
               <th
-                className="text-left p-3 cursor-pointer hover:bg-muted/20 transition-colors"
+                className="text-left py-3 px-2 text-sm font-medium text-muted-foreground cursor-pointer hover:text-foreground transition-colors"
                 onClick={() => handleSort('circuit')}
               >
                 <div className="flex items-center space-x-2">
-                  <span className="text-sm font-medium text-muted-foreground">Circuit</span>
-                  <Icon name={getSortIcon('circuit')} size={14} className="text-muted-foreground" />
+                  <span>Circuit</span>
+                  <Icon name={getSortIcon('circuit')} size={14} />
                 </div>
               </th>
               {/* Status */}
-              <th className="text-left p-3">
-                <span className="text-sm font-medium text-muted-foreground">Status</span>
-              </th>
+              <th className="text-left py-3 px-2 text-sm font-medium text-muted-foreground">Status</th>
               {/* Progress */}
-              <th className="text-left p-3">
-                <span className="text-sm font-medium text-muted-foreground">Progress</span>
-              </th>
+              <th className="text-left py-3 px-2 text-sm font-medium text-muted-foreground">Progress</th>
               {/* Submitted At */}
               <th
-                className="text-left p-3 cursor-pointer hover:bg-muted/20 transition-colors"
+                className="text-left py-3 px-2 text-sm font-medium text-muted-foreground cursor-pointer hover:text-foreground transition-colors"
                 onClick={() => handleSort('submitted_at')}
               >
                 <div className="flex items-center space-x-2">
-                  <span className="text-sm font-medium text-muted-foreground">Submitted At</span>
-                  <Icon name={getSortIcon('submitted_at')} size={14} className="text-muted-foreground" />
+                  <span>Submitted At</span>
+                  <Icon name={getSortIcon('submitted_at')} size={14} />
                 </div>
               </th>
               {/* Actions */}
-              <th className="text-left p-3">
-                <span className="text-sm font-medium text-muted-foreground">Actions</span>
-              </th>
+              <th className="text-left py-3 px-2 text-sm font-medium text-muted-foreground">Actions</th>
             </tr>
           </thead>
           <tbody>
             {filteredAndSortedJobs?.map((job) => (
               <tr
                 key={job?.id || job?.job_id}
-                className="border-b border-border/30 hover:bg-muted/20 hover:shadow-[0_0_0_1px_rgba(6,182,212,0.35),0_0_6px_rgba(6,182,212,0.1)] focus-visible:outline-none focus-visible:shadow-[0_0_0_1px_rgba(6,182,212,0.4),0_0_6px_rgba(6,182,212,0.12)] transition-all duration-200"
+                className="border-b border-slate-700/30 hover:bg-muted/20 transition-colors"
               >
-                <td className="p-3">
+                <td className="py-4 px-2">
                   <input
                     type="checkbox"
                     checked={selectedJobs?.has(job?.job_id || job?.id)}
                     onChange={() => handleSelectJob(job?.job_id || job?.id)}
-                    className="rounded border-border/50 bg-input text-accent focus:ring-accent"
+                    className="rounded border-border/50 bg-input text-accent focus:ring-2 focus:ring-ring"
                   />
                 </td>
                 {/* Job Name */}
-                <td className="p-3">
+                <td className="py-4 px-2">
                   <span className="text-sm text-foreground">{job?.job_name || `Job-${(job?.job_id || job?.id)?.slice(-4)}`}</span>
                 </td>
                 {/* Job ID */}
-                <td className="p-3">
+                <td className="py-4 px-2">
                   <span className="text-sm font-mono text-accent">{(job?.job_id || job?.id)?.slice(0, 8)}...</span>
                 </td>
                 {/* Backend */}
-                <td className="p-3">
+                <td className="py-4 px-2">
                   <span className="text-sm text-foreground">{job?.backend}</span>
                 </td>
                 {/* Circuit */}
-                <td className="p-3">
+                <td className="py-4 px-2">
                   <span className="text-sm text-foreground">{job?.circuit}</span>
                 </td>
                 {/* Status */}
-                <td className="p-3">
+                <td className="py-4 px-2">
                   {getStatusBadge(job?.status)}
                 </td>
                 {/* Progress */}
-                <td className="p-3 w-32">
+                <td className="py-4 px-2 w-32">
                   <div className="w-full bg-border rounded-full h-2">
                     <div className={`h-2 rounded-full bg-accent transition-all`} style={{ width: `${job?.progress || (job?.status === 'completed' || job?.status === 'DONE' ? 100 : 0)}%` }} />
                   </div>
                 </td>
                 {/* Submitted At */}
-                <td className="p-3">
+                <td className="py-4 px-2">
                   <span className="text-sm text-muted-foreground">{formatTimestamp(job?.submitted_at || job?.timestamp)}</span>
                 </td>
                 {/* Actions */}
-                <td className="p-3">
+                <td className="py-4 px-2">
                   <div className="flex items-center space-x-1">
                     <Button
                       variant="ghost"
@@ -356,15 +350,6 @@ const JobDataGrid = ({
                         iconName="RotateCcw"
                         onClick={() => onJobAction('retry', job?.job_id || job?.id)}
                         title="Retry job"
-                      />
-                    )}
-                    {(job?.status === 'queued' || job?.status === 'running') && (
-                      <Button
-                        variant="ghost"
-                        size="xs"
-                        iconName="X"
-                        onClick={() => onJobAction('cancel', job?.job_id || job?.id)}
-                        title="Cancel job"
                       />
                     )}
                     <Button

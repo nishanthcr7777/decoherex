@@ -9,8 +9,6 @@ import StatisticalDistribution from './components/StatisticalDistribution';
 import BackendRankingTable from './components/BackendRankingTable';
 import PerformanceDataGrid from './components/PerformanceDataGrid';
 import Icon from '../../components/AppIcon';
-import { Card, CardHeader, CardTitle, CardContent } from '../../components/ui/card';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../../components/ui/table';
 import { Badge } from '../../components/ui/badge';
 import Button from '../../components/ui/Button';
 import { RefreshCw } from 'lucide-react';
@@ -290,12 +288,12 @@ const PerformanceAnalyticsInsightsDashboard = () => {
 
           {/* Live Backend Statistics (Keep original 'backends' usage for Real-Time comparison) */}
           <div className="w-full overflow-x-auto scrollbar-hide">
-            <Card>
-              <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-2 sm:space-y-0 pb-2">
-                <CardTitle className="text-base sm:text-lg font-medium">Live Backend Statistics (Real-Time API)</CardTitle>
+            <div className="glass-card p-6 rounded-2xl">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-2 sm:space-y-0 pb-4 mb-4 border-b border-slate-700/50">
+                <h3 className="text-base sm:text-lg font-semibold text-foreground">Live Backend Statistics (Real-Time API)</h3>
                 <div className="flex items-center space-x-2">
-                  <div className="flex items-center space-x-1 px-2 py-1 bg-green-500/10 text-green-500 rounded-full text-[10px] sm:text-xs animate-pulse border border-green-500/20">
-                    <div className="w-1.5 h-1.5 rounded-full bg-green-500"></div>
+                  <div className="flex items-center space-x-1 px-2 py-1 bg-success/10 text-success rounded-full text-[10px] sm:text-xs animate-pulse border border-success/20">
+                    <div className="w-1.5 h-1.5 rounded-full bg-success"></div>
                     <span className="font-medium hidden sm:inline">Live Updates</span>
                     <span className="font-medium sm:hidden">Live</span>
                   </div>
@@ -303,66 +301,64 @@ const PerformanceAnalyticsInsightsDashboard = () => {
                     <RefreshCw className={loadingBackends ? "animate-spin" : ""} size={18} className="sm:w-5 sm:h-5" />
                   </Button>
                 </div>
-              </CardHeader>
-              <CardContent>
-                {loadingBackends ? (
-                  <p className="text-sm text-muted-foreground">Loading backend statistics...</p>
-                ) : errorBackends ? (
-                  <p className="text-sm text-red-500">{errorBackends}</p>
-                ) : (
-                  <div className="overflow-x-auto scrollbar-hide -mx-4 sm:mx-0">
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>Backend</TableHead>
-                          <TableHead>Status</TableHead>
-                          <TableHead>Queued Jobs</TableHead>
-                          <TableHead>Pending Jobs</TableHead>
-                          <TableHead>Version</TableHead>
-                          <TableHead>Qubits</TableHead>
-                          <TableHead>Operational</TableHead>
-                          <TableHead>Processor Type</TableHead>
-                          <TableHead>2Q Error (Best)</TableHead>
-                          <TableHead>2Q Error (Layered)</TableHead>
-                          <TableHead>CLOPS</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {backends.map((backend) => (
-                          <TableRow key={backend.name}>
-                            <TableCell className="font-medium">{backend.name}</TableCell>
-                            <TableCell>
-                              <Badge variant={backend.status === 'active' ? 'default' : 'destructive'}>
-                                {backend.status}
-                              </Badge>
-                            </TableCell>
-                            <TableCell>{backend.total_pending_jobs !== undefined ? backend.total_pending_jobs : 'N/A'}</TableCell>
-                            <TableCell>{backend.total_pending_jobs !== undefined ? backend.total_pending_jobs : 'N/A'}</TableCell>
-                            <TableCell>{backend.version || 'N/A'}</TableCell>
-                            <TableCell>{backend.qubits || 'N/A'}</TableCell>
-                            <TableCell>
-                              <Badge variant={backend.operational ? 'default' : 'destructive'}>
-                                {backend.operational ? 'Yes' : 'No'}
-                              </Badge>
-                            </TableCell>
-                            <TableCell>{backend.processor_type || 'N/A'}</TableCell>
-                            <TableCell>
-                              {backend.two_q_error_best ? Number(backend.two_q_error_best).toFixed(6) : 'N/A'}
-                            </TableCell>
-                            <TableCell>
-                              {backend.two_q_error_layered ? Number(backend.two_q_error_layered).toFixed(6) : 'N/A'}
-                            </TableCell>
-                            <TableCell>
-                              {backend.name === 'ibm_torino' ? '210K CLOPS' : backend.name === 'ibm_brisbane' ? '180K CLOPS' : 'N/A'}
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+              </div>
+              {loadingBackends ? (
+                <p className="text-sm text-muted-foreground">Loading backend statistics...</p>
+              ) : errorBackends ? (
+                <p className="text-sm text-red-500">{errorBackends}</p>
+              ) : (
+                <div className="overflow-x-auto scrollbar-hide">
+                  <table className="w-full">
+                    <thead>
+                      <tr className="border-b border-slate-700/50">
+                        <th className="text-left py-3 px-2 text-sm font-medium text-muted-foreground">Backend</th>
+                        <th className="text-left py-3 px-2 text-sm font-medium text-muted-foreground">Status</th>
+                        <th className="text-left py-3 px-2 text-sm font-medium text-muted-foreground">Queued Jobs</th>
+                        <th className="text-left py-3 px-2 text-sm font-medium text-muted-foreground">Pending Jobs</th>
+                        <th className="text-left py-3 px-2 text-sm font-medium text-muted-foreground">Version</th>
+                        <th className="text-left py-3 px-2 text-sm font-medium text-muted-foreground">Qubits</th>
+                        <th className="text-left py-3 px-2 text-sm font-medium text-muted-foreground">Operational</th>
+                        <th className="text-left py-3 px-2 text-sm font-medium text-muted-foreground">Processor Type</th>
+                        <th className="text-left py-3 px-2 text-sm font-medium text-muted-foreground">2Q Error (Best)</th>
+                        <th className="text-left py-3 px-2 text-sm font-medium text-muted-foreground">2Q Error (Layered)</th>
+                        <th className="text-left py-3 px-2 text-sm font-medium text-muted-foreground">CLOPS</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {backends.map((backend) => (
+                        <tr key={backend.name} className="border-b border-slate-700/30 hover:bg-muted/20">
+                          <td className="py-4 px-2 font-medium text-foreground">{backend.name}</td>
+                          <td className="py-4 px-2">
+                            <Badge variant={backend.status === 'active' ? 'default' : 'destructive'}>
+                              {backend.status}
+                            </Badge>
+                          </td>
+                          <td className="py-4 px-2 text-sm text-foreground">{backend.total_pending_jobs !== undefined ? backend.total_pending_jobs : 'N/A'}</td>
+                          <td className="py-4 px-2 text-sm text-foreground">{backend.total_pending_jobs !== undefined ? backend.total_pending_jobs : 'N/A'}</td>
+                          <td className="py-4 px-2 text-sm text-foreground">{backend.version || 'N/A'}</td>
+                          <td className="py-4 px-2 text-sm text-foreground">{backend.qubits || 'N/A'}</td>
+                          <td className="py-4 px-2">
+                            <Badge variant={backend.operational ? 'default' : 'destructive'}>
+                              {backend.operational ? 'Yes' : 'No'}
+                            </Badge>
+                          </td>
+                          <td className="py-4 px-2 text-sm text-foreground">{backend.processor_type || 'N/A'}</td>
+                          <td className="py-4 px-2 text-sm text-foreground">
+                            {backend.two_q_error_best ? Number(backend.two_q_error_best).toFixed(6) : 'N/A'}
+                          </td>
+                          <td className="py-4 px-2 text-sm text-foreground">
+                            {backend.two_q_error_layered ? Number(backend.two_q_error_layered).toFixed(6) : 'N/A'}
+                          </td>
+                          <td className="py-4 px-2 text-sm text-foreground">
+                            {backend.name === 'ibm_torino' ? '210K CLOPS' : backend.name === 'ibm_brisbane' ? '180K CLOPS' : 'N/A'}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
           </div>
 
         </div>

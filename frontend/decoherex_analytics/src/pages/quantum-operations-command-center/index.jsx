@@ -563,7 +563,7 @@ const QuantumOperationsCommandCenter = () => {
                 <button
                   type="button"
                   onClick={() => setIsJobModalOpen(true)}
-                  className="shrink-0 flex items-center gap-2 px-4 xl:px-5 py-2.5 rounded-2xl text-sm font-medium bg-accent text-accent-foreground hover:bg-accent/90 transition-all focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-transparent"
+                  className="shrink-0 flex items-center gap-2 px-4 xl:px-5 py-2.5 rounded-2xl text-sm font-medium bg-accent text-accent-foreground hover:bg-accent/90 transition-all focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-transparent"
                 >
                   <Icon name="Plus" size={16} className="flex-shrink-0" />
                   <span className="hidden sm:inline">Submit Job</span>
@@ -611,7 +611,7 @@ const QuantumOperationsCommandCenter = () => {
             </div>
 
             {/* Job Lifecycle Flow */}
-            <div className="mb-4 sm:mb-6 overflow-x-auto">
+            <div className="mb-4 sm:mb-6 overflow-x-auto scrollbar-hide">
               <JobLifecycleFlow jobs={jobs} />
             </div>
 
@@ -621,6 +621,7 @@ const QuantumOperationsCommandCenter = () => {
             </div>
 
             {/* Job Data Grid */}
+            <div className="w-full overflow-x-auto scrollbar-hide">
             <JobDataGrid
               jobs={jobs}
               onJobAction={handleJobAction}
@@ -630,6 +631,7 @@ const QuantumOperationsCommandCenter = () => {
               jobTypeFilter={jobTypeFilter}
               durationFilter={durationFilter}
             />
+            </div>
           </div>
         </div>
       </main>
