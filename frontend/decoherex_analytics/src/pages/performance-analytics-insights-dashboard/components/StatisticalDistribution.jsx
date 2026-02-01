@@ -1,6 +1,5 @@
 import React from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import Icon from '../../../components/AppIcon';
 
 const StatisticalDistribution = ({ data, title, metric }) => {
   const formatTooltip = (value, name) => {
@@ -53,27 +52,36 @@ const StatisticalDistribution = ({ data, title, metric }) => {
   const stats = calculateStats();
 
   return (
-    <div className="glass-card p-6 rounded-2xl">
-      <div className="flex items-center justify-between mb-4">
+    <div className="glass-card p-6 rounded-2xl h-full flex flex-col">
+      <div className="mb-4 shrink-0">
         <h3 className="text-lg font-semibold text-foreground">{title}</h3>
-        <Icon name="BarChart3" size={20} className="text-muted-foreground" />
       </div>
-      <div className="w-full h-80 mb-4">
+      <div className="w-full flex-1 min-h-0 mb-4" style={{ minHeight: '320px' }}>
         <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={data} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#334155" opacity={0.3} />
-            <XAxis 
-              dataKey="range" 
+          <BarChart
+            data={data}
+            margin={{ top: 12, right: 6, left: 20, bottom: 20 }}
+            barCategoryGap="14%"
+            barGap={2}
+          >
+            <CartesianGrid strokeDasharray="3 3" stroke="#334155" opacity={0.3} vertical={true} horizontal={true} />
+            <XAxis
+              dataKey="range"
               stroke="#94a3b8"
               fontSize={11}
               angle={-45}
               textAnchor="end"
-              height={60}
+              height={58}
+              interval={0}
+              tickMargin={10}
             />
-            <YAxis 
+            <YAxis
               stroke="#94a3b8"
               fontSize={11}
               tickFormatter={(value) => `${value}`}
+              width={32}
+              axisLine={true}
+              tickLine={true}
             />
             <Tooltip
               contentStyle={{
@@ -84,34 +92,35 @@ const StatisticalDistribution = ({ data, title, metric }) => {
               }}
               formatter={formatTooltip}
             />
-            <Bar 
-              dataKey="frequency" 
+            <Bar
+              dataKey="frequency"
               fill={getBarColor()}
               radius={[2, 2, 0, 0]}
+              activeBar={false}
             />
           </BarChart>
         </ResponsiveContainer>
       </div>
       {stats && (
-        <div className="pt-4 border-t border-slate-700/50">
+        <div className="pt-4 border-t border-slate-700/50 shrink-0">
           <div className="grid grid-cols-3 gap-4">
-            <div className="flex flex-col items-center justify-center space-y-1">
-              <div className="text-lg font-semibold text-foreground leading-tight">
+            <div className="flex flex-col items-center justify-center space-y-0.5">
+              <div className="text-sm font-semibold text-foreground leading-tight">
                 {stats?.mean?.toFixed(1)}{metric === 'executionTime' ? 'ms' : metric === 'errorRate' ? '%' : ''}
               </div>
-              <div className="text-xs text-muted-foreground font-medium">Mean</div>
+              <div className="text-[10px] text-muted-foreground font-medium">Mean</div>
             </div>
-            <div className="flex flex-col items-center justify-center space-y-1">
-              <div className="text-lg font-semibold text-foreground leading-tight">
+            <div className="flex flex-col items-center justify-center space-y-0.5">
+              <div className="text-sm font-semibold text-foreground leading-tight">
                 {stats?.median?.toFixed(1)}{metric === 'executionTime' ? 'ms' : metric === 'errorRate' ? '%' : ''}
               </div>
-              <div className="text-xs text-muted-foreground font-medium">Median</div>
+              <div className="text-[10px] text-muted-foreground font-medium">Median</div>
             </div>
-            <div className="flex flex-col items-center justify-center space-y-1">
-              <div className="text-lg font-semibold text-foreground leading-tight">
+            <div className="flex flex-col items-center justify-center space-y-0.5">
+              <div className="text-sm font-semibold text-foreground leading-tight">
                 {stats?.stdDev?.toFixed(1)}{metric === 'executionTime' ? 'ms' : metric === 'errorRate' ? '%' : ''}
               </div>
-              <div className="text-xs text-muted-foreground font-medium">Std Dev</div>
+              <div className="text-[10px] text-muted-foreground font-medium">Std Dev</div>
             </div>
           </div>
         </div>

@@ -11,6 +11,7 @@ import PerformanceDataGrid from './components/PerformanceDataGrid';
 import Icon from '../../components/AppIcon';
 import { Badge } from '../../components/ui/badge';
 import Button from '../../components/ui/Button';
+import Select from '../../components/ui/Select';
 import { RefreshCw } from 'lucide-react';
 
 
@@ -191,57 +192,57 @@ const PerformanceAnalyticsInsightsDashboard = () => {
             ))}
           </div>
 
-          {/* Main Content Grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 sm:gap-6">
+          {/* Main Content Grid - same height as Execution Time Distribution, left content scrollable */}
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 sm:gap-6 lg:min-h-[500px] lg:items-stretch">
             {/* Main Visualization Area */}
-            <div className="lg:col-span-3 space-y-4 sm:space-y-6">
+            <div className="lg:col-span-3 flex flex-col min-h-0">
               {/* Chart Tabs */}
-              <div className="glass-card p-4 sm:p-6 rounded-xl sm:rounded-2xl">
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4 sm:mb-6">
-                  <div className="flex items-center space-x-1 overflow-x-auto overflow-y-hidden scrollbar-hide pb-2 sm:pb-0">
-                    {tabs?.map((tab) => (
-                      <button
-                        key={tab?.id}
-                        onClick={() => setActiveTab(tab?.id)}
-                        className={`
-                          flex items-center space-x-2 px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium whitespace-nowrap
-                          transition-all duration-200
-                          ${activeTab === tab?.id
-                            ? 'bg-accent/20 text-accent border border-accent/30' : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
-                          }
-                        `}
-                      >
-                        <Icon name={tab?.icon} size={14} className="sm:w-4 sm:h-4" />
-                        <span className="hidden sm:inline">{tab?.label}</span>
-                        <span className="sm:hidden">{tab?.label.split(' ')[0]}</span>
-                      </button>
-                    ))}
+              <div className="glass-card p-4 sm:p-6 rounded-xl sm:rounded-2xl flex flex-col flex-1 min-h-0 h-full">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4 sm:mb-6 shrink-0">
+                  <div className="flex items-center space-x-2 overflow-x-auto overflow-y-hidden scrollbar-hide pb-2 sm:pb-0">
+                    {tabs?.map((tab) => {
+                      const isActive = activeTab === tab?.id;
+                      return (
+                        <button
+                          key={tab?.id}
+                          onClick={() => setActiveTab(tab?.id)}
+                          className={`
+                            flex items-center space-x-2 px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-medium whitespace-nowrap
+                            transition-all duration-200
+                            ${isActive
+                              ? 'bg-transparent text-accent ring-2 ring-accent/60 shadow-[0_0_12px_rgba(6,182,212,0.4)]'
+                              : 'bg-muted/30 text-muted-foreground hover:bg-muted/50 hover:text-foreground hover:ring-1 hover:ring-slate-500/40 border border-transparent'
+                            }
+                          `}
+                        >
+                          <Icon name={tab?.icon} size={14} className="sm:w-4 sm:h-4 flex-shrink-0" />
+                          <span className="hidden sm:inline">{tab?.label}</span>
+                          <span className="sm:hidden">{tab?.label.split(' ')[0]}</span>
+                        </button>
+                      );
+                    })}
                   </div>
 
                   {activeTab === 'trends' && (
                     <div className="flex items-center space-x-2">
-                      <span className="text-xs sm:text-sm text-muted-foreground">Metric:</span>
-                      <select
+                      <span className="text-xs sm:text-sm text-muted-foreground shrink-0">Metric:</span>
+                      <Select
+                        options={metricOptions}
                         value={selectedMetric}
-                        onChange={(e) => setSelectedMetric(e?.target?.value)}
-                        className="bg-input border border-border rounded-lg px-2 sm:px-3 py-1 text-xs sm:text-sm text-foreground"
-                      >
-                        {metricOptions?.map((option) => (
-                          <option key={option?.value} value={option?.value}>
-                            {option?.label}
-                          </option>
-                        ))}
-                      </select>
+                        onChange={setSelectedMetric}
+                        placeholder="Metric"
+                        className="w-32 min-w-0"
+                      />
                     </div>
                   )}
                 </div>
 
-                {/* Chart Content */}
-                <div className="h-[300px] sm:h-[400px]">
+                {/* Chart Content - scrollable when it exceeds; height aligned to Execution Time Distribution */}
+                <div className="flex-1 min-h-0 overflow-y-auto scrollbar-hide">
                   {loadingDashboard ? (
-                    <div className="flex items-center justify-center h-full text-muted-foreground">Loading AI Model Data...</div>
+                    <div className="flex items-center justify-center min-h-[280px] text-muted-foreground">Loading AI Model Data...</div>
                   ) : (
-                    <>
+                    <div className="min-h-[280px] h-[300px] sm:h-[360px]">
                       {activeTab === 'trends' && (
                         <PerformanceTrendsChart
                           data={performanceTrendsData}
@@ -257,15 +258,14 @@ const PerformanceAnalyticsInsightsDashboard = () => {
                       {activeTab === 'errors' && (
                         <ErrorPatternsChart data={errorPatternsData} />
                       )}
-                    </>
+                    </div>
                   )}
                 </div>
               </div>
             </div>
 
-            {/* Right Sidebar */}
-            <div className="space-y-4 sm:space-y-6">
-              {/* Statistical Distribution */}
+            {/* Right Sidebar - same height as left */}
+            <div className="flex flex-col min-h-0 h-full">
               <StatisticalDistribution
                 data={executionTimeDistribution}
                 title="Execution Time Distribution"

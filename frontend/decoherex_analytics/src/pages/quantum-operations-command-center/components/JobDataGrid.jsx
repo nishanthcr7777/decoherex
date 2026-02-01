@@ -218,10 +218,10 @@ const JobDataGrid = ({
           </div>
         </div>
       )}
-      {/* Data Grid */}
-      <div className="overflow-x-auto">
+      {/* Data Grid - max 8 rows visible, scroll with hidden scrollbar */}
+      <div className="overflow-x-auto overflow-y-auto max-h-[28rem] scrollbar-hide">
         <table className="w-full">
-          <thead>
+          <thead className="sticky top-0 z-10 bg-slate-800/98 backdrop-blur-sm">
             <tr className="border-b border-slate-700/50">
               <th className="text-left py-3 px-2">
                 <input
