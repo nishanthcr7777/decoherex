@@ -72,23 +72,23 @@ const JobConstraintPanel = ({ onConstraintsChange, isRefreshing }) => {
   };
 
   return (
-    <div className="bg-card/50 backdrop-blur-sm border border-slate-700/50 rounded-2xl p-6">
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center space-x-3">
-          <div className="w-8 h-8 bg-accent/20 rounded-lg flex items-center justify-center">
-            <Icon name="Settings" size={18} className="text-accent" />
+    <div className="bg-card/50 backdrop-blur-sm border border-slate-700/50 rounded-xl sm:rounded-2xl p-4 sm:p-6">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4 sm:mb-6">
+        <div className="flex items-center space-x-2 sm:space-x-3">
+          <div className="w-7 h-7 sm:w-8 sm:h-8 bg-accent/20 rounded-lg flex items-center justify-center flex-shrink-0">
+            <Icon name="Settings" size={16} className="sm:w-[18px] sm:h-[18px] text-accent" />
           </div>
-          <div>
-            <h3 className="text-lg font-semibold text-foreground">Job Constraints</h3>
-            <p className="text-sm text-muted-foreground">Configure quantum job parameters for optimal backend matching</p>
+          <div className="min-w-0">
+            <h3 className="text-base sm:text-lg font-semibold text-foreground">Job Constraints</h3>
+            <p className="text-xs sm:text-sm text-muted-foreground">Configure quantum job parameters for optimal backend matching</p>
           </div>
         </div>
         
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center space-x-2 flex-shrink-0">
           {isRefreshing && (
             <div className="flex items-center space-x-2 text-accent">
-              <Icon name="RefreshCw" size={16} className="animate-spin" />
-              <span className="text-sm font-medium">Updating...</span>
+              <Icon name="RefreshCw" size={14} className="sm:w-4 sm:h-4 animate-spin" />
+              <span className="text-xs sm:text-sm font-medium">Updating...</span>
             </div>
           )}
           <Button
@@ -97,20 +97,24 @@ const JobConstraintPanel = ({ onConstraintsChange, isRefreshing }) => {
             onClick={handleReset}
             iconName="RotateCcw"
             iconPosition="left"
+            className="text-xs sm:text-sm px-3 sm:px-4"
           >
-            Reset
+            <span className="hidden sm:inline">Reset</span>
+            <span className="sm:hidden">R</span>
           </Button>
           <Button
             size="sm"
             onClick={handleSubmit}
             iconName="Check"
             iconPosition="left"
+            className="text-xs sm:text-sm px-3 sm:px-4"
           >
-            Submit
+            <span className="hidden sm:inline">Submit</span>
+            <span className="sm:hidden">S</span>
           </Button>
         </div>
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
         <div className="space-y-2">
           <Input
             label="Circuit Depth"
@@ -186,10 +190,10 @@ const JobConstraintPanel = ({ onConstraintsChange, isRefreshing }) => {
           />
         </div>
       </div>
-      <div className="mt-6 p-4 bg-muted/20 rounded-lg border border-slate-700/30">
-        <div className="flex items-start space-x-3">
-          <Icon name="Lightbulb" size={16} className="text-warning mt-0.5" />
-          <div className="text-sm">
+      <div className="mt-4 sm:mt-6 p-3 sm:p-4 bg-muted/20 rounded-lg border border-slate-700/30">
+        <div className="flex items-start space-x-2 sm:space-x-3">
+          <Icon name="Lightbulb" size={14} className="sm:w-4 sm:h-4 text-warning mt-0.5 flex-shrink-0" />
+          <div className="text-xs sm:text-sm min-w-0">
             <p className="text-foreground font-medium mb-1">AI Optimization Tips</p>
             <p className="text-muted-foreground">
               Lower error tolerance and circuit depth improve backend matching accuracy. 

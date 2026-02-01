@@ -538,29 +538,32 @@ const QuantumOperationsCommandCenter = () => {
     <div className="min-h-screen bg-background">
       <Header />
       <main className="pt-16">
-        <div className="p-6">
-          <div className="max-w-7xl mx-auto space-y-6">
+        <div className="p-4 sm:p-6">
+          <div className="max-w-7xl mx-auto space-y-4 sm:space-y-6">
             {/* Page Header */}
-            <div className="flex items-center justify-between">
-              <div>
-                <h1 className="text-3xl font-bold text-foreground">Job Tracker</h1>
-                <p className="text-muted-foreground mt-1">
-                  Real-time quantum job monitoring and system health oversight
+            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 relative">
+              <div className="flex-1 pr-24 sm:pr-0">
+                <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Job Tracker</h1>
+                <p className="text-sm sm:text-base text-muted-foreground mt-1 leading-relaxed">
+                  Real-time quantum job monitoring<br />
+                  and system health oversight
                 </p>
               </div>
-              <div className="flex items-center space-x-4">
-                <div className="flex items-center space-x-2 text-sm text-muted-foreground">
-                  <Icon name="Clock" size={16} />
-                  <span>Last updated: {new Date().toLocaleTimeString()}</span>
-                </div>
+              <div className="absolute top-0 right-0 sm:relative sm:top-auto sm:right-auto flex flex-col items-end gap-2">
                 <Button
                   onClick={() => setIsJobModalOpen(true)}
-                  className="px-6"
+                  className="px-3 py-2 sm:px-4 sm:py-2.5 text-xs sm:text-sm shadow-lg"
                   iconName="Plus"
                   iconPosition="left"
                 >
-                  Submit Job
+                  <span className="hidden sm:inline">Submit Job</span>
+                  <span className="sm:hidden">Submit</span>
                 </Button>
+                <div className="flex items-center space-x-2 text-xs sm:text-sm text-muted-foreground">
+                  <Icon name="Clock" size={14} className="sm:w-4 sm:h-4" />
+                  <span className="hidden sm:inline">Last updated: </span>
+                  <span>{new Date().toLocaleTimeString()}</span>
+                </div>
               </div>
             </div>
 
@@ -579,7 +582,7 @@ const QuantumOperationsCommandCenter = () => {
             </div>
 
             {/* KPI Cards - Curated Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 mb-4 sm:mb-6">
               {/* Using a curated list of important metrics to avoid clutter */}
               {[
                 { key: 'ActiveJobs', title: 'Active Jobs', icon: 'Activity', fallback: liveJobsKpiData.find(x => x.title === 'Active Jobs') },
@@ -615,12 +618,12 @@ const QuantumOperationsCommandCenter = () => {
             </div>
 
             {/* Job Lifecycle Flow */}
-            <div className="mb-6">
+            <div className="mb-4 sm:mb-6 overflow-x-auto">
               <JobLifecycleFlow jobs={jobs} />
             </div>
 
             {/* Live Job Feed */}
-            <div className="mb-8">
+            <div className="mb-6 sm:mb-8">
               <LiveJobFeed jobs={jobs} onJobAction={handleJobAction} />
             </div>
 

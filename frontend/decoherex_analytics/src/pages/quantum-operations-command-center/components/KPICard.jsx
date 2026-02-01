@@ -38,35 +38,35 @@ const KPICard = ({ title, value, unit, trend, trendValue, status, sparklineData,
   };
 
   return (
-    <div className="relative group overflow-hidden bg-gradient-to-br from-gray-900/90 to-black/90 border border-white/10 p-5 rounded-2xl shadow-xl backdrop-blur-md transition-all duration-300 hover:shadow-cyan-500/20 hover:border-cyan-500/30">
+    <div className="relative group overflow-hidden bg-gradient-to-br from-gray-900/90 to-black/90 border border-white/10 p-4 sm:p-5 rounded-xl sm:rounded-2xl shadow-xl backdrop-blur-md transition-all duration-300 hover:shadow-cyan-500/20 hover:border-cyan-500/30">
 
       {/* Glow Effect */}
-      <div className="absolute -top-10 -right-10 w-24 h-24 bg-cyan-500/10 rounded-full blur-3xl group-hover:bg-cyan-500/20 transition-all duration-500" />
+      <div className="absolute -top-10 -right-10 w-20 sm:w-24 h-20 sm:h-24 bg-cyan-500/10 rounded-full blur-3xl group-hover:bg-cyan-500/20 transition-all duration-500" />
 
-      <div className="flex items-center justify-between mb-4 relative z-10">
-        <div className="flex items-center space-x-3">
-          <div className="w-10 h-10 bg-cyan-500/10 rounded-xl flex items-center justify-center border border-cyan-500/20 group-hover:scale-110 transition-transform duration-300">
-            <Icon name={icon} size={20} className="text-cyan-400" />
+      <div className="flex items-center justify-between mb-3 sm:mb-4 relative z-10">
+        <div className="flex items-center space-x-2 sm:space-x-3 min-w-0 flex-1">
+          <div className="w-8 h-8 sm:w-10 sm:h-10 bg-cyan-500/10 rounded-lg sm:rounded-xl flex items-center justify-center border border-cyan-500/20 group-hover:scale-110 transition-transform duration-300 flex-shrink-0">
+            <Icon name={icon} size={16} className="sm:w-5 sm:h-5 text-cyan-400" />
           </div>
-          <h3 className="text-sm font-semibold text-gray-400 tracking-wide uppercase">{title}</h3>
+          <h3 className="text-xs sm:text-sm font-semibold text-gray-400 tracking-wide uppercase truncate">{title}</h3>
         </div>
-        <div className={`flex items-center space-x-1 px-2 py-1 rounded-full bg-white/5 ${getTrendColor(trend)}`}>
-          <Icon name={getTrendIcon(trend)} size={14} />
-          <span className="text-xs font-bold">{trendValue}</span>
+        <div className={`flex items-center space-x-1 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full bg-white/5 ${getTrendColor(trend)} flex-shrink-0 ml-2`}>
+          <Icon name={getTrendIcon(trend)} size={12} className="sm:w-3.5 sm:h-3.5" />
+          <span className="text-[10px] sm:text-xs font-bold">{trendValue}</span>
         </div>
       </div>
 
-      <div className="flex items-baseline space-x-2 mb-4 relative z-10">
-        <span className={`text-3xl font-bold tracking-tight ${getStatusColor(status)} group-hover:text-white transition-colors`}>
+      <div className="flex items-baseline space-x-1 sm:space-x-2 mb-3 sm:mb-4 relative z-10">
+        <span className={`text-2xl sm:text-3xl font-bold tracking-tight ${getStatusColor(status)} group-hover:text-white transition-colors`}>
           {value}
         </span>
         {unit && (
-          <span className="text-sm text-gray-500 font-medium">{unit}</span>
+          <span className="text-xs sm:text-sm text-gray-500 font-medium">{unit}</span>
         )}
       </div>
 
       {/* Sparkline visualization */}
-      <div className="h-8 flex items-end space-x-1 relative z-10 opacity-70 group-hover:opacity-100 transition-opacity">
+      <div className="h-6 sm:h-8 flex items-end space-x-0.5 sm:space-x-1 relative z-10 opacity-70 group-hover:opacity-100 transition-opacity">
         {sparklineData?.map((point, index) => (
           <div
             key={index}

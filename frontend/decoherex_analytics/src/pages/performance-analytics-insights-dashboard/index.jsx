@@ -176,56 +176,57 @@ const PerformanceAnalyticsInsightsDashboard = () => {
   return (
     <div className="min-h-screen bg-background">
       <Header />
-      <main className="pt-20 px-6 pb-6">
-        <div className="max-w-7xl mx-auto space-y-8">
+      <main className="pt-16 sm:pt-20 px-4 sm:px-6 pb-4 sm:pb-6">
+        <div className="max-w-7xl mx-auto space-y-6 sm:space-y-8">
           {/* Page Header */}
-          <div className="pt-4">
-            <h1 className="text-3xl font-bold text-foreground">Performance Analytics & Insights</h1>
-            <p className="text-muted-foreground mt-2">
+          <div className="pt-2 sm:pt-4">
+            <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Performance Analytics & Insights</h1>
+            <p className="text-sm sm:text-base text-muted-foreground mt-2">
               Comprehensive analysis of quantum job performance trends and optimization opportunities
             </p>
           </div>
 
           {/* KPI Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
             {kpiData?.map((kpi, index) => (
               <KPICard key={index} {...kpi} />
             ))}
           </div>
 
           {/* Main Content Grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 sm:gap-6">
             {/* Main Visualization Area */}
-            <div className="lg:col-span-3 space-y-6">
+            <div className="lg:col-span-3 space-y-4 sm:space-y-6">
               {/* Chart Tabs */}
-              <div className="glass-card p-6 rounded-2xl">
-                <div className="flex items-center justify-between mb-6">
-                  <div className="flex items-center space-x-1">
+              <div className="glass-card p-4 sm:p-6 rounded-xl sm:rounded-2xl">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4 sm:mb-6">
+                  <div className="flex items-center space-x-1 overflow-x-auto pb-2 sm:pb-0">
                     {tabs?.map((tab) => (
                       <button
                         key={tab?.id}
                         onClick={() => setActiveTab(tab?.id)}
                         className={`
-                          flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium
+                          flex items-center space-x-2 px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium whitespace-nowrap
                           transition-all duration-200
                           ${activeTab === tab?.id
                             ? 'bg-accent/20 text-accent border border-accent/30' : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
                           }
                         `}
                       >
-                        <Icon name={tab?.icon} size={16} />
-                        <span>{tab?.label}</span>
+                        <Icon name={tab?.icon} size={14} className="sm:w-4 sm:h-4" />
+                        <span className="hidden sm:inline">{tab?.label}</span>
+                        <span className="sm:hidden">{tab?.label.split(' ')[0]}</span>
                       </button>
                     ))}
                   </div>
 
                   {activeTab === 'trends' && (
                     <div className="flex items-center space-x-2">
-                      <span className="text-sm text-muted-foreground">Metric:</span>
+                      <span className="text-xs sm:text-sm text-muted-foreground">Metric:</span>
                       <select
                         value={selectedMetric}
                         onChange={(e) => setSelectedMetric(e?.target?.value)}
-                        className="bg-input border border-border rounded-lg px-3 py-1 text-sm text-foreground"
+                        className="bg-input border border-border rounded-lg px-2 sm:px-3 py-1 text-xs sm:text-sm text-foreground"
                       >
                         {metricOptions?.map((option) => (
                           <option key={option?.value} value={option?.value}>
@@ -238,7 +239,7 @@ const PerformanceAnalyticsInsightsDashboard = () => {
                 </div>
 
                 {/* Chart Content */}
-                <div className="h-[400px]">
+                <div className="h-[300px] sm:h-[400px]">
                   {loadingDashboard ? (
                     <div className="flex items-center justify-center h-full text-muted-foreground">Loading AI Model Data...</div>
                   ) : (
@@ -265,7 +266,7 @@ const PerformanceAnalyticsInsightsDashboard = () => {
             </div>
 
             {/* Right Sidebar */}
-            <div className="space-y-6">
+            <div className="space-y-4 sm:space-y-6">
               {/* Statistical Distribution */}
               <StatisticalDistribution
                 data={executionTimeDistribution}
@@ -276,39 +277,40 @@ const PerformanceAnalyticsInsightsDashboard = () => {
           </div>
 
           {/* Full Width Backend Ranking Table - USING CSV DATA */}
-          <div className="w-full">
-            <h3 className="text-xl font-semibold mb-4 text-foreground">Top Performing Backends (Historical Analysis)</h3>
-            {loadingDashboard ? <p>Loading...</p> : <BackendRankingTable data={backendRankingData} />}
+          <div className="w-full overflow-x-auto">
+            <h3 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4 text-foreground">Top Performing Backends (Historical Analysis)</h3>
+            {loadingDashboard ? <p className="text-sm text-muted-foreground">Loading...</p> : <BackendRankingTable data={backendRankingData} />}
           </div>
 
           {/* Full Width Performance Data Grid - USING CSV DATA */}
-          <div className="w-full">
-            <h3 className="text-xl font-semibold mb-4 text-foreground">Recent Job Executions</h3>
-            {loadingDashboard ? <p>Loading...</p> : <PerformanceDataGrid data={performanceGridData} />}
+          <div className="w-full overflow-x-auto">
+            <h3 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4 text-foreground">Recent Job Executions</h3>
+            {loadingDashboard ? <p className="text-sm text-muted-foreground">Loading...</p> : <PerformanceDataGrid data={performanceGridData} />}
           </div>
 
           {/* Live Backend Statistics (Keep original 'backends' usage for Real-Time comparison) */}
-          <div className="w-full">
+          <div className="w-full overflow-x-auto">
             <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-lg font-medium">Live Backend Statistics (Real-Time API)</CardTitle>
+              <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-2 sm:space-y-0 pb-2">
+                <CardTitle className="text-base sm:text-lg font-medium">Live Backend Statistics (Real-Time API)</CardTitle>
                 <div className="flex items-center space-x-2">
-                  <div className="flex items-center space-x-1 px-2 py-1 bg-green-500/10 text-green-500 rounded-full text-xs animate-pulse border border-green-500/20">
+                  <div className="flex items-center space-x-1 px-2 py-1 bg-green-500/10 text-green-500 rounded-full text-[10px] sm:text-xs animate-pulse border border-green-500/20">
                     <div className="w-1.5 h-1.5 rounded-full bg-green-500"></div>
-                    <span className="font-medium">Live Updates</span>
+                    <span className="font-medium hidden sm:inline">Live Updates</span>
+                    <span className="font-medium sm:hidden">Live</span>
                   </div>
                   <Button variant="ghost" size="icon" onClick={() => fetchBackends()} disabled={loadingBackends}>
-                    <RefreshCw className={loadingBackends ? "animate-spin" : ""} size={20} />
+                    <RefreshCw className={loadingBackends ? "animate-spin" : ""} size={18} className="sm:w-5 sm:h-5" />
                   </Button>
                 </div>
               </CardHeader>
               <CardContent>
                 {loadingBackends ? (
-                  <p>Loading backend statistics...</p>
+                  <p className="text-sm text-muted-foreground">Loading backend statistics...</p>
                 ) : errorBackends ? (
-                  <p className="text-red-500">{errorBackends}</p>
+                  <p className="text-sm text-red-500">{errorBackends}</p>
                 ) : (
-                  <div className="overflow-x-auto">
+                  <div className="overflow-x-auto -mx-4 sm:mx-0">
                     <Table>
                       <TableHeader>
                         <TableRow>

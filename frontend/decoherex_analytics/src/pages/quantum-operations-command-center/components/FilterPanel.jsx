@@ -72,7 +72,7 @@ const FilterPanel = ({
   return (
     <div className="flex items-center space-x-3">
       {/* Filter Controls */}
-      <div className="flex items-center space-x-2">
+      <div className="hidden sm:flex items-center space-x-2">
         <Icon name="Filter" size={16} className="text-muted-foreground" />
         <span className="text-sm text-muted-foreground">Filters:</span>
       </div>
