@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import Icon from '../AppIcon';
 import Button from './Button';
 import Select from './Select';
@@ -69,40 +70,48 @@ const Header = () => {
   };
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-1000 h-16 bg-background border-b border-slate-700/50">
+    <header className="fixed top-0 left-0 right-0 z-1000 h-[4.25rem] bg-background border-b border-slate-700/50 shadow-[0_4px_20px_rgba(0,0,0,0.25),0_0_40px_rgba(6,182,212,0.08)]">
       <div className="flex items-center justify-between h-full px-4 sm:px-6">
         {/* Logo Section */}
         <div className="flex items-center space-x-4 sm:space-x-8">
-          <div className="flex items-center space-x-2 sm:space-x-3">
-            <div className="w-7 h-7 sm:w-8 sm:h-8 bg-gradient-to-br from-accent to-secondary rounded-lg flex items-center justify-center">
-              <Icon name="Atom" size={18} className="sm:w-5 sm:h-5 text-primary-foreground" />
-            </div>
-            <div className="flex flex-col">
-              <h1 className="text-base sm:text-lg font-semibold text-foreground">DecohereX</h1>
-              <span className="text-[10px] sm:text-xs text-muted-foreground -mt-1">Analytics</span>
-            </div>
-          </div>
+          <h1 
+              className="text-lg sm:text-xl font-semibold text-foreground"
+              style={{ textShadow: '0 0 24px rgba(6, 182, 212, 0.4), 0 0 48px rgba(6, 182, 212, 0.2)' }}
+            >
+              DecohereX
+            </h1>
 
           {/* Navigation Tabs - Hidden on mobile */}
           <nav className="hidden lg:flex items-center space-x-1">
             {navigationItems?.map((item) => {
               const isActive = location?.pathname === item?.path;
               return (
-                <button
+                <motion.button
                   key={item?.path}
                   onClick={() => handleNavigation(item?.path)}
-                  className={`
-                    flex items-center space-x-2 px-3 xl:px-4 py-2 rounded-lg text-sm font-medium
-                    transition-all duration-200 ease-out
-                    ${isActive 
-                      ? 'bg-accent/20 text-accent border border-accent/30' :'text-muted-foreground hover:text-foreground hover:bg-muted/50'
-                    }
-                  `}
+                  className={cn(
+                    'relative flex items-center space-x-2 px-3 xl:px-4 py-2.5 rounded-lg text-sm font-medium overflow-hidden',
+                    isActive
+                      ? 'text-accent'
+                      : 'text-muted-foreground hover:text-foreground'
+                  )}
                   title={item?.description}
+                  whileHover={{ scale: 1.03 }}
+                  whileTap={{ scale: 0.97 }}
+                  transition={{ type: 'spring', stiffness: 400, damping: 25 }}
                 >
-                  <Icon name={item?.icon} size={16} />
-                  <span>{item?.label}</span>
-                </button>
+                  {isActive && (
+                    <motion.span
+                      layoutId="nav-active"
+                      className="absolute inset-0 rounded-lg bg-accent/20 border border-accent/30"
+                      transition={{ type: 'spring', stiffness: 380, damping: 30 }}
+                    />
+                  )}
+                  <span className="relative z-10 flex items-center space-x-2">
+                    <Icon name={item?.icon} size={16} />
+                    <span>{item?.label}</span>
+                  </span>
+                </motion.button>
               );
             })}
           </nav>
@@ -164,25 +173,28 @@ const Header = () => {
             className="fixed inset-0 bg-black/50 z-999 lg:hidden"
             onClick={() => setIsMobileMenuOpen(false)}
           />
-          <div className="fixed top-16 right-0 w-64 bg-background border-l border-b border-slate-700/50 z-1000 lg:hidden shadow-xl">
+          <div className="fixed top-[4.25rem] right-0 w-64 bg-background border-l border-b border-slate-700/50 z-1000 lg:hidden shadow-xl">
             <nav className="flex flex-col p-4 space-y-2">
-              {navigationItems?.map((item) => {
+              {navigationItems?.map((item, index) => {
                 const isActive = location?.pathname === item?.path;
                 return (
-                  <button
+                  <motion.button
                     key={item?.path}
                     onClick={() => handleNavigation(item?.path)}
-                    className={`
-                      flex items-center space-x-3 px-4 py-2.5 rounded-lg text-sm font-medium
-                      transition-all duration-200 ease-out w-full text-left
-                      ${isActive 
-                        ? 'bg-accent/20 text-accent border border-accent/30' :'text-muted-foreground hover:text-foreground hover:bg-muted/50'
-                      }
-                    `}
+                    className={cn(
+                      'flex items-center space-x-3 px-4 py-2.5 rounded-lg text-sm font-medium w-full text-left',
+                      isActive
+                        ? 'bg-accent/20 text-accent border border-accent/30'
+                        : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
+                    )}
+                    initial={{ opacity: 0, x: 8 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: index * 0.04, duration: 0.2 }}
+                    whileTap={{ scale: 0.98 }}
                   >
                     <Icon name={item?.icon} size={18} />
                     <span>{item?.label}</span>
-                  </button>
+                  </motion.button>
                 );
               })}
               {/* Mobile-only controls */}

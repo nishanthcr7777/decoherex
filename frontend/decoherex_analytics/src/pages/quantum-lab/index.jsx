@@ -66,7 +66,7 @@ const QuantumLab = () => {
     return (
         <div className="min-h-screen bg-background text-foreground">
             <Header />
-            <main className="pt-16 sm:pt-20 px-4 sm:px-6 pb-6 sm:pb-8 max-w-7xl mx-auto">
+            <main className="pt-[4.25rem] px-4 sm:px-6 pb-6 sm:pb-8 max-w-7xl mx-auto">
                 <div className="flex items-center space-x-3 sm:space-x-4 mb-6 sm:mb-8">
                     <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-purple-500 to-blue-600 rounded-lg sm:rounded-xl flex items-center justify-center shadow-lg shadow-purple-500/20 flex-shrink-0">
                         <Icon name="Cpu" size={20} className="sm:w-6 sm:h-6 text-white" />

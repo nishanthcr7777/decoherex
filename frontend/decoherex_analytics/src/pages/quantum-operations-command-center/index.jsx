@@ -537,7 +537,7 @@ const QuantumOperationsCommandCenter = () => {
   return (
     <div className="min-h-screen bg-background">
       <Header />
-      <main className="pt-16">
+      <main className="pt-[4.25rem]">
         <div className="p-4 sm:p-6">
           <div className="max-w-7xl mx-auto space-y-4 sm:space-y-6">
             {/* Page Header */}
@@ -545,8 +545,7 @@ const QuantumOperationsCommandCenter = () => {
               <div className="flex-1 pr-24 sm:pr-0">
                 <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Job Tracker</h1>
                 <p className="text-sm sm:text-base text-muted-foreground mt-1 leading-relaxed">
-                  Real-time quantum job monitoring<br />
-                  and system health oversight
+                  Real-time quantum job monitoring and system health oversight
                 </p>
               </div>
               <div className="absolute top-0 right-0 sm:relative sm:top-auto sm:right-auto flex flex-col items-end gap-2">
