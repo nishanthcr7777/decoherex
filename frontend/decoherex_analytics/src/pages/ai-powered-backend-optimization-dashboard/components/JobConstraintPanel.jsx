@@ -113,8 +113,6 @@ const JobConstraintPanel = ({ onConstraintsChange, isRefreshing }) => {
             <Button
               size="sm"
               onClick={handleSubmit}
-              iconName="Check"
-              iconPosition="left"
               className="rounded-xl border border-transparent bg-accent text-accent-foreground hover:bg-accent/90 shadow-md shadow-accent/20 h-9 min-h-9 px-4 gap-2 font-medium transition-all hover:shadow-accent/30 w-[7.25rem] min-w-[7.25rem]"
             >
               Submit

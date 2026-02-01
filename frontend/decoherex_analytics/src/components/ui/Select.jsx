@@ -5,7 +5,7 @@ import { cn } from "../../utils/cn";
 import Button from "./Button";
 import Input from "./Input";
 
-const DROPDOWN_MAX_HEIGHT = 176; // max-h-44 = 11rem — shorter, scrollable list
+const DROPDOWN_MAX_HEIGHT = 128; // max-h-32 = 8rem — compact, scrollable, scrollbar hidden
 const VIEWPORT_PADDING = 8;
 
 const Select = React.forwardRef(({
@@ -235,7 +235,7 @@ const Select = React.forwardRef(({
                             </div>
                         )}
 
-                        <div className="py-1 max-h-44 overflow-y-auto scrollbar-hide">
+                        <div className="py-1 max-h-32 overflow-y-auto scrollbar-hide">
                             {filteredOptions?.length === 0 ? (
                                 <div className="px-3 py-2 text-sm text-muted-foreground">
                                     {searchTerm ? 'No options found' : 'No options available'}

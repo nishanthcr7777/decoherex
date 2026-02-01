@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer, Legend } from 'recharts';
 import Icon from '../../../components/AppIcon';
-import Button from '../../../components/ui/Button';
 
 const BackendComparisonMatrix = ({ backends, selectedBackends, onBackendSelect }) => {
   const [viewMode, setViewMode] = useState('radar'); // 'radar' or 'table'
@@ -38,24 +37,34 @@ const BackendComparisonMatrix = ({ backends, selectedBackends, onBackendSelect }
         </div>
 
         <div className="flex items-center space-x-2">
-          <Button
-            variant={viewMode === 'radar' ? 'default' : 'outline'}
-            size="sm"
+          <button
+            type="button"
             onClick={() => setViewMode('radar')}
-            iconName="Radar"
-            iconPosition="left"
+            className={`
+              flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium transition-all duration-200
+              ${viewMode === 'radar'
+                ? 'bg-transparent text-accent ring-2 ring-accent/60 shadow-[0_0_12px_rgba(6,182,212,0.4)]'
+                : 'bg-muted/30 text-muted-foreground hover:bg-muted/50 hover:text-foreground hover:ring-1 hover:ring-slate-500/40 border border-transparent'
+              }
+            `}
           >
+            <Icon name="Radar" size={14} className="flex-shrink-0" />
             Radar
-          </Button>
-          <Button
-            variant={viewMode === 'table' ? 'default' : 'outline'}
-            size="sm"
+          </button>
+          <button
+            type="button"
             onClick={() => setViewMode('table')}
-            iconName="Table"
-            iconPosition="left"
+            className={`
+              flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium transition-all duration-200
+              ${viewMode === 'table'
+                ? 'bg-transparent text-accent ring-2 ring-accent/60 shadow-[0_0_12px_rgba(6,182,212,0.4)]'
+                : 'bg-muted/30 text-muted-foreground hover:bg-muted/50 hover:text-foreground hover:ring-1 hover:ring-slate-500/40 border border-transparent'
+              }
+            `}
           >
+            <Icon name="Table" size={14} className="flex-shrink-0" />
             Table
-          </Button>
+          </button>
         </div>
       </div>
       {/* Backend Selection */}
@@ -65,21 +74,24 @@ const BackendComparisonMatrix = ({ backends, selectedBackends, onBackendSelect }
           <span className="text-sm font-medium text-foreground">Select backends to compare:</span>
         </div>
         <div className="flex flex-wrap gap-2">
-          {backends?.slice(0, 5)?.map((backend, index) => (
-            <button
-              key={`${backend?.id}-${index}`}
-              onClick={() => onBackendSelect(backend)}
-              className={`
-                px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200
-                ${selectedBackends?.some(b => b?.id === backend?.id)
-                  ? 'bg-accent text-accent-foreground'
-                  : 'bg-muted/30 text-muted-foreground hover:bg-muted/50 hover:text-foreground'
-                }
-              `}
-            >
-              {backend?.name}
-            </button>
-          ))}
+          {backends?.slice(0, 5)?.map((backend, index) => {
+            const isSelected = selectedBackends?.some(b => b?.id === backend?.id);
+            return (
+              <button
+                key={`${backend?.id}-${index}`}
+                onClick={() => onBackendSelect(backend)}
+                className={`
+                  px-3 py-2 rounded-xl text-sm font-medium transition-all duration-200
+                  ${isSelected
+                    ? 'bg-transparent text-accent ring-2 ring-accent/60 shadow-[0_0_12px_rgba(6,182,212,0.4)]'
+                    : 'bg-muted/30 text-muted-foreground hover:bg-muted/50 hover:text-foreground hover:ring-1 hover:ring-slate-500/40'
+                  }
+                `}
+              >
+                {backend?.name}
+              </button>
+            );
+          })}
         </div>
       </div>
       {selectedBackends?.length === 0 ? (

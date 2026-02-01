@@ -91,23 +91,26 @@ const PredictiveAnalyticsSection = ({ constraints }) => {
         </div>
       </div>
       {/* Tab Navigation */}
-      <div className="flex space-x-1 mb-6 bg-muted/20 p-1 rounded-lg">
-        {tabs?.map((tab) => (
-          <button
-            key={tab?.id}
-            onClick={() => setActiveTab(tab?.id)}
-            className={`
-              flex items-center space-x-2 px-4 py-2 rounded-md text-sm font-medium transition-all duration-200
-              ${activeTab === tab?.id
-                ? 'bg-accent text-accent-foreground'
-                : 'text-muted-foreground hover:text-foreground hover:bg-muted/30'
-              }
-            `}
-          >
-            <Icon name={tab?.icon} size={16} />
-            <span>{tab?.label}</span>
-          </button>
-        ))}
+      <div className="flex space-x-2 mb-6">
+        {tabs?.map((tab) => {
+          const isActive = activeTab === tab?.id;
+          return (
+            <button
+              key={tab?.id}
+              onClick={() => setActiveTab(tab?.id)}
+              className={`
+                flex items-center space-x-2 px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200
+                ${isActive
+                  ? 'bg-transparent text-accent ring-2 ring-accent/60 shadow-[0_0_12px_rgba(6,182,212,0.4)]'
+                  : 'bg-muted/30 text-muted-foreground hover:bg-muted/50 hover:text-foreground hover:ring-1 hover:ring-slate-500/40 border border-transparent'
+                }
+              `}
+            >
+              <Icon name={tab?.icon} size={16} className="flex-shrink-0" />
+              <span>{tab?.label}</span>
+            </button>
+          );
+        })}
       </div>
       {/* Tab Content */}
       {activeTab === 'queue-optimization' && (
