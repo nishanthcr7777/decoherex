@@ -174,9 +174,9 @@ const PerformanceAnalyticsInsightsDashboard = () => {
 
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen">
       <Header />
-      <main className="pt-[4.25rem] px-4 sm:px-6 pb-4 sm:pb-6">
+      <main className="pt-[3.75rem] px-4 sm:px-6 pb-4 sm:pb-6">
         <div className="max-w-7xl mx-auto space-y-6 sm:space-y-8">
           {/* Page Header */}
           <div className="pt-2 sm:pt-4">
@@ -200,7 +200,7 @@ const PerformanceAnalyticsInsightsDashboard = () => {
               {/* Chart Tabs */}
               <div className="glass-card p-4 sm:p-6 rounded-xl sm:rounded-2xl">
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4 sm:mb-6">
-                  <div className="flex items-center space-x-1 overflow-x-auto pb-2 sm:pb-0">
+                  <div className="flex items-center space-x-1 overflow-x-auto overflow-y-hidden scrollbar-hide pb-2 sm:pb-0">
                     {tabs?.map((tab) => (
                       <button
                         key={tab?.id}
@@ -277,19 +277,19 @@ const PerformanceAnalyticsInsightsDashboard = () => {
           </div>
 
           {/* Full Width Backend Ranking Table - USING CSV DATA */}
-          <div className="w-full overflow-x-auto">
+          <div className="w-full overflow-x-auto scrollbar-hide">
             <h3 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4 text-foreground">Top Performing Backends (Historical Analysis)</h3>
             {loadingDashboard ? <p className="text-sm text-muted-foreground">Loading...</p> : <BackendRankingTable data={backendRankingData} />}
           </div>
 
           {/* Full Width Performance Data Grid - USING CSV DATA */}
-          <div className="w-full overflow-x-auto">
+          <div className="w-full overflow-x-auto scrollbar-hide">
             <h3 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4 text-foreground">Recent Job Executions</h3>
             {loadingDashboard ? <p className="text-sm text-muted-foreground">Loading...</p> : <PerformanceDataGrid data={performanceGridData} />}
           </div>
 
           {/* Live Backend Statistics (Keep original 'backends' usage for Real-Time comparison) */}
-          <div className="w-full overflow-x-auto">
+          <div className="w-full overflow-x-auto scrollbar-hide">
             <Card>
               <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-2 sm:space-y-0 pb-2">
                 <CardTitle className="text-base sm:text-lg font-medium">Live Backend Statistics (Real-Time API)</CardTitle>
@@ -310,7 +310,7 @@ const PerformanceAnalyticsInsightsDashboard = () => {
                 ) : errorBackends ? (
                   <p className="text-sm text-red-500">{errorBackends}</p>
                 ) : (
-                  <div className="overflow-x-auto -mx-4 sm:mx-0">
+                  <div className="overflow-x-auto scrollbar-hide -mx-4 sm:mx-0">
                     <Table>
                       <TableHeader>
                         <TableRow>

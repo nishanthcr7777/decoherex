@@ -66,28 +66,25 @@ const LiveJobFeed = ({ jobs, onJobAction }) => {
   };
 
   return (
-    <div className="h-full flex flex-col bg-gradient-to-br from-gray-900/95 to-black/95 backdrop-blur-xl border border-white/5 rounded-2xl shadow-2xl p-6 relative overflow-hidden">
-
-      {/* Background Decor */}
-      <div className="absolute top-0 right-0 w-64 h-64 bg-cyan-500/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none" />
+    <div className="h-full flex flex-col bg-card/50 backdrop-blur-sm border border-slate-700/50 rounded-2xl p-6 relative overflow-hidden">
 
       <div className="flex items-center justify-between mb-6 relative z-10">
         <div className="flex items-center space-x-3">
-          <div className="p-2 bg-cyan-500/10 rounded-lg border border-cyan-500/20">
-            <Icon name="Activity" size={20} className="text-cyan-400" />
+          <div className="p-2 bg-accent/10 rounded-lg border border-accent/20">
+            <Icon name="Activity" size={20} className="text-accent" />
           </div>
-          <h2 className="text-xl font-bold text-white tracking-tight">Live Feed</h2>
+          <h2 className="text-xl font-bold text-foreground tracking-tight">Live Feed</h2>
         </div>
-        <div className="flex items-center space-x-2 px-3 py-1 rounded-full bg-white/5 border border-white/5">
-          <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse shadow-[0_0_10px_#34d399]" />
-          <span className="text-xs font-semibold text-emerald-400 tracking-wide">
+        <div className="flex items-center space-x-2 px-3 py-1 rounded-full border border-slate-700/50 bg-transparent">
+          <div className="w-2 h-2 bg-success rounded-full animate-pulse" />
+          <span className="text-xs font-semibold text-success tracking-wide">
             {sortedJobs?.length} ACTIVE
           </span>
         </div>
       </div>
 
-      {/* Modern Filters */}
-      <div className="flex space-x-2 mb-6 p-1 bg-black/40 rounded-xl border border-white/5 relative z-10">
+      {/* Filters */}
+      <div className="flex space-x-2 mb-6 p-1 rounded-xl border border-slate-700/50 bg-transparent relative z-10">
         {filters.map((opt) => {
           const isActive = filter === opt.id;
           return (
@@ -95,17 +92,14 @@ const LiveJobFeed = ({ jobs, onJobAction }) => {
               key={opt.id}
               onClick={() => setFilter(opt.id)}
               className={`
-                  flex items-center space-x-2 px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider
+                  flex items-center space-x-2 px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider border
                   transition-all duration-300 flex-1 justify-center relative overflow-hidden group
                   ${isActive
-                  ? 'text-white'
-                  : 'text-gray-500 hover:text-gray-300 hover:bg-white/5'
+                  ? 'text-foreground border-accent/50 bg-accent/20'
+                  : 'text-muted-foreground hover:text-foreground border-transparent hover:border-slate-600/50 hover:bg-white/5'
                 }
                 `}
             >
-              {isActive && (
-                <div className="absolute inset-0 bg-gradient-to-r from-cyan-600 to-blue-600 opacity-100 rounded-lg shadow-lg" />
-              )}
               <span className="relative z-10 flex items-center gap-2">
                 <Icon name={opt.icon} size={14} className={isActive ? 'text-white' : ''} />
                 {opt.label}
@@ -124,7 +118,7 @@ const LiveJobFeed = ({ jobs, onJobAction }) => {
           return (
             <div
               key={job.job_id || job.id}
-              className="group relative p-4 bg-white/[0.02] hover:bg-white/[0.05] rounded-xl border border-white/5 hover:border-cyan-500/30 transition-all duration-300 cursor-pointer overflow-hidden"
+              className="group relative p-4 rounded-xl border border-slate-700/50 bg-transparent hover:bg-white/5 hover:border-accent/40 hover:shadow-[0_0_0_1px_rgba(6,182,212,0.4),0_0_8px_rgba(6,182,212,0.12)] focus-visible:outline-none focus-visible:border-accent/40 focus-visible:shadow-[0_0_0_1px_rgba(6,182,212,0.4),0_0_8px_rgba(6,182,212,0.12)] transition-all duration-300 cursor-pointer overflow-hidden"
             >
               <div className={`absolute left-0 top-0 bottom-0 w-1 ${statusStyle.split(' ')[1].replace('text-', 'bg-').replace('border-', 'bg-')}`} />
 

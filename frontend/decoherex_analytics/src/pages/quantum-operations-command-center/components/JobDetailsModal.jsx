@@ -1,6 +1,5 @@
 import React from 'react';
 import Modal from '../../../components/ui/Modal';
-import Button from '../../../components/ui/Button';
 import Icon from '../../../components/AppIcon';
 
 const InfoRow = ({ label, value }) => (
@@ -62,9 +61,6 @@ const JobDetailsModal = ({ job, open, onClose }) => {
         <InfoRow label="Progress" value={`${job.progress ?? 0}%`} />
         <InfoRow label="Submitted At" value={new Date(job.submitted_at || job.timestamp).toLocaleString()} />
         <InfoRow label="Output" value={outputDisplay} />
-      </div>
-      <div className="flex justify-end pt-4">
-        <Button onClick={onClose}>Close</Button>
       </div>
     </Modal>
   );

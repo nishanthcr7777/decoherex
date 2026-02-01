@@ -1,9 +1,12 @@
 // components/ui/Select.jsx - Shadcn style Select
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { ChevronDown, Check, Search, X } from "lucide-react";
 import { cn } from "../../utils/cn";
 import Button from "./Button";
 import Input from "./Input";
+
+const DROPDOWN_MAX_HEIGHT = 240; // max-h-60 = 15rem
+const VIEWPORT_PADDING = 8;
 
 const Select = React.forwardRef(({
     className,
@@ -28,6 +31,9 @@ const Select = React.forwardRef(({
 }, ref) => {
     const [isOpen, setIsOpen] = useState(false);
     const [searchTerm, setSearchTerm] = useState("");
+    const [dropUp, setDropUp] = useState(false);
+    const containerRef = useRef(null);
+    const buttonRef = useRef(null);
 
     // Generate unique ID if not provided
     const selectId = id || `select-${Math.random()?.toString(36)?.substr(2, 9)}`;
@@ -58,6 +64,12 @@ const Select = React.forwardRef(({
     const handleToggle = () => {
         if (!disabled) {
             const newIsOpen = !isOpen;
+            if (newIsOpen && buttonRef.current) {
+                const rect = buttonRef.current.getBoundingClientRect();
+                const spaceBelow = window.innerHeight - rect.bottom - VIEWPORT_PADDING;
+                const spaceAbove = rect.top - VIEWPORT_PADDING;
+                setDropUp(spaceBelow < DROPDOWN_MAX_HEIGHT && spaceAbove >= spaceBelow);
+            }
             setIsOpen(newIsOpen);
             onOpenChange?.(newIsOpen);
             if (!newIsOpen) {
@@ -65,6 +77,31 @@ const Select = React.forwardRef(({
             }
         }
     };
+
+    // Click outside and Escape to close
+    useEffect(() => {
+        if (!isOpen) return;
+        const onMouseDown = (e) => {
+            if (containerRef.current && !containerRef.current.contains(e.target)) {
+                setIsOpen(false);
+                onOpenChange?.(false);
+                setSearchTerm("");
+            }
+        };
+        const onKeyDown = (e) => {
+            if (e.key === "Escape") {
+                setIsOpen(false);
+                onOpenChange?.(false);
+                setSearchTerm("");
+            }
+        };
+        document.addEventListener("mousedown", onMouseDown);
+        document.addEventListener("keydown", onKeyDown);
+        return () => {
+            document.removeEventListener("mousedown", onMouseDown);
+            document.removeEventListener("keydown", onKeyDown);
+        };
+    }, [isOpen, onOpenChange]);
 
     const handleOptionSelect = (option) => {
         if (multiple) {
@@ -99,7 +136,7 @@ const Select = React.forwardRef(({
     const hasValue = multiple ? value?.length > 0 : value !== undefined && value !== '';
 
     return (
-        <div className={cn("relative", className)}>
+        <div ref={containerRef} className={cn("relative", className)}>
             {label && (
                 <label
                     htmlFor={selectId}
@@ -114,7 +151,11 @@ const Select = React.forwardRef(({
             )}
             <div className="relative">
                 <button
-                    ref={ref}
+                    ref={(el) => {
+                        buttonRef.current = el;
+                        if (typeof ref === "function") ref(el);
+                        else if (ref) ref.current = el;
+                    }}
                     id={selectId}
                     type="button"
                     className={cn(
@@ -171,9 +212,14 @@ const Select = React.forwardRef(({
                     ))}
                 </select>
 
-                {/* Dropdown */}
+                {/* Dropdown / Drop-up */}
                 {isOpen && (
-                    <div className="absolute z-50 w-full mt-1 bg-slate-800 text-foreground border border-slate-700/50 rounded-md shadow-lg">
+                    <div
+                        className={cn(
+                            "absolute z-50 w-full left-0 bg-slate-800 text-foreground border border-slate-700/50 rounded-md shadow-lg",
+                            dropUp ? "bottom-full mb-1" : "top-full mt-1"
+                        )}
+                    >
                         {searchable && (
                             <div className="p-2 border-b border-slate-700/30">
                                 <div className="relative">

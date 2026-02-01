@@ -38,7 +38,7 @@ const KPICard = ({ title, value, unit, trend, trendValue, status, sparklineData,
   };
 
   return (
-    <div className="relative group overflow-hidden bg-gradient-to-br from-gray-900/90 to-black/90 border border-white/10 p-4 sm:p-5 rounded-xl sm:rounded-2xl shadow-xl backdrop-blur-md transition-all duration-300 hover:shadow-cyan-500/20 hover:border-cyan-500/30">
+    <div className="relative group overflow-hidden bg-gradient-to-br from-gray-900/90 to-black/90 border border-white/10 p-4 sm:p-5 rounded-xl sm:rounded-2xl backdrop-blur-md transition-all duration-300 hover:border-cyan-500/40">
 
       {/* Glow Effect */}
       <div className="absolute -top-10 -right-10 w-20 sm:w-24 h-20 sm:h-24 bg-cyan-500/10 rounded-full blur-3xl group-hover:bg-cyan-500/20 transition-all duration-500" />

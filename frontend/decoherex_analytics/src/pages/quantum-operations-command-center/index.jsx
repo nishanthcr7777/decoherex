@@ -535,30 +535,41 @@ const QuantumOperationsCommandCenter = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen">
       <Header />
-      <main className="pt-[4.25rem]">
+      <main className="pt-[3.75rem]">
         <div className="p-4 sm:p-6">
           <div className="max-w-7xl mx-auto space-y-4 sm:space-y-6">
-            {/* Page Header */}
-            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 relative">
-              <div className="flex-1 pr-24 sm:pr-0">
+            {/* Page Header + Filters + Submit Job (compact single line) */}
+            <div className="flex flex-col gap-3 sm:gap-0 sm:flex-row sm:items-center sm:justify-between relative">
+              <div className="flex-1 pr-24 sm:pr-0 min-w-0">
                 <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Job Tracker</h1>
                 <p className="text-sm sm:text-base text-muted-foreground mt-1 leading-relaxed">
                   Real-time quantum job monitoring and system health oversight
                 </p>
               </div>
-              <div className="absolute top-0 right-0 sm:relative sm:top-auto sm:right-auto flex flex-col items-end gap-2">
-                <Button
+              <div className="absolute top-0 right-0 sm:relative sm:top-auto sm:right-auto flex flex-wrap items-center justify-end gap-2 sm:gap-3">
+                <FilterPanel
+                  statusFilter={statusFilter}
+                  setStatusFilter={setStatusFilter}
+                  backendFilter={backendFilter}
+                  setBackendFilter={setBackendFilter}
+                  jobTypeFilter={jobTypeFilter}
+                  setJobTypeFilter={setJobTypeFilter}
+                  durationFilter={durationFilter}
+                  setDurationFilter={setDurationFilter}
+                  compact
+                />
+                <button
+                  type="button"
                   onClick={() => setIsJobModalOpen(true)}
-                  className="px-3 py-2 sm:px-4 sm:py-2.5 text-xs sm:text-sm shadow-lg"
-                  iconName="Plus"
-                  iconPosition="left"
+                  className="shrink-0 flex items-center gap-2 px-4 xl:px-5 py-2.5 rounded-2xl text-sm font-medium bg-accent text-accent-foreground hover:bg-accent/90 transition-all focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-transparent"
                 >
+                  <Icon name="Plus" size={16} className="flex-shrink-0" />
                   <span className="hidden sm:inline">Submit Job</span>
                   <span className="sm:hidden">Submit</span>
-                </Button>
-                <div className="flex items-center space-x-2 text-xs sm:text-sm text-muted-foreground">
+                </button>
+                <div className="flex items-center space-x-2 text-xs sm:text-sm text-muted-foreground shrink-0">
                   <Icon name="Clock" size={14} className="sm:w-4 sm:h-4" />
                   <span className="hidden sm:inline">Last updated: </span>
                   <span>{new Date().toLocaleTimeString()}</span>
@@ -566,23 +577,8 @@ const QuantumOperationsCommandCenter = () => {
               </div>
             </div>
 
-            {/* Filter Panel */}
-            <div className="flex justify-end">
-              <FilterPanel
-                statusFilter={statusFilter}
-                setStatusFilter={setStatusFilter}
-                backendFilter={backendFilter}
-                setBackendFilter={setBackendFilter}
-                jobTypeFilter={jobTypeFilter}
-                setJobTypeFilter={setJobTypeFilter}
-                durationFilter={durationFilter}
-                setDurationFilter={setDurationFilter}
-              />
-            </div>
-
-            {/* KPI Cards - Curated Grid */}
-            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 mb-4 sm:mb-6">
-              {/* Using a curated list of important metrics to avoid clutter */}
+            {/* KPI Cards - Single row */}
+            <div className="flex flex-nowrap gap-3 sm:gap-4 mb-4 sm:mb-6 overflow-x-auto scrollbar-hide pb-1">
               {[
                 { key: 'ActiveJobs', title: 'Active Jobs', icon: 'Activity', fallback: liveJobsKpiData.find(x => x.title === 'Active Jobs') },
                 { key: 'QueueLength', title: 'Queue Length', icon: 'Clock', fallback: liveJobsKpiData.find(x => x.title === 'Queue Length') },
@@ -593,25 +589,23 @@ const QuantumOperationsCommandCenter = () => {
                 { key: 'PendingJobs', title: 'Global Pending', icon: 'Loader', fallback: { value: '0', unit: '', change: '' } }
               ].map((metric) => {
                 const apiData = kpiData[metric.key];
-                // If API data exists and is valid, use it. Otherwise fallback.
-                // Prefer API data even if 0.
                 const useApi = apiData && apiData.value !== 'N/A' && apiData.value !== undefined;
-
                 const displayData = useApi ? apiData : metric.fallback;
                 if (!displayData || displayData.value === 'N/A') return null;
 
                 return (
-                  <KPICard
-                    key={metric.key}
-                    title={metric.title}
-                    value={displayData.value}
-                    unit={displayData.unit}
-                    trend={displayData.changeType || displayData.trend || 'neutral'}
-                    trendValue={displayData.change || displayData.trendValue}
-                    status={displayData.status || (displayData.changeType === 'increase' ? 'success' : 'neutral')}
-                    sparklineData={displayData.sparklineData || [50, 50, 50, 50, 50]}
-                    icon={metric.icon}
-                  />
+                  <div key={metric.key} className="flex-shrink-0 min-w-[140px] sm:min-w-[160px]">
+                    <KPICard
+                      title={metric.title}
+                      value={displayData.value}
+                      unit={displayData.unit}
+                      trend={displayData.changeType || displayData.trend || 'neutral'}
+                      trendValue={displayData.change || displayData.trendValue}
+                      status={displayData.status || (displayData.changeType === 'increase' ? 'success' : 'neutral')}
+                      sparklineData={displayData.sparklineData || [50, 50, 50, 50, 50]}
+                      icon={metric.icon}
+                    />
+                  </div>
                 );
               })}
             </div>

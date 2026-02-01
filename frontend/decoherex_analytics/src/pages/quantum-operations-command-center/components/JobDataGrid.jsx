@@ -128,16 +128,16 @@ const JobDataGrid = ({
 
   const getStatusBadge = (status) => {
     const configs = {
-      queued: { color: 'bg-slate-600 text-slate-100', icon: 'Clock' },
-      running: { color: 'bg-warning text-warning-foreground', icon: 'Play' },
-      completed: { color: 'bg-success text-success-foreground', icon: 'CheckCircle' },
-      failed: { color: 'bg-error text-error-foreground', icon: 'XCircle' }
+      queued: { color: 'border-slate-500/50 bg-slate-600/20 text-slate-200', icon: 'Clock' },
+      running: { color: 'border-amber-500/50 bg-amber-500/20 text-amber-200', icon: 'Play' },
+      completed: { color: 'border-emerald-500/50 bg-emerald-500/20 text-emerald-200', icon: 'CheckCircle' },
+      failed: { color: 'border-red-500/50 bg-red-500/20 text-red-200', icon: 'XCircle' }
     };
 
     const config = configs?.[status] || configs?.queued;
 
     return (
-      <div className={`flex items-center space-x-1 px-2 py-1 rounded-full text-xs font-medium ${config?.color}`}>
+      <div className={`flex items-center space-x-1 px-2 py-1 rounded-full text-xs font-medium border ${config?.color}`}>
         <Icon name={config?.icon} size={12} />
         <span className="capitalize">{status}</span>
       </div>
@@ -165,7 +165,7 @@ const JobDataGrid = ({
   };
 
   return (
-    <div className="glass-card p-6 rounded-2xl">
+    <div className="bg-card/50 backdrop-blur-sm border border-slate-700/50 rounded-2xl p-6">
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-lg font-semibold text-foreground">Job Management</h2>
         <div className="flex items-center space-x-3">
@@ -299,7 +299,7 @@ const JobDataGrid = ({
             {filteredAndSortedJobs?.map((job) => (
               <tr
                 key={job?.id || job?.job_id}
-                className="border-b border-border/30 hover:bg-muted/20 transition-colors"
+                className="border-b border-border/30 hover:bg-muted/20 hover:shadow-[0_0_0_1px_rgba(6,182,212,0.35),0_0_6px_rgba(6,182,212,0.1)] focus-visible:outline-none focus-visible:shadow-[0_0_0_1px_rgba(6,182,212,0.4),0_0_6px_rgba(6,182,212,0.12)] transition-all duration-200"
               >
                 <td className="p-3">
                   <input

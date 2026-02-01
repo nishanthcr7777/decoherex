@@ -14,15 +14,15 @@ const JobLifecycleFlow = ({ jobs }) => {
   const getStageColor = (color) => {
     switch (color) {
       case 'slate':
-        return 'bg-slate-600 text-slate-100';
+        return 'border-slate-500/60 bg-slate-600/20 text-slate-200';
       case 'warning':
-        return 'bg-warning text-warning-foreground';
+        return 'border-amber-500/50 bg-amber-500/20 text-amber-200';
       case 'success':
-        return 'bg-success text-success-foreground';
+        return 'border-emerald-500/50 bg-emerald-500/20 text-emerald-200';
       case 'error':
-        return 'bg-error text-error-foreground';
+        return 'border-red-500/50 bg-red-500/20 text-red-200';
       default:
-        return 'bg-muted text-muted-foreground';
+        return 'border-slate-600/50 bg-muted/20 text-muted-foreground';
     }
   };
 
@@ -59,7 +59,7 @@ const JobLifecycleFlow = ({ jobs }) => {
   }, [jobs]);
 
   return (
-    <div className="glass-card p-4 sm:p-6 rounded-xl sm:rounded-2xl">
+    <div className="bg-card/50 backdrop-blur-sm border border-slate-700/50 rounded-xl sm:rounded-2xl p-4 sm:p-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-0 mb-4 sm:mb-6">
         <h2 className="text-base sm:text-lg font-semibold text-foreground">Job Lifecycle Flow</h2>
         <div className="flex items-center space-x-2">
@@ -76,7 +76,7 @@ const JobLifecycleFlow = ({ jobs }) => {
               <div key={stage?.id || index} className="flex flex-col min-w-0">
                 {/* Stage Header */}
                 <div className={`
-                  flex items-center justify-center space-x-1.5 sm:space-x-2 p-2.5 sm:p-3 rounded-lg mb-3 sm:mb-4
+                  flex items-center justify-center space-x-1.5 sm:space-x-2 p-2.5 sm:p-3 rounded-lg mb-3 sm:mb-4 border
                   ${getStageColor(stage?.color)}
                 `}>
                   <Icon name={stage?.icon} size={14} className="sm:w-4 sm:h-4" />
@@ -86,13 +86,15 @@ const JobLifecycleFlow = ({ jobs }) => {
                   </span>
                 </div>
                 {/* Job Cards */}
-                <div className="flex-1 space-y-2 overflow-y-auto max-h-[300px] sm:max-h-96">
+                <div className="flex-1 space-y-2 overflow-y-auto max-h-[300px] sm:max-h-96 scrollbar-hide">
                   {stageJobs?.map((job) => (
                     <div
                       key={job?.job_id || job?.id}
                       className={`
-                        p-2.5 sm:p-3 bg-surface/50 rounded-lg border border-border/50
-                        hover:bg-surface/70 transition-all duration-200 cursor-pointer
+                        p-2.5 sm:p-3 rounded-lg border border-slate-700/50 bg-transparent
+                        hover:bg-white/5 hover:border-accent/40 hover:shadow-[0_0_0_1px_rgba(6,182,212,0.4),0_0_8px_rgba(6,182,212,0.12)]
+                        focus-visible:outline-none focus-visible:border-accent/40 focus-visible:shadow-[0_0_0_1px_rgba(6,182,212,0.4),0_0_8px_rgba(6,182,212,0.12)]
+                        transition-all duration-200 cursor-pointer
                         ${animatingJobs?.has(job?.job_id || job?.id) ? 'animate-pulse' : ''}
                       `}
                       title={`Job ${job?.id} - ${job?.type} on ${job?.backend}`}
