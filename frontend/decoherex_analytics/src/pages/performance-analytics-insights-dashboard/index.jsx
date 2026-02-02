@@ -9,9 +9,10 @@ import StatisticalDistribution from './components/StatisticalDistribution';
 import BackendRankingTable from './components/BackendRankingTable';
 import PerformanceDataGrid from './components/PerformanceDataGrid';
 import Icon from '../../components/AppIcon';
+import { Card, CardHeader, CardTitle, CardContent } from '../../components/ui/card';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../../components/ui/table';
 import { Badge } from '../../components/ui/badge';
 import Button from '../../components/ui/Button';
-import Select from '../../components/ui/Select';
 import { RefreshCw } from 'lucide-react';
 
 
@@ -173,76 +174,75 @@ const PerformanceAnalyticsInsightsDashboard = () => {
 
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-background">
       <Header />
-      <main className="pt-[3.75rem] px-4 sm:px-6 pb-4 sm:pb-6">
-        <div className="max-w-7xl mx-auto space-y-6 sm:space-y-8">
+      <main className="pt-20 px-6 pb-6">
+        <div className="max-w-7xl mx-auto space-y-8">
           {/* Page Header */}
-          <div className="pt-2 sm:pt-4">
-            <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Performance Analytics & Insights</h1>
-            <p className="text-sm sm:text-base text-muted-foreground mt-2">
+          <div className="pt-4">
+            <h1 className="text-3xl font-bold text-foreground">Performance Analytics & Insights</h1>
+            <p className="text-muted-foreground mt-2">
               Comprehensive analysis of quantum job performance trends and optimization opportunities
             </p>
           </div>
 
           {/* KPI Cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {kpiData?.map((kpi, index) => (
               <KPICard key={index} {...kpi} />
             ))}
           </div>
 
-          {/* Main Content Grid - same height as Execution Time Distribution, left content scrollable */}
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 sm:gap-6 lg:min-h-[500px] lg:items-stretch">
+          {/* Main Content Grid */}
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
             {/* Main Visualization Area */}
-            <div className="lg:col-span-3 flex flex-col min-h-0">
+            <div className="lg:col-span-3 space-y-6">
               {/* Chart Tabs */}
-              <div className="glass-card p-4 sm:p-6 rounded-xl sm:rounded-2xl flex flex-col flex-1 min-h-0 h-full">
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4 sm:mb-6 shrink-0">
-                  <div className="flex items-center space-x-2 overflow-x-auto overflow-y-hidden scrollbar-hide pb-2 sm:pb-0">
-                    {tabs?.map((tab) => {
-                      const isActive = activeTab === tab?.id;
-                      return (
-                        <button
-                          key={tab?.id}
-                          onClick={() => setActiveTab(tab?.id)}
-                          className={`
-                            flex items-center space-x-2 px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-medium whitespace-nowrap
-                            transition-all duration-200
-                            ${isActive
-                              ? 'bg-transparent text-accent ring-2 ring-accent/60 shadow-[0_0_12px_rgba(6,182,212,0.4)]'
-                              : 'bg-muted/30 text-muted-foreground hover:bg-muted/50 hover:text-foreground hover:ring-1 hover:ring-slate-500/40 border border-transparent'
-                            }
-                          `}
-                        >
-                          <Icon name={tab?.icon} size={14} className="sm:w-4 sm:h-4 flex-shrink-0" />
-                          <span className="hidden sm:inline">{tab?.label}</span>
-                          <span className="sm:hidden">{tab?.label.split(' ')[0]}</span>
-                        </button>
-                      );
-                    })}
+              <div className="glass-card p-6 rounded-2xl">
+                <div className="flex items-center justify-between mb-6">
+                  <div className="flex items-center space-x-1">
+                    {tabs?.map((tab) => (
+                      <button
+                        key={tab?.id}
+                        onClick={() => setActiveTab(tab?.id)}
+                        className={`
+                          flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium
+                          transition-all duration-200
+                          ${activeTab === tab?.id
+                            ? 'bg-accent/20 text-accent border border-accent/30' : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
+                          }
+                        `}
+                      >
+                        <Icon name={tab?.icon} size={16} />
+                        <span>{tab?.label}</span>
+                      </button>
+                    ))}
                   </div>
 
                   {activeTab === 'trends' && (
                     <div className="flex items-center space-x-2">
-                      <span className="text-xs sm:text-sm text-muted-foreground shrink-0">Metric:</span>
-                      <Select
-                        options={metricOptions}
+                      <span className="text-sm text-muted-foreground">Metric:</span>
+                      <select
                         value={selectedMetric}
-                        onChange={setSelectedMetric}
-                        placeholder="Metric"
-                        className="w-32 min-w-0"
-                      />
+                        onChange={(e) => setSelectedMetric(e?.target?.value)}
+                        className="bg-input border border-border rounded-lg px-3 py-1 text-sm text-foreground"
+                      >
+                        {metricOptions?.map((option) => (
+                          <option key={option?.value} value={option?.value}>
+                            {option?.label}
+                          </option>
+                        ))}
+                      </select>
                     </div>
                   )}
                 </div>
 
-                {/* Chart Content - scrollable when it exceeds; height aligned to Execution Time Distribution */}
-                <div className="flex-1 min-h-0 overflow-y-auto scrollbar-hide">
+                {/* Chart Content */}
+                <div className="h-[400px]">
                   {loadingDashboard ? (
-                    <div className="flex items-center justify-center min-h-[280px] text-muted-foreground">Loading AI Model Data...</div>
+                    <div className="flex items-center justify-center h-full text-muted-foreground">Loading AI Model Data...</div>
                   ) : (
-                    <div className="min-h-[280px] h-[300px] sm:h-[360px]">
+                    <>
                       {activeTab === 'trends' && (
                         <PerformanceTrendsChart
                           data={performanceTrendsData}
@@ -258,14 +258,15 @@ const PerformanceAnalyticsInsightsDashboard = () => {
                       {activeTab === 'errors' && (
                         <ErrorPatternsChart data={errorPatternsData} />
                       )}
-                    </div>
+                    </>
                   )}
                 </div>
               </div>
             </div>
 
-            {/* Right Sidebar - same height as left */}
-            <div className="flex flex-col min-h-0 h-full">
+            {/* Right Sidebar */}
+            <div className="space-y-6">
+              {/* Statistical Distribution */}
               <StatisticalDistribution
                 data={executionTimeDistribution}
                 title="Execution Time Distribution"
@@ -275,90 +276,91 @@ const PerformanceAnalyticsInsightsDashboard = () => {
           </div>
 
           {/* Full Width Backend Ranking Table - USING CSV DATA */}
-          <div className="w-full overflow-x-auto scrollbar-hide">
-            <h3 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4 text-foreground">Top Performing Backends (Historical Analysis)</h3>
-            {loadingDashboard ? <p className="text-sm text-muted-foreground">Loading...</p> : <BackendRankingTable data={backendRankingData} />}
+          <div className="w-full">
+            <h3 className="text-xl font-semibold mb-4 text-foreground">Top Performing Backends (Historical Analysis)</h3>
+            {loadingDashboard ? <p>Loading...</p> : <BackendRankingTable data={backendRankingData} />}
           </div>
 
           {/* Full Width Performance Data Grid - USING CSV DATA */}
-          <div className="w-full overflow-x-auto scrollbar-hide">
-            <h3 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4 text-foreground">Recent Job Executions</h3>
-            {loadingDashboard ? <p className="text-sm text-muted-foreground">Loading...</p> : <PerformanceDataGrid data={performanceGridData} />}
+          <div className="w-full">
+            <h3 className="text-xl font-semibold mb-4 text-foreground">Recent Job Executions</h3>
+            {loadingDashboard ? <p>Loading...</p> : <PerformanceDataGrid data={performanceGridData} />}
           </div>
 
           {/* Live Backend Statistics (Keep original 'backends' usage for Real-Time comparison) */}
-          <div className="w-full overflow-x-auto scrollbar-hide">
-            <div className="glass-card p-6 rounded-2xl">
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-2 sm:space-y-0 pb-4 mb-4 border-b border-slate-700/50">
-                <h3 className="text-base sm:text-lg font-semibold text-foreground">Live Backend Statistics (Real-Time API)</h3>
+          <div className="w-full">
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-lg font-medium">Live Backend Statistics (Real-Time API)</CardTitle>
                 <div className="flex items-center space-x-2">
-                  <div className="flex items-center space-x-1 px-2 py-1 bg-success/10 text-success rounded-full text-[10px] sm:text-xs animate-pulse border border-success/20">
-                    <div className="w-1.5 h-1.5 rounded-full bg-success"></div>
-                    <span className="font-medium hidden sm:inline">Live Updates</span>
-                    <span className="font-medium sm:hidden">Live</span>
+                  <div className="flex items-center space-x-1 px-2 py-1 bg-green-500/10 text-green-500 rounded-full text-xs animate-pulse border border-green-500/20">
+                    <div className="w-1.5 h-1.5 rounded-full bg-green-500"></div>
+                    <span className="font-medium">Live Updates</span>
                   </div>
                   <Button variant="ghost" size="icon" onClick={() => fetchBackends()} disabled={loadingBackends}>
-                    <RefreshCw className={loadingBackends ? "animate-spin" : ""} size={18} className="sm:w-5 sm:h-5" />
+                    <RefreshCw className={loadingBackends ? "animate-spin" : ""} size={20} />
                   </Button>
                 </div>
-              </div>
-              {loadingBackends ? (
-                <p className="text-sm text-muted-foreground">Loading backend statistics...</p>
-              ) : errorBackends ? (
-                <p className="text-sm text-red-500">{errorBackends}</p>
-              ) : (
-                <div className="overflow-x-auto scrollbar-hide">
-                  <table className="w-full">
-                    <thead>
-                      <tr className="border-b border-slate-700/50">
-                        <th className="text-left py-3 px-2 text-sm font-medium text-muted-foreground">Backend</th>
-                        <th className="text-left py-3 px-2 text-sm font-medium text-muted-foreground">Status</th>
-                        <th className="text-left py-3 px-2 text-sm font-medium text-muted-foreground">Queued Jobs</th>
-                        <th className="text-left py-3 px-2 text-sm font-medium text-muted-foreground">Pending Jobs</th>
-                        <th className="text-left py-3 px-2 text-sm font-medium text-muted-foreground">Version</th>
-                        <th className="text-left py-3 px-2 text-sm font-medium text-muted-foreground">Qubits</th>
-                        <th className="text-left py-3 px-2 text-sm font-medium text-muted-foreground">Operational</th>
-                        <th className="text-left py-3 px-2 text-sm font-medium text-muted-foreground">Processor Type</th>
-                        <th className="text-left py-3 px-2 text-sm font-medium text-muted-foreground">2Q Error (Best)</th>
-                        <th className="text-left py-3 px-2 text-sm font-medium text-muted-foreground">2Q Error (Layered)</th>
-                        <th className="text-left py-3 px-2 text-sm font-medium text-muted-foreground">CLOPS</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {backends.map((backend) => (
-                        <tr key={backend.name} className="border-b border-slate-700/30 hover:bg-muted/20">
-                          <td className="py-4 px-2 font-medium text-foreground">{backend.name}</td>
-                          <td className="py-4 px-2">
-                            <Badge variant={backend.status === 'active' ? 'default' : 'destructive'}>
-                              {backend.status}
-                            </Badge>
-                          </td>
-                          <td className="py-4 px-2 text-sm text-foreground">{backend.total_pending_jobs !== undefined ? backend.total_pending_jobs : 'N/A'}</td>
-                          <td className="py-4 px-2 text-sm text-foreground">{backend.total_pending_jobs !== undefined ? backend.total_pending_jobs : 'N/A'}</td>
-                          <td className="py-4 px-2 text-sm text-foreground">{backend.version || 'N/A'}</td>
-                          <td className="py-4 px-2 text-sm text-foreground">{backend.qubits || 'N/A'}</td>
-                          <td className="py-4 px-2">
-                            <Badge variant={backend.operational ? 'default' : 'destructive'}>
-                              {backend.operational ? 'Yes' : 'No'}
-                            </Badge>
-                          </td>
-                          <td className="py-4 px-2 text-sm text-foreground">{backend.processor_type || 'N/A'}</td>
-                          <td className="py-4 px-2 text-sm text-foreground">
-                            {backend.two_q_error_best ? Number(backend.two_q_error_best).toFixed(6) : 'N/A'}
-                          </td>
-                          <td className="py-4 px-2 text-sm text-foreground">
-                            {backend.two_q_error_layered ? Number(backend.two_q_error_layered).toFixed(6) : 'N/A'}
-                          </td>
-                          <td className="py-4 px-2 text-sm text-foreground">
-                            {backend.name === 'ibm_torino' ? '210K CLOPS' : backend.name === 'ibm_brisbane' ? '180K CLOPS' : 'N/A'}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-            </div>
+              </CardHeader>
+              <CardContent>
+                {loadingBackends ? (
+                  <p>Loading backend statistics...</p>
+                ) : errorBackends ? (
+                  <p className="text-red-500">{errorBackends}</p>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Backend</TableHead>
+                          <TableHead>Status</TableHead>
+                          <TableHead>Queued Jobs</TableHead>
+                          <TableHead>Pending Jobs</TableHead>
+                          <TableHead>Version</TableHead>
+                          <TableHead>Qubits</TableHead>
+                          <TableHead>Operational</TableHead>
+                          <TableHead>Processor Type</TableHead>
+                          <TableHead>2Q Error (Best)</TableHead>
+                          <TableHead>2Q Error (Layered)</TableHead>
+                          <TableHead>CLOPS</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {backends.map((backend) => (
+                          <TableRow key={backend.name}>
+                            <TableCell className="font-medium">{backend.name}</TableCell>
+                            <TableCell>
+                              <Badge variant={backend.status === 'active' ? 'default' : 'destructive'}>
+                                {backend.status}
+                              </Badge>
+                            </TableCell>
+                            <TableCell>{backend.total_pending_jobs !== undefined ? backend.total_pending_jobs : 'N/A'}</TableCell>
+                            <TableCell>{backend.total_pending_jobs !== undefined ? backend.total_pending_jobs : 'N/A'}</TableCell>
+                            <TableCell>{backend.version || 'N/A'}</TableCell>
+                            <TableCell>{backend.qubits || 'N/A'}</TableCell>
+                            <TableCell>
+                              <Badge variant={backend.operational ? 'default' : 'destructive'}>
+                                {backend.operational ? 'Yes' : 'No'}
+                              </Badge>
+                            </TableCell>
+                            <TableCell>{backend.processor_type || 'N/A'}</TableCell>
+                            <TableCell>
+                              {backend.two_q_error_best ? Number(backend.two_q_error_best).toFixed(6) : 'N/A'}
+                            </TableCell>
+                            <TableCell>
+                              {backend.two_q_error_layered ? Number(backend.two_q_error_layered).toFixed(6) : 'N/A'}
+                            </TableCell>
+                            <TableCell>
+                              {backend.name === 'ibm_torino' ? '210K CLOPS' : backend.name === 'ibm_brisbane' ? '180K CLOPS' : 'N/A'}
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
           </div>
 
         </div>
