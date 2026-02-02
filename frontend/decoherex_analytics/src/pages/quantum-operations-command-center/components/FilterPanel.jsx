@@ -66,7 +66,7 @@ const FilterPanel = ({
   const selectClassBackend = compact ? 'w-32 min-w-0' : 'w-40';
 
   return (
-    <div className="flex items-center space-x-2 sm:space-x-3 flex-wrap gap-y-2">
+    <div className="flex flex-row items-center gap-2 sm:space-x-2 sm:space-x-3">
       {/* Filter Controls - hide label when compact */}
       {!compact && (
         <div className="hidden sm:flex items-center space-x-2">
@@ -75,7 +75,7 @@ const FilterPanel = ({
         </div>
       )}
       
-      <div className="flex items-center space-x-2">
+      <div className="flex flex-row items-center gap-2 sm:space-x-2">
         <Select
           options={durationOptions}
           value={durationFilter}

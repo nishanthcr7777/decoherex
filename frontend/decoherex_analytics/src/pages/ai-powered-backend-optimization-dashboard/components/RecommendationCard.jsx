@@ -18,10 +18,10 @@ const RecommendationCard = ({ backend, isSelected, onClick }) => {
     <div
       onClick={() => onClick(backend)}
       className={`
-        relative p-4 sm:p-6 rounded-xl sm:rounded-2xl border-2 transition-all duration-300 cursor-pointer
+        relative p-5 sm:p-6 rounded-2xl sm:rounded-2xl border-2 transition-all duration-300 cursor-pointer
         ${isSelected 
-          ? 'bg-accent/10 border-accent shadow-lg shadow-accent/20' 
-          : 'glass-card border-slate-700/50 hover:border-accent/50 hover:bg-accent/5'
+          ? 'bg-gradient-to-br from-accent/15 via-accent/10 to-accent/5 border-accent shadow-xl shadow-accent/30 ring-2 ring-accent/20' 
+          : 'glass-card border-slate-700/50 hover:border-accent/50 hover:bg-accent/5 hover:shadow-lg hover:shadow-accent/10'
         }
       `}
     >

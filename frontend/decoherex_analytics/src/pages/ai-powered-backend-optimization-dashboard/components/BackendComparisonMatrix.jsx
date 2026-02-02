@@ -22,58 +22,60 @@ const BackendComparisonMatrix = ({ backends, selectedBackends, onBackendSelect }
   };
 
   return (
-    <div className="glass-card p-6 rounded-2xl">
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center space-x-3">
-          <div className="w-8 h-8 bg-secondary/20 rounded-lg flex items-center justify-center">
-            <Icon name="BarChart3" size={18} className="text-secondary" />
+    <div className="glass-card p-5 sm:p-6 rounded-2xl sm:rounded-2xl border border-slate-700/40 shadow-xl shadow-black/20">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 sm:gap-0 mb-5 sm:mb-6">
+        <div className="flex items-center space-x-3 sm:space-x-3 min-w-0 flex-1">
+          <div className="w-10 h-10 sm:w-8 sm:h-8 bg-gradient-to-br from-secondary/30 to-secondary/10 rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg shadow-secondary/20">
+            <Icon name="BarChart3" size={18} className="sm:w-[18px] sm:h-[18px] text-secondary" />
           </div>
-          <div>
-            <h3 className="text-lg font-semibold text-foreground">Backend Comparison Matrix</h3>
-            <p className="text-sm text-muted-foreground">
+          <div className="min-w-0 flex-1">
+            <h3 className="text-base sm:text-lg font-bold text-foreground mb-1">Backend Comparison Matrix</h3>
+            <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
               Multi-dimensional performance analysis of selected backends
             </p>
           </div>
         </div>
 
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center space-x-2 flex-shrink-0 bg-slate-800/40 p-1 rounded-xl border border-slate-700/30">
           <button
             type="button"
             onClick={() => setViewMode('radar')}
             className={`
-              flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium transition-all duration-200
+              flex items-center gap-2 sm:gap-2 px-3 sm:px-3 py-2 sm:py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all duration-200
               ${viewMode === 'radar'
-                ? 'bg-transparent text-accent ring-2 ring-accent/60 shadow-[0_0_12px_rgba(6,182,212,0.4)]'
-                : 'bg-muted/30 text-muted-foreground hover:bg-muted/50 hover:text-foreground hover:ring-1 hover:ring-slate-500/40 border border-transparent'
+                ? 'bg-gradient-to-r from-accent/20 to-accent/10 text-accent ring-2 ring-accent/60 shadow-lg shadow-accent/20'
+                : 'bg-transparent text-muted-foreground hover:bg-slate-700/50 hover:text-foreground'
               }
             `}
           >
-            <Icon name="Radar" size={14} className="flex-shrink-0" />
-            Radar
+            <Icon name="Radar" size={14} className="sm:w-3.5 sm:h-3.5 flex-shrink-0" />
+            <span className="hidden sm:inline">Radar</span>
           </button>
           <button
             type="button"
             onClick={() => setViewMode('table')}
             className={`
-              flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium transition-all duration-200
+              flex items-center gap-2 sm:gap-2 px-3 sm:px-3 py-2 sm:py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all duration-200
               ${viewMode === 'table'
-                ? 'bg-transparent text-accent ring-2 ring-accent/60 shadow-[0_0_12px_rgba(6,182,212,0.4)]'
-                : 'bg-muted/30 text-muted-foreground hover:bg-muted/50 hover:text-foreground hover:ring-1 hover:ring-slate-500/40 border border-transparent'
+                ? 'bg-gradient-to-r from-accent/20 to-accent/10 text-accent ring-2 ring-accent/60 shadow-lg shadow-accent/20'
+                : 'bg-transparent text-muted-foreground hover:bg-slate-700/50 hover:text-foreground'
               }
             `}
           >
-            <Icon name="Table" size={14} className="flex-shrink-0" />
-            Table
+            <Icon name="Table" size={14} className="sm:w-3.5 sm:h-3.5 flex-shrink-0" />
+            <span className="hidden sm:inline">Table</span>
           </button>
         </div>
       </div>
       {/* Backend Selection */}
-      <div className="mb-6">
-        <div className="flex items-center space-x-2 mb-3">
-          <Icon name="MousePointer" size={16} className="text-muted-foreground" />
-          <span className="text-sm font-medium text-foreground">Select backends to compare:</span>
+      <div className="mb-5 sm:mb-6 p-4 rounded-xl bg-slate-800/30 border border-slate-700/30">
+        <div className="flex items-center space-x-2 sm:space-x-2 mb-3 sm:mb-3">
+          <div className="w-6 h-6 rounded-lg bg-accent/20 flex items-center justify-center">
+            <Icon name="MousePointer" size={14} className="sm:w-4 sm:h-4 text-accent" />
+          </div>
+          <span className="text-xs sm:text-sm font-semibold text-foreground">Select backends to compare:</span>
         </div>
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-2 sm:gap-2">
           {backends?.slice(0, 5)?.map((backend, index) => {
             const isSelected = selectedBackends?.some(b => b?.id === backend?.id);
             return (
@@ -81,10 +83,10 @@ const BackendComparisonMatrix = ({ backends, selectedBackends, onBackendSelect }
                 key={`${backend?.id}-${index}`}
                 onClick={() => onBackendSelect(backend)}
                 className={`
-                  px-3 py-2 rounded-xl text-sm font-medium transition-all duration-200
+                  px-3 sm:px-3 py-2 sm:py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-200 truncate max-w-full
                   ${isSelected
-                    ? 'bg-transparent text-accent ring-2 ring-accent/60 shadow-[0_0_12px_rgba(6,182,212,0.4)]'
-                    : 'bg-muted/30 text-muted-foreground hover:bg-muted/50 hover:text-foreground hover:ring-1 hover:ring-slate-500/40'
+                    ? 'bg-gradient-to-r from-accent/20 to-accent/10 text-accent ring-2 ring-accent/60 shadow-lg shadow-accent/20'
+                    : 'bg-slate-700/40 text-muted-foreground hover:bg-slate-600/50 hover:text-foreground hover:ring-1 hover:ring-slate-500/40 border border-slate-600/30'
                   }
                 `}
               >
@@ -95,17 +97,17 @@ const BackendComparisonMatrix = ({ backends, selectedBackends, onBackendSelect }
         </div>
       </div>
       {selectedBackends?.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-12 text-center">
-          <Icon name="MousePointer" size={48} className="text-muted-foreground mb-4" />
-          <h4 className="text-lg font-medium text-foreground mb-2">Select Backends to Compare</h4>
-          <p className="text-muted-foreground">
+        <div className="flex flex-col items-center justify-center py-8 sm:py-12 text-center">
+          <Icon name="MousePointer" size={36} className="sm:w-12 sm:h-12 text-muted-foreground mb-3 sm:mb-4" />
+          <h4 className="text-base sm:text-lg font-medium text-foreground mb-1 sm:mb-2">Select Backends to Compare</h4>
+          <p className="text-xs sm:text-sm text-muted-foreground px-2">
             Choose 2-5 backends from above to view detailed performance comparison
           </p>
         </div>
       ) : (
         <>
           {viewMode === 'radar' ? (
-            <div className="h-96">
+            <div className="h-64 sm:h-96">
               <ResponsiveContainer width="100%" height="100%">
                 <RadarChart data={radarData}>
                   <PolarGrid stroke="#334155" />
@@ -177,12 +179,14 @@ const BackendComparisonMatrix = ({ backends, selectedBackends, onBackendSelect }
           )}
 
           {/* Comparison Insights */}
-          <div className="mt-6 p-4 bg-muted/20 rounded-lg border border-slate-700/30">
-            <div className="flex items-start space-x-3">
-              <Icon name="Brain" size={16} className="text-accent mt-0.5" />
-              <div className="text-sm">
-                <p className="text-foreground font-medium mb-1">AI Comparison Insights</p>
-                <p className="text-muted-foreground">
+          <div className="mt-5 sm:mt-6 p-4 sm:p-4 bg-gradient-to-r from-accent/10 via-accent/5 to-transparent rounded-xl border border-accent/20 shadow-lg">
+            <div className="flex items-start space-x-3 sm:space-x-3">
+              <div className="w-8 h-8 rounded-lg bg-accent/20 flex items-center justify-center flex-shrink-0">
+                <Icon name="Brain" size={16} className="sm:w-4 sm:h-4 text-accent" />
+              </div>
+              <div className="text-xs sm:text-sm min-w-0 flex-1">
+                <p className="text-foreground font-bold mb-1.5 text-sm sm:text-sm">AI Comparison Insights</p>
+                <p className="text-muted-foreground leading-relaxed">
                   {selectedBackends?.length > 1 ? (
                     `${selectedBackends?.[0]?.name} shows the highest overall performance score, 
                     while ${selectedBackends?.[selectedBackends?.length - 1]?.name} offers the best queue efficiency. 

@@ -81,18 +81,18 @@ const LiveJobFeed = ({ jobs, onJobAction }) => {
 
       {/* Tab navigation */}
       <motion.nav
-        className="flex mb-6 p-1 rounded-xl border border-slate-700/50 bg-slate-800/30 relative z-10"
+        className="flex mb-6 p-1 rounded-xl border border-slate-700/50 bg-slate-800/30 relative z-10 overflow-hidden"
         initial={false}
         transition={{ type: 'spring', stiffness: 400, damping: 30 }}
       >
-        <div className="relative flex flex-1 rounded-lg overflow-visible">
+        <div className="relative flex flex-1 rounded-lg overflow-hidden">
           {filters.map((opt) => {
             const isActive = filter === opt.id;
             return (
               <motion.button
                 key={opt.id}
                 onClick={() => setFilter(opt.id)}
-                className="relative flex items-center justify-center space-x-2 px-4 py-2.5 rounded-lg text-xs font-bold uppercase tracking-wider flex-1 min-w-0 z-[1]"
+                className="relative flex items-center justify-center space-x-1 sm:space-x-2 px-2 sm:px-4 py-2.5 rounded-lg text-xs font-bold uppercase tracking-wider flex-1 min-w-0 z-[1] overflow-hidden"
                 whileTap={{ scale: 0.98 }}
                 transition={{ type: 'spring', stiffness: 400, damping: 25 }}
               >
@@ -105,12 +105,12 @@ const LiveJobFeed = ({ jobs, onJobAction }) => {
                   />
                 )}
                 <span
-                  className={`relative z-10 flex items-center gap-2 transition-colors duration-200 ${
+                  className={`relative z-10 flex items-center gap-1 sm:gap-2 transition-colors duration-200 truncate ${
                     isActive ? 'text-foreground' : 'text-muted-foreground hover:text-foreground'
                   }`}
                 >
-                  <Icon name={opt.icon} size={14} className={isActive ? 'text-accent' : ''} />
-                  {opt.label}
+                  <Icon name={opt.icon} size={12} className={`flex-shrink-0 ${isActive ? 'text-accent' : ''}`} />
+                  <span className="truncate">{opt.label}</span>
                 </span>
               </motion.button>
             );
@@ -119,7 +119,7 @@ const LiveJobFeed = ({ jobs, onJobAction }) => {
       </motion.nav>
 
       {/* Quantum Job List */}
-      <div className="flex-1 overflow-y-auto space-y-4 pr-2 custom-scrollbar relative z-10">
+      <div className="flex-1 sm:flex-1 max-h-[450px] sm:max-h-none overflow-y-auto space-y-4 pr-2 scrollbar-hide sm:[scrollbar-width:auto] sm:[&::-webkit-scrollbar]:block custom-scrollbar relative z-10">
         {sortedJobs.map((job) => {
           const statusStyle = getStatusColor(job.status);
           const type = job.circuit_type || job.type || 'Custom Circuit';

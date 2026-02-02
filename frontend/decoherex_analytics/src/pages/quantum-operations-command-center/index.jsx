@@ -541,39 +541,42 @@ const QuantumOperationsCommandCenter = () => {
         <div className="p-4 sm:p-6">
           <div className="max-w-7xl mx-auto space-y-4 sm:space-y-6">
             {/* Page Header + Filters + Submit Job (compact single line) */}
-            <div className="flex flex-col gap-3 sm:gap-0 sm:flex-row sm:items-center sm:justify-between relative">
-              <div className="flex-1 pr-24 sm:pr-0 min-w-0">
+            <div className="flex flex-col gap-4 sm:gap-0 sm:flex-row sm:items-center sm:justify-between relative">
+              <div className="flex-1 min-w-0 pr-20 sm:pr-0">
                 <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Job Tracker</h1>
                 <p className="text-sm sm:text-base text-muted-foreground mt-1 leading-relaxed">
                   Real-time quantum job monitoring and system health oversight
                 </p>
               </div>
-              <div className="absolute top-0 right-0 sm:relative sm:top-auto sm:right-auto flex flex-wrap items-center justify-end gap-2 sm:gap-3">
-                <FilterPanel
-                  statusFilter={statusFilter}
-                  setStatusFilter={setStatusFilter}
-                  backendFilter={backendFilter}
-                  setBackendFilter={setBackendFilter}
-                  jobTypeFilter={jobTypeFilter}
-                  setJobTypeFilter={setJobTypeFilter}
-                  durationFilter={durationFilter}
-                  setDurationFilter={setDurationFilter}
-                  compact
-                />
+              {/* Last updated time - top right on mobile */}
+              <div className="absolute top-0 right-0 sm:relative sm:top-auto sm:right-auto flex items-center space-x-1 text-xs sm:text-sm text-muted-foreground shrink-0">
+                <Icon name="Clock" size={12} className="sm:w-4 sm:h-4" />
+                <span className="hidden sm:inline">Last updated: </span>
+                <span className="text-xs sm:text-sm">{new Date().toLocaleTimeString()}</span>
+              </div>
+              <div className="flex flex-row sm:flex-row items-center justify-between sm:justify-end gap-2 sm:gap-3 w-full sm:w-auto">
+                <div className="flex-1 sm:flex-none min-w-0 overflow-hidden">
+                  <FilterPanel
+                    statusFilter={statusFilter}
+                    setStatusFilter={setStatusFilter}
+                    backendFilter={backendFilter}
+                    setBackendFilter={setBackendFilter}
+                    jobTypeFilter={jobTypeFilter}
+                    setJobTypeFilter={setJobTypeFilter}
+                    durationFilter={durationFilter}
+                    setDurationFilter={setDurationFilter}
+                    compact
+                  />
+                </div>
                 <button
                   type="button"
                   onClick={() => setIsJobModalOpen(true)}
-                  className="shrink-0 flex items-center gap-2 px-4 xl:px-5 py-2.5 rounded-2xl text-sm font-medium bg-accent text-accent-foreground hover:bg-accent/90 transition-all focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-transparent"
+                  className="shrink-0 flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-4 xl:px-5 py-2 sm:py-2.5 rounded-2xl text-xs sm:text-sm font-medium bg-accent text-accent-foreground hover:bg-accent/90 transition-all focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-transparent"
                 >
-                  <Icon name="Plus" size={16} className="flex-shrink-0" />
+                  <Icon name="Plus" size={14} className="sm:w-4 sm:h-4 flex-shrink-0" />
                   <span className="hidden sm:inline">Submit Job</span>
                   <span className="sm:hidden">Submit</span>
                 </button>
-                <div className="flex items-center space-x-2 text-xs sm:text-sm text-muted-foreground shrink-0">
-                  <Icon name="Clock" size={14} className="sm:w-4 sm:h-4" />
-                  <span className="hidden sm:inline">Last updated: </span>
-                  <span>{new Date().toLocaleTimeString()}</span>
-                </div>
               </div>
             </div>
 
