@@ -548,14 +548,16 @@ const QuantumOperationsCommandCenter = () => {
                   Real-time quantum job monitoring and system health oversight
                 </p>
               </div>
-              {/* Last updated time - top right on mobile */}
-              <div className="absolute top-0 right-0 sm:relative sm:top-auto sm:right-auto flex items-center space-x-1 text-xs sm:text-sm text-muted-foreground shrink-0">
-                <Icon name="Clock" size={12} className="sm:w-4 sm:h-4" />
-                <span className="hidden sm:inline">Last updated: </span>
-                <span className="text-xs sm:text-sm">{new Date().toLocaleTimeString()}</span>
-              </div>
-              <div className="flex flex-row sm:flex-row items-center justify-between sm:justify-end gap-2 sm:gap-3 w-full sm:w-auto">
-                <div className="flex-1 sm:flex-none min-w-0 overflow-hidden">
+              {/* Desktop: one right-aligned group (FilterPanel, Submit, Last updated). Mobile: Last updated absolute top-right, then filters+button row. */}
+              <div className="flex flex-col sm:flex-row sm:flex-wrap sm:items-center sm:justify-end gap-4 sm:gap-2 sm:gap-3 w-full sm:w-auto">
+                {/* Last updated: absolute top-right on mobile; in flow on desktop (order-3 so it appears last) */}
+                <div className="absolute top-0 right-0 sm:relative sm:top-auto sm:right-auto sm:order-3 flex items-center space-x-1 text-xs sm:text-sm text-muted-foreground shrink-0">
+                  <Icon name="Clock" size={12} className="sm:w-4 sm:h-4" />
+                  <span className="hidden sm:inline">Last updated: </span>
+                  <span className="text-xs sm:text-sm">{new Date().toLocaleTimeString()}</span>
+                </div>
+                {/* Filters + Submit: full-width row on mobile; order-1 on desktop so FilterPanel+Button then Last updated */}
+                <div className="flex flex-row items-center justify-between sm:justify-end gap-2 sm:gap-3 sm:order-1 flex-1 sm:flex-none min-w-0 overflow-hidden sm:overflow-visible">
                   <FilterPanel
                     statusFilter={statusFilter}
                     setStatusFilter={setStatusFilter}
@@ -567,16 +569,16 @@ const QuantumOperationsCommandCenter = () => {
                     setDurationFilter={setDurationFilter}
                     compact
                   />
+                  <button
+                    type="button"
+                    onClick={() => setIsJobModalOpen(true)}
+                    className="shrink-0 flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-4 xl:px-5 py-2 sm:py-2.5 rounded-2xl text-xs sm:text-sm font-medium bg-accent text-accent-foreground hover:bg-accent/90 transition-all focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-transparent"
+                  >
+                    <Icon name="Plus" size={14} className="sm:w-4 sm:h-4 flex-shrink-0" />
+                    <span className="hidden sm:inline">Submit Job</span>
+                    <span className="sm:hidden">Submit</span>
+                  </button>
                 </div>
-                <button
-                  type="button"
-                  onClick={() => setIsJobModalOpen(true)}
-                  className="shrink-0 flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-4 xl:px-5 py-2 sm:py-2.5 rounded-2xl text-xs sm:text-sm font-medium bg-accent text-accent-foreground hover:bg-accent/90 transition-all focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-transparent"
-                >
-                  <Icon name="Plus" size={14} className="sm:w-4 sm:h-4 flex-shrink-0" />
-                  <span className="hidden sm:inline">Submit Job</span>
-                  <span className="sm:hidden">Submit</span>
-                </button>
               </div>
             </div>
 

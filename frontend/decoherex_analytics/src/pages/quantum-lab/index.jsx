@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { motion } from 'framer-motion';
 import Header from '../../components/ui/Header';
 import Icon from '../../components/AppIcon';
 import Modal from '../../components/ui/Modal';
@@ -10,6 +11,7 @@ import SavedCircuitsList from '../quantum-operations-command-center/components/S
 
 const QuantumLab = () => {
     const [prompt, setPrompt] = useState('');
+    const [circuitInputFocused, setCircuitInputFocused] = useState(false);
     const [code, setCode] = useState('');
     const [diagram, setDiagram] = useState(null);
     const [results, setResults] = useState(null);
@@ -144,19 +146,32 @@ const QuantumLab = () => {
                                         Describe your circuit
                                     </label>
                                     <div className="flex flex-col sm:flex-row gap-2 sm:space-x-2">
-                                        <input
-                                            type="text"
-                                            value={prompt}
-                                            onChange={(e) => setPrompt(e.target.value)}
-                                            placeholder="e.g., Create a Bell State..."
-                                            className="flex-1 bg-input border border-slate-700/50 rounded-lg px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm text-foreground focus:outline-none transition-all"
-                                            onKeyDown={(e) => e.key === 'Enter' && handleGenerate()}
-                                        />
+                                        <motion.div
+                                            className="flex-1 rounded-lg"
+                                            initial={false}
+                                            animate={{
+                                                boxShadow: circuitInputFocused
+                                                    ? '0 0 0 1px rgba(6,182,212,0.5), 0 0 16px rgba(6,182,212,0.2)'
+                                                    : '0 0 0 1px transparent, 0 0 0 transparent',
+                                            }}
+                                            transition={{ type: 'tween', duration: 0.25, ease: 'easeOut' }}
+                                        >
+                                            <input
+                                                type="text"
+                                                value={prompt}
+                                                onChange={(e) => setPrompt(e.target.value)}
+                                                placeholder="e.g., Create a Bell State..."
+                                                className="w-full bg-input border border-slate-700/50 rounded-lg px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm text-foreground focus:outline-none focus:border-transparent transition-colors"
+                                                onKeyDown={(e) => e.key === 'Enter' && handleGenerate()}
+                                                onFocus={() => setCircuitInputFocused(true)}
+                                                onBlur={() => setCircuitInputFocused(false)}
+                                            />
+                                        </motion.div>
                                         <button
                                             type="button"
                                             onClick={handleGenerate}
                                             disabled={generating}
-                                            className="shrink-0 flex items-center justify-center gap-2 px-4 sm:px-6 py-2.5 rounded-xl text-sm font-medium bg-accent text-accent-foreground hover:bg-accent/90 transition-all disabled:opacity-50 disabled:pointer-events-none"
+                                            className="shrink-0 flex items-center justify-center gap-2 px-4 sm:px-6 py-2.5 rounded-xl text-sm font-medium bg-accent text-accent-foreground hover:bg-accent/90 hover:scale-[1.02] hover:shadow-[0_0_14px_rgba(6,182,212,0.35)] transition-all duration-200 disabled:opacity-50 disabled:pointer-events-none disabled:hover:scale-100 disabled:hover:shadow-none"
                                         >
                                             {generating ? (
                                                 <span className="animate-spin h-4 w-4 border-2 border-accent-foreground/30 border-t-accent-foreground rounded-full" />
@@ -201,7 +216,7 @@ const QuantumLab = () => {
                                             type="button"
                                             onClick={handleSimulate}
                                             disabled={!code || loading}
-                                            className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium bg-accent text-accent-foreground hover:bg-accent/90 transition-all disabled:opacity-50 disabled:pointer-events-none"
+                                            className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium bg-accent text-accent-foreground hover:bg-accent/90 hover:scale-[1.02] hover:shadow-[0_0_14px_rgba(6,182,212,0.35)] transition-all duration-200 disabled:opacity-50 disabled:pointer-events-none disabled:hover:scale-100 disabled:hover:shadow-none"
                                         >
                                             {loading ? (
                                                 <span className="animate-spin h-4 w-4 border-2 border-accent-foreground/30 border-t-accent-foreground rounded-full" />
