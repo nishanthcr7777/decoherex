@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
+import { motion } from 'framer-motion';
 import Icon from '../../../components/AppIcon';
 import Input from '../../../components/ui/Input';
 import Select from '../../../components/ui/Select';
@@ -72,45 +73,54 @@ const JobConstraintPanel = ({ onConstraintsChange, isRefreshing }) => {
   };
 
   return (
-    <div className="bg-card/50 backdrop-blur-sm border border-slate-700/50 rounded-2xl p-6">
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center space-x-3">
-          <div className="w-8 h-8 bg-accent/20 rounded-lg flex items-center justify-center">
-            <Icon name="Settings" size={18} className="text-accent" />
+    <div className="glass-card p-5 sm:p-6 rounded-2xl sm:rounded-2xl border border-slate-700/40 shadow-xl shadow-black/20">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 sm:gap-4 mb-5 sm:mb-6">
+        <div className="flex items-center space-x-3 sm:space-x-3 min-w-0 flex-1">
+          <div className="w-10 h-10 sm:w-8 sm:h-8 bg-gradient-to-br from-accent/30 to-accent/10 rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg shadow-accent/20">
+            <Icon name="Settings" size={18} className="sm:w-[18px] sm:h-[18px] text-accent" />
           </div>
-          <div>
-            <h3 className="text-lg font-semibold text-foreground">Job Constraints</h3>
-            <p className="text-sm text-muted-foreground">Configure quantum job parameters for optimal backend matching</p>
+          <div className="min-w-0 flex-1">
+            <h3 className="text-base sm:text-lg font-bold text-foreground mb-1">Job Constraints</h3>
+            <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">Configure quantum job parameters for optimal backend matching</p>
           </div>
         </div>
         
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center gap-2.5 flex-shrink-0 flex-wrap w-full sm:w-auto">
           {isRefreshing && (
-            <div className="flex items-center space-x-2 text-accent">
-              <Icon name="RefreshCw" size={16} className="animate-spin" />
-              <span className="text-sm font-medium">Updating...</span>
-            </div>
+            <motion.div
+              className="flex items-center gap-2 text-accent px-3 py-2 rounded-xl bg-accent/10 border border-accent/30 shadow-lg shadow-accent/20"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+            >
+              <Icon name="RefreshCw" size={14} className="sm:w-4 sm:h-4 animate-spin" />
+              <span className="text-xs sm:text-sm font-semibold">Updating...</span>
+            </motion.div>
           )}
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleReset}
-            iconName="RotateCcw"
-            iconPosition="left"
-          >
-            Reset
-          </Button>
-          <Button
-            size="sm"
-            onClick={handleSubmit}
-            iconName="Check"
-            iconPosition="left"
-          >
-            Submit
-          </Button>
+          <motion.div whileTap={{ scale: 0.96 }} transition={{ type: 'spring', stiffness: 400, damping: 25 }} className="flex-1 sm:flex-none">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleReset}
+              iconName="RotateCcw"
+              iconPosition="left"
+              className="rounded-xl border border-slate-600/60 bg-slate-800/40 hover:bg-slate-700/60 hover:border-slate-500 text-muted-foreground hover:text-foreground h-10 sm:h-9 min-h-10 sm:min-h-9 px-4 sm:px-4 gap-2 sm:gap-2 font-semibold transition-all shadow-md text-sm sm:text-sm w-full sm:w-[7.25rem] sm:min-w-[7.25rem]"
+            >
+              Reset
+            </Button>
+          </motion.div>
+          <motion.div whileTap={{ scale: 0.96 }} transition={{ type: 'spring', stiffness: 400, damping: 25 }} className="flex-1 sm:flex-none">
+            <Button
+              size="sm"
+              onClick={handleSubmit}
+              className="rounded-xl border border-transparent bg-accent text-accent-foreground hover:bg-accent/90 shadow-md shadow-accent/20 sm:shadow-lg sm:shadow-accent/30 h-10 sm:h-9 min-h-10 sm:min-h-9 px-4 sm:px-4 gap-2 sm:gap-2 font-semibold transition-all hover:shadow-accent/30 sm:hover:shadow-accent/40 text-sm sm:text-sm w-full sm:w-[7.25rem] sm:min-w-[7.25rem]"
+            >
+              Submit
+            </Button>
+          </motion.div>
         </div>
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
         <div className="space-y-2">
           <Input
             label="Circuit Depth"
@@ -186,12 +196,14 @@ const JobConstraintPanel = ({ onConstraintsChange, isRefreshing }) => {
           />
         </div>
       </div>
-      <div className="mt-6 p-4 bg-muted/20 rounded-lg border border-slate-700/30">
-        <div className="flex items-start space-x-3">
-          <Icon name="Lightbulb" size={16} className="text-warning mt-0.5" />
-          <div className="text-sm">
-            <p className="text-foreground font-medium mb-1">AI Optimization Tips</p>
-            <p className="text-muted-foreground">
+      <div className="mt-4 sm:mt-6 p-4 sm:p-4 bg-gradient-to-r from-warning/10 via-warning/5 to-transparent rounded-xl border border-warning/20 shadow-lg">
+        <div className="flex items-start space-x-3 sm:space-x-3">
+          <div className="w-8 h-8 rounded-lg bg-warning/20 flex items-center justify-center flex-shrink-0">
+            <Icon name="Lightbulb" size={16} className="sm:w-4 sm:h-4 text-warning" />
+          </div>
+          <div className="text-xs sm:text-sm min-w-0 flex-1">
+            <p className="text-foreground font-bold mb-1.5 text-sm sm:text-sm">AI Optimization Tips</p>
+            <p className="text-muted-foreground leading-relaxed">
               Lower error tolerance and circuit depth improve backend matching accuracy. 
               High priority jobs may have longer wait times on premium backends.
             </p>

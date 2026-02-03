@@ -1048,9 +1048,10 @@ async def simulate_circuit(request: SimulateRequest):
         print(f"Simulation Error: {e}")
         return {"error": str(e)}
 
-# Mount static files
+# Mount static files (only if build directory exists - for production)
 static_dir = os.path.join(os.path.dirname(__file__), "..", "frontend", "decoherex_analytics", "build")
-app.mount("/static", StaticFiles(directory=static_dir), name="static")
+if os.path.exists(static_dir) and os.path.isdir(static_dir):
+    app.mount("/static", StaticFiles(directory=static_dir), name="static")
 
 
 # --------------------------------------------------------------------------------

@@ -1,6 +1,5 @@
 import React from 'react';
 import Modal from '../../../components/ui/Modal';
-import Button from '../../../components/ui/Button';
 import Icon from '../../../components/AppIcon';
 
 const InfoRow = ({ label, value }) => (
@@ -21,7 +20,7 @@ const JobDetailsModal = ({ job, open, onClose }) => {
     // If we have structured results (from backend fetch)
     if (typeof job.results === 'object') {
       outputDisplay = (
-        <pre className="text-xs bg-black/20 p-2 rounded overflow-auto max-h-40">
+        <pre className="text-xs bg-slate-800/50 border border-slate-700/50 p-2 rounded-lg overflow-auto max-h-40 scrollbar-hide">
           {JSON.stringify(job.results, null, 2)}
         </pre>
       );
@@ -35,7 +34,7 @@ const JobDetailsModal = ({ job, open, onClose }) => {
     try {
       const parsed = JSON.parse(job.output);
       outputDisplay = (
-        <pre className="text-xs bg-black/20 p-2 rounded overflow-auto max-h-40">
+        <pre className="text-xs bg-slate-800/50 border border-slate-700/50 p-2 rounded-lg overflow-auto max-h-40 scrollbar-hide">
           {JSON.stringify(parsed, null, 2)}
         </pre>
       );
@@ -49,9 +48,18 @@ const JobDetailsModal = ({ job, open, onClose }) => {
   }
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title={
-      <span className="flex items-center gap-2"><Icon name="Eye" size={18} /> Job Details</span>
-    }>
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title={
+        <span className="flex items-center gap-2">
+          <Icon name="Eye" size={18} className="text-accent" />
+          Job Details
+        </span>
+      }
+      contentClassName="bg-slate-800/70 border border-slate-700/50 backdrop-blur-sm rounded-xl shadow-xl w-full max-w-lg p-6 flex flex-col max-h-[70vh]"
+      bodyClassName="overflow-y-auto scrollbar-hide min-h-0"
+    >
       <div className="space-y-3 mt-2">
         <InfoRow label="Job Name" value={job.job_name || job.type || 'N/A'} />
         <InfoRow label="Job ID" value={`#${(job.job_id || job.id)?.slice(-8)}`} />
@@ -62,9 +70,6 @@ const JobDetailsModal = ({ job, open, onClose }) => {
         <InfoRow label="Progress" value={`${job.progress ?? 0}%`} />
         <InfoRow label="Submitted At" value={new Date(job.submitted_at || job.timestamp).toLocaleString()} />
         <InfoRow label="Output" value={outputDisplay} />
-      </div>
-      <div className="flex justify-end pt-4">
-        <Button onClick={onClose}>Close</Button>
       </div>
     </Modal>
   );

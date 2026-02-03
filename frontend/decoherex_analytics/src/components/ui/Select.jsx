@@ -1,9 +1,12 @@
 // components/ui/Select.jsx - Shadcn style Select
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { ChevronDown, Check, Search, X } from "lucide-react";
 import { cn } from "../../utils/cn";
 import Button from "./Button";
 import Input from "./Input";
+
+const DROPDOWN_MAX_HEIGHT = 128; // max-h-32 = 8rem — compact, scrollable, scrollbar hidden
+const VIEWPORT_PADDING = 8;
 
 const Select = React.forwardRef(({
     className,
@@ -28,6 +31,9 @@ const Select = React.forwardRef(({
 }, ref) => {
     const [isOpen, setIsOpen] = useState(false);
     const [searchTerm, setSearchTerm] = useState("");
+    const [dropUp, setDropUp] = useState(false);
+    const containerRef = useRef(null);
+    const buttonRef = useRef(null);
 
     // Generate unique ID if not provided
     const selectId = id || `select-${Math.random()?.toString(36)?.substr(2, 9)}`;
@@ -58,6 +64,12 @@ const Select = React.forwardRef(({
     const handleToggle = () => {
         if (!disabled) {
             const newIsOpen = !isOpen;
+            if (newIsOpen && buttonRef.current) {
+                const rect = buttonRef.current.getBoundingClientRect();
+                const spaceBelow = window.innerHeight - rect.bottom - VIEWPORT_PADDING;
+                const spaceAbove = rect.top - VIEWPORT_PADDING;
+                setDropUp(spaceBelow < DROPDOWN_MAX_HEIGHT && spaceAbove >= spaceBelow);
+            }
             setIsOpen(newIsOpen);
             onOpenChange?.(newIsOpen);
             if (!newIsOpen) {
@@ -65,6 +77,31 @@ const Select = React.forwardRef(({
             }
         }
     };
+
+    // Click outside and Escape to close
+    useEffect(() => {
+        if (!isOpen) return;
+        const onMouseDown = (e) => {
+            if (containerRef.current && !containerRef.current.contains(e.target)) {
+                setIsOpen(false);
+                onOpenChange?.(false);
+                setSearchTerm("");
+            }
+        };
+        const onKeyDown = (e) => {
+            if (e.key === "Escape") {
+                setIsOpen(false);
+                onOpenChange?.(false);
+                setSearchTerm("");
+            }
+        };
+        document.addEventListener("mousedown", onMouseDown);
+        document.addEventListener("keydown", onKeyDown);
+        return () => {
+            document.removeEventListener("mousedown", onMouseDown);
+            document.removeEventListener("keydown", onKeyDown);
+        };
+    }, [isOpen, onOpenChange]);
 
     const handleOptionSelect = (option) => {
         if (multiple) {
@@ -99,7 +136,7 @@ const Select = React.forwardRef(({
     const hasValue = multiple ? value?.length > 0 : value !== undefined && value !== '';
 
     return (
-        <div className={cn("relative", className)}>
+        <div ref={containerRef} className={cn("relative", className)}>
             {label && (
                 <label
                     htmlFor={selectId}
@@ -114,13 +151,18 @@ const Select = React.forwardRef(({
             )}
             <div className="relative">
                 <button
-                    ref={ref}
+                    ref={(el) => {
+                        buttonRef.current = el;
+                        if (typeof ref === "function") ref(el);
+                        else if (ref) ref.current = el;
+                    }}
                     id={selectId}
                     type="button"
                     className={cn(
-                        "flex h-10 w-full items-center justify-between rounded-md border border-slate-700/50 bg-slate-800/50 text-foreground px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
+                        "flex h-10 w-full items-center justify-between rounded-md border border-slate-700/50 bg-slate-800/50 text-foreground px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 transition-colors",
                         error && "border-destructive focus:ring-destructive",
-                        !hasValue && "text-muted-foreground"
+                        !hasValue && "text-muted-foreground",
+                        isOpen && "border-slate-600/60 bg-slate-800/70"
                     )}
                     onClick={handleToggle}
                     disabled={disabled}
@@ -171,9 +213,14 @@ const Select = React.forwardRef(({
                     ))}
                 </select>
 
-                {/* Dropdown */}
+                {/* Dropdown / Drop-up */}
                 {isOpen && (
-                    <div className="absolute z-50 w-full mt-1 bg-slate-800 text-foreground border border-slate-700/50 rounded-md shadow-lg">
+                    <div
+                        className={cn(
+                            "absolute z-50 w-full left-0 bg-slate-800/70 border border-slate-700/50 text-foreground rounded-md shadow-lg backdrop-blur-sm",
+                            dropUp ? "bottom-full mb-1" : "top-full mt-1"
+                        )}
+                    >
                         {searchable && (
                             <div className="p-2 border-b border-slate-700/30">
                                 <div className="relative">
@@ -182,13 +229,13 @@ const Select = React.forwardRef(({
                                         placeholder="Search options..."
                                         value={searchTerm}
                                         onChange={handleSearchChange}
-                                        className="pl-8 bg-slate-800 border-slate-700/50"
+                                        className="pl-8 bg-slate-800/50 border-slate-700/50"
                                     />
                                 </div>
                             </div>
                         )}
 
-                        <div className="py-1 max-h-60 overflow-y-auto scrollbar-hide">
+                        <div className="py-1 max-h-32 overflow-y-auto scrollbar-hide">
                             {filteredOptions?.length === 0 ? (
                                 <div className="px-3 py-2 text-sm text-muted-foreground">
                                     {searchTerm ? 'No options found' : 'No options available'}

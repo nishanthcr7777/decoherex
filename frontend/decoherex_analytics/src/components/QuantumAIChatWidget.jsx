@@ -126,7 +126,7 @@ const QuantumAIChatWidget = () => {
                                 onChange={(e) => setInputText(e.target.value)}
                                 onKeyDown={handleKeyPress}
                                 placeholder="Ask about jobs..."
-                                className="w-full bg-white border border-slate-300 rounded-xl py-3 pl-4 pr-12 text-sm text-black placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-accent/50"
+                                className="w-full bg-white border border-slate-300 rounded-xl py-3 pl-4 pr-12 text-sm text-black placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-[var(--color-ring)]"
                             />
                             <button
                                 onClick={handleSend}

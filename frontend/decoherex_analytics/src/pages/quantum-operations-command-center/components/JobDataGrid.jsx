@@ -128,19 +128,19 @@ const JobDataGrid = ({
 
   const getStatusBadge = (status) => {
     const configs = {
-      queued: { color: 'bg-slate-600 text-slate-100', icon: 'Clock' },
-      running: { color: 'bg-warning text-warning-foreground', icon: 'Play' },
-      completed: { color: 'bg-success text-success-foreground', icon: 'CheckCircle' },
-      failed: { color: 'bg-error text-error-foreground', icon: 'XCircle' }
+      queued: { color: 'bg-muted/20 text-muted-foreground', icon: 'Clock' },
+      running: { color: 'bg-warning/20 text-warning', icon: 'Play' },
+      completed: { color: 'bg-success/20 text-success', icon: 'CheckCircle' },
+      failed: { color: 'bg-error/20 text-error', icon: 'XCircle' }
     };
 
     const config = configs?.[status] || configs?.queued;
 
     return (
-      <div className={`flex items-center space-x-1 px-2 py-1 rounded-full text-xs font-medium ${config?.color}`}>
+      <span className={`inline-flex items-center space-x-1 px-2 py-1 rounded-full text-xs font-medium ${config?.color}`}>
         <Icon name={config?.icon} size={12} />
         <span className="capitalize">{status}</span>
-      </div>
+      </span>
     );
   };
 
@@ -218,129 +218,123 @@ const JobDataGrid = ({
           </div>
         </div>
       )}
-      {/* Data Grid */}
-      <div className="overflow-x-auto">
+      {/* Data Grid - max 8 rows visible, scroll with hidden scrollbar */}
+      <div className="overflow-x-auto overflow-y-auto max-h-[28rem] scrollbar-hide">
         <table className="w-full">
-          <thead>
-            <tr className="border-b border-border/50">
-              <th className="text-left p-3">
+          <thead className="sticky top-0 z-10 bg-slate-800/98 backdrop-blur-sm">
+            <tr className="border-b border-slate-700/50">
+              <th className="text-left py-3 px-2">
                 <input
                   type="checkbox"
                   checked={selectedJobs?.size === filteredAndSortedJobs?.length && filteredAndSortedJobs?.length > 0}
                   onChange={handleSelectAll}
-                  className="rounded border-border/50 bg-input text-accent focus:ring-accent"
+                  className="rounded border-border/50 bg-input text-accent focus:ring-2 focus:ring-ring"
                 />
               </th>
               {/* Job Name */}
               <th
-                className="text-left p-3 cursor-pointer hover:bg-muted/20 transition-colors"
+                className="text-left py-3 px-2 text-sm font-medium text-muted-foreground cursor-pointer hover:text-foreground transition-colors"
                 onClick={() => handleSort('job_name')}
               >
                 <div className="flex items-center space-x-2">
-                  <span className="text-sm font-medium text-muted-foreground">Job Name</span>
-                  <Icon name={getSortIcon('job_name')} size={14} className="text-muted-foreground" />
+                  <span>Job Name</span>
+                  <Icon name={getSortIcon('job_name')} size={14} />
                 </div>
               </th>
               {/* Job ID */}
               <th
-                className="text-left p-3 cursor-pointer hover:bg-muted/20 transition-colors"
+                className="text-left py-3 px-2 text-sm font-medium text-muted-foreground cursor-pointer hover:text-foreground transition-colors"
                 onClick={() => handleSort('job_id')}
               >
                 <div className="flex items-center space-x-2">
-                  <span className="text-sm font-medium text-muted-foreground">Job ID</span>
-                  <Icon name={getSortIcon('job_id')} size={14} className="text-muted-foreground" />
+                  <span>Job ID</span>
+                  <Icon name={getSortIcon('job_id')} size={14} />
                 </div>
               </th>
               {/* Backend */}
               <th
-                className="text-left p-3 cursor-pointer hover:bg-muted/20 transition-colors"
+                className="text-left py-3 px-2 text-sm font-medium text-muted-foreground cursor-pointer hover:text-foreground transition-colors"
                 onClick={() => handleSort('backend')}
               >
                 <div className="flex items-center space-x-2">
-                  <span className="text-sm font-medium text-muted-foreground">Backend</span>
-                  <Icon name={getSortIcon('backend')} size={14} className="text-muted-foreground" />
+                  <span>Backend</span>
+                  <Icon name={getSortIcon('backend')} size={14} />
                 </div>
               </th>
               {/* Circuit */}
               <th
-                className="text-left p-3 cursor-pointer hover:bg-muted/20 transition-colors"
+                className="text-left py-3 px-2 text-sm font-medium text-muted-foreground cursor-pointer hover:text-foreground transition-colors"
                 onClick={() => handleSort('circuit')}
               >
                 <div className="flex items-center space-x-2">
-                  <span className="text-sm font-medium text-muted-foreground">Circuit</span>
-                  <Icon name={getSortIcon('circuit')} size={14} className="text-muted-foreground" />
+                  <span>Circuit</span>
+                  <Icon name={getSortIcon('circuit')} size={14} />
                 </div>
               </th>
               {/* Status */}
-              <th className="text-left p-3">
-                <span className="text-sm font-medium text-muted-foreground">Status</span>
-              </th>
+              <th className="text-left py-3 px-2 text-sm font-medium text-muted-foreground">Status</th>
               {/* Progress */}
-              <th className="text-left p-3">
-                <span className="text-sm font-medium text-muted-foreground">Progress</span>
-              </th>
+              <th className="text-left py-3 px-2 text-sm font-medium text-muted-foreground">Progress</th>
               {/* Submitted At */}
               <th
-                className="text-left p-3 cursor-pointer hover:bg-muted/20 transition-colors"
+                className="text-left py-3 px-2 text-sm font-medium text-muted-foreground cursor-pointer hover:text-foreground transition-colors"
                 onClick={() => handleSort('submitted_at')}
               >
                 <div className="flex items-center space-x-2">
-                  <span className="text-sm font-medium text-muted-foreground">Submitted At</span>
-                  <Icon name={getSortIcon('submitted_at')} size={14} className="text-muted-foreground" />
+                  <span>Submitted At</span>
+                  <Icon name={getSortIcon('submitted_at')} size={14} />
                 </div>
               </th>
               {/* Actions */}
-              <th className="text-left p-3">
-                <span className="text-sm font-medium text-muted-foreground">Actions</span>
-              </th>
+              <th className="text-left py-3 px-2 text-sm font-medium text-muted-foreground">Actions</th>
             </tr>
           </thead>
           <tbody>
             {filteredAndSortedJobs?.map((job) => (
               <tr
                 key={job?.id || job?.job_id}
-                className="border-b border-border/30 hover:bg-muted/20 transition-colors"
+                className="border-b border-slate-700/30 hover:bg-muted/20 transition-colors"
               >
-                <td className="p-3">
+                <td className="py-4 px-2">
                   <input
                     type="checkbox"
                     checked={selectedJobs?.has(job?.job_id || job?.id)}
                     onChange={() => handleSelectJob(job?.job_id || job?.id)}
-                    className="rounded border-border/50 bg-input text-accent focus:ring-accent"
+                    className="rounded border-border/50 bg-input text-accent focus:ring-2 focus:ring-ring"
                   />
                 </td>
                 {/* Job Name */}
-                <td className="p-3">
+                <td className="py-4 px-2">
                   <span className="text-sm text-foreground">{job?.job_name || `Job-${(job?.job_id || job?.id)?.slice(-4)}`}</span>
                 </td>
                 {/* Job ID */}
-                <td className="p-3">
+                <td className="py-4 px-2">
                   <span className="text-sm font-mono text-accent">{(job?.job_id || job?.id)?.slice(0, 8)}...</span>
                 </td>
                 {/* Backend */}
-                <td className="p-3">
+                <td className="py-4 px-2">
                   <span className="text-sm text-foreground">{job?.backend}</span>
                 </td>
                 {/* Circuit */}
-                <td className="p-3">
+                <td className="py-4 px-2">
                   <span className="text-sm text-foreground">{job?.circuit}</span>
                 </td>
                 {/* Status */}
-                <td className="p-3">
+                <td className="py-4 px-2">
                   {getStatusBadge(job?.status)}
                 </td>
                 {/* Progress */}
-                <td className="p-3 w-32">
+                <td className="py-4 px-2 w-32">
                   <div className="w-full bg-border rounded-full h-2">
                     <div className={`h-2 rounded-full bg-accent transition-all`} style={{ width: `${job?.progress || (job?.status === 'completed' || job?.status === 'DONE' ? 100 : 0)}%` }} />
                   </div>
                 </td>
                 {/* Submitted At */}
-                <td className="p-3">
+                <td className="py-4 px-2">
                   <span className="text-sm text-muted-foreground">{formatTimestamp(job?.submitted_at || job?.timestamp)}</span>
                 </td>
                 {/* Actions */}
-                <td className="p-3">
+                <td className="py-4 px-2">
                   <div className="flex items-center space-x-1">
                     <Button
                       variant="ghost"
@@ -348,6 +342,7 @@ const JobDataGrid = ({
                       iconName="Eye"
                       onClick={() => onJobAction('view', job?.job_id || job?.id)}
                       title="View details"
+                      className="active:bg-transparent active:shadow-[0_0_12px_rgba(6,182,212,0.5)] active:ring-2 active:ring-accent/50 active:ring-offset-1"
                     />
                     {job?.status === 'failed' && (
                       <Button
@@ -356,15 +351,7 @@ const JobDataGrid = ({
                         iconName="RotateCcw"
                         onClick={() => onJobAction('retry', job?.job_id || job?.id)}
                         title="Retry job"
-                      />
-                    )}
-                    {(job?.status === 'queued' || job?.status === 'running') && (
-                      <Button
-                        variant="ghost"
-                        size="xs"
-                        iconName="X"
-                        onClick={() => onJobAction('cancel', job?.job_id || job?.id)}
-                        title="Cancel job"
+                        className="active:bg-transparent active:shadow-[0_0_12px_rgba(6,182,212,0.5)] active:ring-2 active:ring-accent/50 active:ring-offset-1"
                       />
                     )}
                     <Button
@@ -373,6 +360,7 @@ const JobDataGrid = ({
                       iconName="MoreHorizontal"
                       onClick={() => onJobAction('menu', job?.job_id || job?.id)}
                       title="More actions"
+                      className="active:bg-transparent active:shadow-[0_0_12px_rgba(6,182,212,0.5)] active:ring-2 active:ring-accent/50 active:ring-offset-1"
                     />
                   </div>
                 </td>

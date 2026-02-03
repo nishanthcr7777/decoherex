@@ -11,7 +11,7 @@
     --color-foreground: #f8fafc; /* slate-50 */
     --color-border: #334155; /* slate-700 */
     --color-input: #1e293b; /* slate-800 */
-    --color-ring: #06b6d4; /* cyan-500 */
+    --color-ring: #164e63; /* cyan-900 - darker focus glow matching UI */
     
     /* Card Colors */
     --color-card: #1e293b; /* slate-800 */
@@ -64,10 +64,30 @@
   * {
     @apply border-border;
   }
-  
+
+  /* No glow on text field focus - outline only removed */
+  input:focus,
+  textarea:focus,
+  select:focus {
+    outline: none;
+  }
+
+  html {
+    background: #0f172a;
+    overscroll-behavior: none;
+  }
+
   body {
-    @apply bg-background text-foreground font-sans;
+    @apply text-foreground font-sans;
     font-feature-settings: "rlig" 1, "calt" 1;
+    background: radial-gradient(ellipse 80% 70% at 50% 50%, rgba(15, 23, 42, 0.97) 0%, rgba(7, 12, 22, 0.99) 50%, rgba(2, 4, 8, 1) 100%);
+    min-height: 100vh;
+    overscroll-behavior: none;
+  }
+
+  /* Shared app / loading wizard background - use when a full-bleed gradient is needed */
+  .bg-app-gradient {
+    background: radial-gradient(ellipse 80% 70% at 50% 50%, rgba(15, 23, 42, 0.97) 0%, rgba(7, 12, 22, 0.99) 50%, rgba(2, 4, 8, 1) 100%);
   }
   
   /* Glass Morphism Utilities */

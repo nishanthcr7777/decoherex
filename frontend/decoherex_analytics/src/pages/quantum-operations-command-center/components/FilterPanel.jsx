@@ -10,7 +10,8 @@ const FilterPanel = ({
   jobTypeFilter, 
   setJobTypeFilter, 
   durationFilter, 
-  setDurationFilter 
+  setDurationFilter,
+  compact = false,
 }) => {
   const statusOptions = [
     { value: 'all', label: 'All Statuses' },
@@ -60,30 +61,27 @@ const FilterPanel = ({
     { value: 'last-month', label: 'Last Month' }
   ];
 
-  const hasActiveFilters = statusFilter !== 'all' || backendFilter !== 'all' || jobTypeFilter !== 'all' || durationFilter !== 'all';
-
-  const clearAllFilters = () => {
-    setStatusFilter('all');
-    setBackendFilter('all');
-    setJobTypeFilter('all');
-    setDurationFilter('all');
-  };
+  const selectClass = compact ? 'w-28 min-w-0' : 'w-32';
+  const selectClassJob = compact ? 'w-28 min-w-0' : 'w-36';
+  const selectClassBackend = compact ? 'w-32 min-w-0' : 'w-40';
 
   return (
-    <div className="flex items-center space-x-3">
-      {/* Filter Controls */}
-      <div className="flex items-center space-x-2">
-        <Icon name="Filter" size={16} className="text-muted-foreground" />
-        <span className="text-sm text-muted-foreground">Filters:</span>
-      </div>
+    <div className="flex flex-row items-center gap-2 sm:space-x-2 sm:space-x-3">
+      {/* Filter Controls - hide label when compact */}
+      {!compact && (
+        <div className="hidden sm:flex items-center space-x-2">
+          <Icon name="Filter" size={16} className="text-muted-foreground" />
+          <span className="text-sm text-muted-foreground">Filters:</span>
+        </div>
+      )}
       
-      <div className="flex items-center space-x-2">
+      <div className="flex flex-row items-center gap-2 sm:space-x-2">
         <Select
           options={durationOptions}
           value={durationFilter}
           onChange={setDurationFilter}
           placeholder="Duration"
-          className="w-32"
+          className={selectClass}
         />
         
         <Select
@@ -91,7 +89,7 @@ const FilterPanel = ({
           value={jobTypeFilter}
           onChange={setJobTypeFilter}
           placeholder="Job Type"
-          className="w-36"
+          className={selectClassJob}
         />
         
         <Select
@@ -99,68 +97,9 @@ const FilterPanel = ({
           value={backendFilter}
           onChange={setBackendFilter}
           placeholder="Backend"
-          className="w-40"
+          className={selectClassBackend}
         />
       </div>
-
-      {/* Active Filters Display */}
-      {hasActiveFilters && (
-        <div className="flex items-center space-x-2">
-          <div className="flex items-center space-x-1 flex-wrap">
-            {statusFilter !== 'all' && (
-              <span className="inline-flex items-center px-2 py-1 bg-accent/10 text-accent text-xs rounded-full">
-                Status: {statusOptions.find(opt => opt.value === statusFilter)?.label}
-                <button
-                  onClick={() => setStatusFilter('all')}
-                  className="ml-1 hover:text-accent/70"
-                >
-                  <Icon name="X" size={12} />
-                </button>
-              </span>
-            )}
-            {backendFilter !== 'all' && (
-              <span className="inline-flex items-center px-2 py-1 bg-secondary/10 text-secondary text-xs rounded-full">
-                Backend: {backendOptions.find(opt => opt.value === backendFilter)?.label}
-                <button
-                  onClick={() => setBackendFilter('all')}
-                  className="ml-1 hover:text-secondary/70"
-                >
-                  <Icon name="X" size={12} />
-                </button>
-              </span>
-            )}
-            {jobTypeFilter !== 'all' && (
-              <span className="inline-flex items-center px-2 py-1 bg-warning/10 text-warning text-xs rounded-full">
-                Type: {jobTypeOptions.find(opt => opt.value === jobTypeFilter)?.label}
-                <button
-                  onClick={() => setJobTypeFilter('all')}
-                  className="ml-1 hover:text-warning/70"
-                >
-                  <Icon name="X" size={12} />
-                </button>
-              </span>
-            )}
-            {durationFilter !== 'all' && (
-              <span className="inline-flex items-center px-2 py-1 bg-success/10 text-success text-xs rounded-full">
-                Duration: {durationOptions.find(opt => opt.value === durationFilter)?.label}
-                <button
-                  onClick={() => setDurationFilter('all')}
-                  className="ml-1 hover:text-success/70"
-                >
-                  <Icon name="X" size={12} />
-                </button>
-              </span>
-            )}
-          </div>
-          
-          <button
-            onClick={clearAllFilters}
-            className="text-xs text-muted-foreground hover:text-foreground underline"
-          >
-            Clear all
-          </button>
-        </div>
-      )}
     </div>
   );
 };
