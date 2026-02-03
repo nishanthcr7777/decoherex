@@ -1,0 +1,75 @@
+Prompt:
+
+Build a full-stack quantum job dashboard using Python (FastAPI) for the backend and HTML + JavaScript for the frontend. The dashboard should:
+
+Backend Requirements:
+
+Connect to IBM Quantum using Qiskit and an API token.
+
+Include steps to save the API token (IBMQ.save_account('YOUR_API_TOKEN')) and load it (IBMQ.load_account()) for authentication.
+
+Provide a POST endpoint /submit-job that allows users to:
+
+Enter Job Name (optional)
+
+Select Backend (ibm_torino or ibm_brisbane)
+
+Select Circuit from predefined options: Superposition (1 qubit), Bell State (2 qubits), Quantum Random (1 qubit)
+
+Enter Shots (default 1024)
+
+Return a Job ID after submission.
+
+Track all submitted jobs in real-time using job.status() and store them in memory for frontend display.
+
+Provide a WebSocket endpoint /ws/jobs that streams live updates of all jobs including:
+
+Job ID
+
+Job Name
+
+Backend
+
+Status (QUEUED, RUNNING, DONE, ERROR)
+
+Creation time / Submitted at
+
+Progress percentage (if measurable)
+
+Provide an API endpoint /jobs to return a list of pending and completed jobs, sorted by submission time.
+
+Frontend Requirements:
+
+Simple dashboard interface with:
+
+Form to submit a job (Job Name, Backend, Circuit dropdown, Shots, Submit button)
+
+Table showing all jobs with columns: Job Name, Backend, Status, Submitted At, Progress
+
+Live updates: Connect to /ws/jobs to update the table in real-time without page refresh.
+
+Progress bars for jobs that are RUNNING, showing approximate completion based on backend job status.
+
+Highlight queued jobs visually (e.g., yellow) and completed jobs in green.
+
+Constraints / Notes:
+
+Only use predefined circuits, no custom circuits.
+
+Keep circuits small (≤2 qubits) for real backend (Torino / Brisbane) to ensure fast execution.
+
+Support trial accounts by only displaying recent 10–20 jobs.
+
+Backend should poll IBMQ job statuses asynchronously to update WebSocket clients.
+
+Use minimal external libraries beyond FastAPI, Qiskit, asyncio, and standard frontend JS/CSS.
+
+Include instructions for obtaining the IBM Quantum API token and how it is used in the backend.
+
+Deliverables:
+
+Fully working FastAPI backend code that submits jobs to Torino / Brisbane using the API token.
+
+Fully working frontend (HTML + JS) with live job queue, progress bars, and status tracking.
+
+Ready to run locally showing real IBM Quantum jobs submitted and live queue updates.

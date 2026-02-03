@@ -1,0 +1,286 @@
+// components/ui/Select.jsx - Shadcn style Select
+import React, { useState, useRef, useEffect } from "react";
+import { ChevronDown, Check, Search, X } from "lucide-react";
+import { cn } from "../../utils/cn";
+import Button from "./Button";
+import Input from "./Input";
+
+const DROPDOWN_MAX_HEIGHT = 128; // max-h-32 = 8rem — compact, scrollable, scrollbar hidden
+const VIEWPORT_PADDING = 8;
+
+const Select = React.forwardRef(({
+    className,
+    options = [],
+    value,
+    defaultValue,
+    placeholder = "Select an option",
+    multiple = false,
+    disabled = false,
+    required = false,
+    label,
+    description,
+    error,
+    searchable = false,
+    clearable = false,
+    loading = false,
+    id,
+    name,
+    onChange,
+    onOpenChange,
+    ...props
+}, ref) => {
+    const [isOpen, setIsOpen] = useState(false);
+    const [searchTerm, setSearchTerm] = useState("");
+    const [dropUp, setDropUp] = useState(false);
+    const containerRef = useRef(null);
+    const buttonRef = useRef(null);
+
+    // Generate unique ID if not provided
+    const selectId = id || `select-${Math.random()?.toString(36)?.substr(2, 9)}`;
+
+    // Filter options based on search
+    const filteredOptions = searchable && searchTerm
+        ? options?.filter(option =>
+            option?.label?.toLowerCase()?.includes(searchTerm?.toLowerCase()) ||
+            (option?.value && option?.value?.toString()?.toLowerCase()?.includes(searchTerm?.toLowerCase()))
+        )
+        : options;
+
+    // Get selected option(s) for display
+    const getSelectedDisplay = () => {
+        if (!value) return placeholder;
+
+        if (multiple) {
+            const selectedOptions = options?.filter(opt => value?.includes(opt?.value));
+            if (selectedOptions?.length === 0) return placeholder;
+            if (selectedOptions?.length === 1) return selectedOptions?.[0]?.label;
+            return `${selectedOptions?.length} items selected`;
+        }
+
+        const selectedOption = options?.find(opt => opt?.value === value);
+        return selectedOption ? selectedOption?.label : placeholder;
+    };
+
+    const handleToggle = () => {
+        if (!disabled) {
+            const newIsOpen = !isOpen;
+            if (newIsOpen && buttonRef.current) {
+                const rect = buttonRef.current.getBoundingClientRect();
+                const spaceBelow = window.innerHeight - rect.bottom - VIEWPORT_PADDING;
+                const spaceAbove = rect.top - VIEWPORT_PADDING;
+                setDropUp(spaceBelow < DROPDOWN_MAX_HEIGHT && spaceAbove >= spaceBelow);
+            }
+            setIsOpen(newIsOpen);
+            onOpenChange?.(newIsOpen);
+            if (!newIsOpen) {
+                setSearchTerm("");
+            }
+        }
+    };
+
+    // Click outside and Escape to close
+    useEffect(() => {
+        if (!isOpen) return;
+        const onMouseDown = (e) => {
+            if (containerRef.current && !containerRef.current.contains(e.target)) {
+                setIsOpen(false);
+                onOpenChange?.(false);
+                setSearchTerm("");
+            }
+        };
+        const onKeyDown = (e) => {
+            if (e.key === "Escape") {
+                setIsOpen(false);
+                onOpenChange?.(false);
+                setSearchTerm("");
+            }
+        };
+        document.addEventListener("mousedown", onMouseDown);
+        document.addEventListener("keydown", onKeyDown);
+        return () => {
+            document.removeEventListener("mousedown", onMouseDown);
+            document.removeEventListener("keydown", onKeyDown);
+        };
+    }, [isOpen, onOpenChange]);
+
+    const handleOptionSelect = (option) => {
+        if (multiple) {
+            const newValue = value || [];
+            const updatedValue = newValue?.includes(option?.value)
+                ? newValue?.filter(v => v !== option?.value)
+                : [...newValue, option?.value];
+            onChange?.(updatedValue);
+        } else {
+            onChange?.(option?.value);
+            setIsOpen(false);
+            onOpenChange?.(false);
+        }
+    };
+
+    const handleClear = (e) => {
+        e?.stopPropagation();
+        onChange?.(multiple ? [] : '');
+    };
+
+    const handleSearchChange = (e) => {
+        setSearchTerm(e?.target?.value);
+    };
+
+    const isSelected = (optionValue) => {
+        if (multiple) {
+            return value?.includes(optionValue) || false;
+        }
+        return value === optionValue;
+    };
+
+    const hasValue = multiple ? value?.length > 0 : value !== undefined && value !== '';
+
+    return (
+        <div ref={containerRef} className={cn("relative", className)}>
+            {label && (
+                <label
+                    htmlFor={selectId}
+                    className={cn(
+                        "text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 mb-2 block",
+                        error ? "text-destructive" : "text-foreground"
+                    )}
+                >
+                    {label}
+                    {required && <span className="text-destructive ml-1">*</span>}
+                </label>
+            )}
+            <div className="relative">
+                <button
+                    ref={(el) => {
+                        buttonRef.current = el;
+                        if (typeof ref === "function") ref(el);
+                        else if (ref) ref.current = el;
+                    }}
+                    id={selectId}
+                    type="button"
+                    className={cn(
+                        "flex h-10 w-full items-center justify-between rounded-md border border-slate-700/50 bg-slate-800/50 text-foreground px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 transition-colors",
+                        error && "border-destructive focus:ring-destructive",
+                        !hasValue && "text-muted-foreground",
+                        isOpen && "border-slate-600/60 bg-slate-800/70"
+                    )}
+                    onClick={handleToggle}
+                    disabled={disabled}
+                    aria-expanded={isOpen}
+                    aria-haspopup="listbox"
+                    {...props}
+                >
+                    <span className="truncate">{getSelectedDisplay()}</span>
+
+                    <div className="flex items-center gap-1">
+                        {loading && (
+                            <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
+                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                            </svg>
+                        )}
+
+                        {clearable && hasValue && !loading && (
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-4 w-4"
+                                onClick={handleClear}
+                            >
+                                <X className="h-3 w-3" />
+                            </Button>
+                        )}
+
+                        <ChevronDown className={cn("h-4 w-4 transition-transform", isOpen && "rotate-180")} />
+                    </div>
+                </button>
+
+                {/* Hidden native select for form submission */}
+                <select
+                    name={name}
+                    value={value || ''}
+                    onChange={() => { }} // Controlled by our custom logic
+                    className="sr-only"
+                    tabIndex={-1}
+                    multiple={multiple}
+                    required={required}
+                >
+                    <option value="">Select...</option>
+                    {options?.map(option => (
+                        <option key={option?.value} value={option?.value}>
+                            {option?.label}
+                        </option>
+                    ))}
+                </select>
+
+                {/* Dropdown / Drop-up */}
+                {isOpen && (
+                    <div
+                        className={cn(
+                            "absolute z-50 w-full left-0 bg-slate-800/70 border border-slate-700/50 text-foreground rounded-md shadow-lg backdrop-blur-sm",
+                            dropUp ? "bottom-full mb-1" : "top-full mt-1"
+                        )}
+                    >
+                        {searchable && (
+                            <div className="p-2 border-b border-slate-700/30">
+                                <div className="relative">
+                                    <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+                                    <Input
+                                        placeholder="Search options..."
+                                        value={searchTerm}
+                                        onChange={handleSearchChange}
+                                        className="pl-8 bg-slate-800/50 border-slate-700/50"
+                                    />
+                                </div>
+                            </div>
+                        )}
+
+                        <div className="py-1 max-h-32 overflow-y-auto scrollbar-hide">
+                            {filteredOptions?.length === 0 ? (
+                                <div className="px-3 py-2 text-sm text-muted-foreground">
+                                    {searchTerm ? 'No options found' : 'No options available'}
+                                </div>
+                            ) : (
+                                filteredOptions?.map((option) => (
+                                    <div
+                                        key={option?.value}
+                                        className={cn(
+                                            "relative flex cursor-pointer select-none items-center rounded-sm px-3 py-2 text-sm outline-none hover:bg-accent/20 hover:text-accent transition-colors",
+                                            isSelected(option?.value) && "bg-accent/30 text-accent",
+                                            option?.disabled && "pointer-events-none opacity-50"
+                                        )}
+                                        onClick={() => !option?.disabled && handleOptionSelect(option)}
+                                    >
+                                        <span className="flex-1">{option?.label}</span>
+                                        {multiple && isSelected(option?.value) && (
+                                            <Check className="h-4 w-4" />
+                                        )}
+                                        {option?.description && (
+                                            <span className="text-xs text-muted-foreground ml-2">
+                                                {option?.description}
+                                            </span>
+                                        )}
+                                    </div>
+                                ))
+                            )}
+                        </div>
+                    </div>
+                )}
+            </div>
+            {description && !error && (
+                <p className="text-sm text-muted-foreground mt-1">
+                    {description}
+                </p>
+            )}
+            {error && (
+                <p className="text-sm text-destructive mt-1">
+                    {error}
+                </p>
+            )}
+        </div>
+    );
+});
+
+Select.displayName = "Select";
+
+export default Select;

@@ -1,0 +1,28 @@
+venv/
+.venv/
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Virtual env
+.venv/
+venv/
+
+# Secrets
+*.pkl
+*.pickle
+ai_model/backend_recommender.pkl
+
+
+backend/.local/
+
+# Node
+node_modules/
+
+# Frontend build
+frontend/decoherex_analytics/dist/
+
+# Mac/Windows trash
+.DS_Store
+Thumbs.db
