@@ -9,6 +9,7 @@ import PerformanceAnalyticsInsightsDashboard from './pages/performance-analytics
 import LiveJobs from './pages/live-jobs';
 
 import QuantumLab from './pages/quantum-lab';
+import SavedCircuitsPage from './pages/saved-circuits';
 import QuantumAIChatWidget from './components/QuantumAIChatWidget';
 
 const Routes = () => {
@@ -24,6 +25,7 @@ const Routes = () => {
           <Route path="/live-jobs" element={<LiveJobs />} />
           <Route path="/quantum-lab" element={<QuantumLab />} />
           <Route path="/performance-analytics-insights-dashboard" element={<PerformanceAnalyticsInsightsDashboard />} />
+          <Route path="/saved-circuits" element={<SavedCircuitsPage />} />
           <Route path="*" element={<NotFound />} />
         </RouterRoutes>
       </ErrorBoundary>

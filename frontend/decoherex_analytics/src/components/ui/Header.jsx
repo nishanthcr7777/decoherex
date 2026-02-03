@@ -31,6 +31,11 @@ const Header = () => {
       label: 'Quantum Lab',
       path: '/quantum-lab',
       description: 'AI-assisted circuit generation and simulation'
+    },
+    {
+      label: 'My Library',
+      path: '/saved-circuits',
+      description: 'Manage your saved quantum circuits and code snippets'
     }
   ];
 
@@ -181,7 +186,7 @@ const Header = () => {
       {/* Mobile Menu Overlay */}
       {isMobileMenuOpen && (
         <>
-          <div 
+          <div
             className="fixed inset-0 bg-black/50 z-999 lg:hidden"
             onClick={() => setIsMobileMenuOpen(false)}
           />
