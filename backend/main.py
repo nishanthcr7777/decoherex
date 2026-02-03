@@ -1320,6 +1320,53 @@ async def chat_endpoint(request: ChatRequest):
         logging.error(f"Chat Error: {e}")
         return {"response": "I encountered a quantum fluctuation while thinking. Please try again."}
 
+
+# ----------------------------
+# 9️⃣ Saved Circuits (Code Library)
+# ----------------------------
+class CircuitModel(BaseModel):
+    name: str
+    code: str
+    description: str = None
+    tags: List[str] = []
+    backend_preference: str = None
+
+@app.get("/api/circuits")
+async def get_saved_circuits():
+    if not supabase: return []
+    try:
+        res = supabase.table("saved_circuits").select("*").order("created_at", desc=True).limit(50).execute()
+        return res.data
+    except Exception as e:
+        logging.error(f"Error fetching circuits: {e}")
+        return []
+
+@app.post("/api/circuits")
+async def save_circuit(circuit: CircuitModel):
+    if not supabase: return {"error": "DB not connected"}
+    try:
+        data = {
+            "name": circuit.name,
+            "code": circuit.code,
+            "description": circuit.description,
+            "tags": circuit.tags,
+            "backend_preference": circuit.backend_preference
+        }
+        res = supabase.table("saved_circuits").insert(data).execute()
+        return res.data[0] if res.data else {}
+    except Exception as e:
+        logging.error(f"Error saving circuit: {e}")
+        return {"error": str(e)}
+
+@app.delete("/api/circuits/{circuit_id}")
+async def delete_circuit(circuit_id: int):
+    if not supabase: return {"error": "DB not connected"}
+    try:
+        supabase.table("saved_circuits").delete().eq("id", circuit_id).execute()
+        return {"message": "Deleted"}
+    except Exception as e:
+        return {"error": str(e)}
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=5001)
