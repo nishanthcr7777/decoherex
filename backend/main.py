@@ -816,6 +816,79 @@ class GenerateRequest(BaseModel):
 class SimulateRequest(BaseModel):
     code: str
 
+class ExplainRequest(BaseModel):
+    code: str
+
+@app.post("/api/ai/explain")
+async def explain_circuit_code(request: ExplainRequest):
+    """
+    Explains Qiskit code in a structured "AI Teacher" Markdown format using Groq.
+    """
+    if not groq_client:
+        return {"markdown": "### ⚠️ AI Teacher Not Connected\n\nPlease check your API key configuration."}
+
+    try:
+        model_name = os.getenv("GROQ_MODEL", "llama-3.3-70b-versatile")
+        
+        system_prompt = """You are a charismatic and clear Quantum Computing Teacher for beginners.
+        
+        Task: Explain the provided Qiskit code in a structured, educational Markdown format.
+        
+        STRICT FORMATTING RULES:
+        1. Return ONLY raw Markdown. Do not wrap in JSON. Do not include ```markdown``` fences.
+        2. Use the exact headers and emojis below.
+        
+        RESPONSE TEMPLATE:
+        
+        ## 🧠 Circuit Overview
+        **What this circuit does:** (1-2 lines)
+        **Why this matters:** (Student framing - problem/concept demonstrated)
+        
+        ## 🧩 Step-by-Step Circuit Breakdown
+        (Explain in execution order)
+        *   **1️⃣ Initialize:** ...
+        *   **2️⃣ Apply [Gate]:** What it does here. Key idea.
+        
+        ## ⚛️ Quantum Gates Explained
+        | Gate | Role in This Circuit |
+        | :--- | :--- |
+        | H | ... |
+        
+        ## 🧪 Quantum Concepts Demonstrated
+        *   **Concept 1:** ...
+        *   **Concept 2:** ...
+        
+        ## 📊 Expected Measurement Results
+        *   **What you will see:** ...
+        *   **Why:** ...
+        
+        ## 🧑‍🏫 Teacher’s Intuition
+        (A simple analogy, e.g. "Like synchronized coins...")
+        
+        ## 🚀 Where This Is Used
+        (List real-world applications)
+        
+        ## ✅ One-Line Summary
+        (The takeaway)
+        """
+        
+        user_prompt = f"Here is the Qiskit code to explain:\n\n{request.code}"
+        
+        completion = groq_client.chat.completions.create(
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_prompt}
+            ],
+            model=model_name,
+            temperature=0.3, # Slightly higher for creative analogies
+        )
+        
+        return {"markdown": completion.choices[0].message.content}
+
+    except Exception as e:
+        logging.error(f"Explanation Error: {e}")
+        return {"markdown": f"### ❌ Error Generating Explanation\n\n{str(e)}"}
+
 class PredictRequest(BaseModel):
     code: str
     backend_options: List[str]
