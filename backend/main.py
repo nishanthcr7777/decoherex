@@ -816,6 +816,72 @@ class GenerateRequest(BaseModel):
 class SimulateRequest(BaseModel):
     code: str
 
+class PredictRequest(BaseModel):
+    code: str
+    backend_options: List[str]
+
+@app.post("/api/ai/predict")
+async def predict_circuit_outcome(request: PredictRequest):
+    """
+    Analyzes circuit code using Groq to predict performance, errors, and recommend backends.
+    """
+    if not groq_client:
+        return {
+            "estimated_time": "Unknown",
+            "failure_risk": "Unknown",
+            "error_probability": "Unknown",
+            "warnings": ["AI service not connected"],
+            "recommended_backend": "ibm_torino",
+            "reasoning": "Default fallback."
+        }
+    
+    try:
+        model_name = os.getenv("GROQ_MODEL", "llama-3.3-70b-versatile")
+        
+        system_prompt = """You are a quantum computing expert. Analyze the provided Qiskit code for execution on IBM Quantum hardware.
+        
+        Return ONLY a JSON object with this exact structure:
+        {
+            "estimated_time": "string (e.g. '15s')",
+            "failure_risk": "'Low', 'Medium', or 'High'",
+            "error_probability": "string (e.g. '12%')",
+            "warnings": ["list", "of", "strings"],
+            "recommended_backend": "one string from the provided options",
+            "reasoning": "short explanation"
+        }
+        
+        Rules:
+        1. High depth (>50) or many params usually means High risk on NISQ devices.
+        2. 'ibm_torino' is generally fastest/best for large circuits. 'ibm_fez' is good for mid-range.
+        3. Identify if code uses non-standard gates or missing measurements.
+        """
+        
+        user_prompt = f"Code:\n{request.code}\n\nBackend Options: {request.backend_options}"
+        
+        completion = groq_client.chat.completions.create(
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_prompt}
+            ],
+            model=model_name,
+            temperature=0.1,
+            response_format={"type": "json_object"}
+        )
+        
+        response_content = completion.choices[0].message.content
+        return json.loads(response_content)
+
+    except Exception as e:
+        logging.error(f"Prediction Error: {e}")
+        return {
+            "estimated_time": "Error",
+            "failure_risk": "Unknown",
+            "error_probability": "Unknown",
+            "warnings": [f"Analysis failed: {str(e)}"],
+            "recommended_backend": "ibm_torino",
+            "reasoning": "Fallback due to error."
+        }
+
 @app.post("/api/ai/generate")
 async def generate_circuit_code(request: GenerateRequest):
     """
