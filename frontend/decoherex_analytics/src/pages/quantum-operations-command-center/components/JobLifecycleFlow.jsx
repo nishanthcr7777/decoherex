@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import Icon from '../../../components/AppIcon';
+import JobDetailsModal from './JobDetailsModal';
 
 const JobLifecycleFlow = ({ jobs }) => {
   const [animatingJobs, setAnimatingJobs] = useState(new Set());
+  const [selectedJob, setSelectedJob] = useState(null);
+  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
 
   const stages = [
     { id: 'queued', label: 'Queued', icon: 'Clock', color: 'slate' },
@@ -23,6 +26,21 @@ const JobLifecycleFlow = ({ jobs }) => {
         return 'border-red-500/50 bg-red-500/20 text-red-200';
       default:
         return 'border-slate-600/50 bg-muted/20 text-muted-foreground';
+    }
+  };
+
+  const getJobCardBgColor = (stageId) => {
+    switch (stageId) {
+      case 'queued':
+        return 'bg-slate-600/10';
+      case 'running':
+        return 'bg-amber-500/10';
+      case 'completed':
+        return 'bg-emerald-500/10';
+      case 'failed':
+        return 'bg-red-500/10';
+      default:
+        return 'bg-transparent';
     }
   };
 
@@ -90,12 +108,15 @@ const JobLifecycleFlow = ({ jobs }) => {
                   {stageJobs?.map((job) => (
                     <div
                       key={job?.job_id || job?.id}
+                      onClick={() => {
+                        setSelectedJob(job);
+                        setIsDetailsOpen(true);
+                      }}
                       className={`
-                        p-2.5 sm:p-3 rounded-lg border border-slate-700/50 bg-transparent
+                        p-2.5 sm:p-3 rounded-lg border border-slate-700/50 ${getJobCardBgColor(stage?.id)}
                         hover:bg-white/5 hover:border-accent/40 hover:shadow-[0_0_0_1px_rgba(6,182,212,0.4),0_0_8px_rgba(6,182,212,0.12)]
                         focus-visible:outline-none focus-visible:border-accent/40 focus-visible:shadow-[0_0_0_1px_rgba(6,182,212,0.4),0_0_8px_rgba(6,182,212,0.12)]
                         transition-all duration-200 cursor-pointer
-                        ${animatingJobs?.has(job?.job_id || job?.id) ? 'animate-pulse' : ''}
                       `}
                       title={`Job ${job?.id} - ${job?.type} on ${job?.backend}`}
                     >
@@ -143,6 +164,16 @@ const JobLifecycleFlow = ({ jobs }) => {
           })}
         </div>
       </div>
+
+      {/* Job Details Modal */}
+      <JobDetailsModal
+        job={selectedJob}
+        open={isDetailsOpen}
+        onClose={() => {
+          setIsDetailsOpen(false);
+          setSelectedJob(null);
+        }}
+      />
     </div>
   );
 };
