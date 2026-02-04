@@ -1,14 +1,23 @@
 import React, { useState, useMemo } from 'react';
+import { motion } from 'framer-motion';
 import Icon from '../../../components/AppIcon';
 import Button from '../../../components/ui/Button';
 import Input from '../../../components/ui/Input';
 import Select from '../../../components/ui/Select';
+
+const statusTabFilters = [
+  { id: 'all', label: 'All Jobs', icon: 'List' },
+  { id: 'failed', label: 'Failed', icon: 'AlertTriangle' },
+  { id: 'running', label: 'Running', icon: 'Play' },
+  { id: 'completed', label: 'Completed', icon: 'CheckCircle' }
+];
 
 const JobDataGrid = ({
   jobs,
   onJobAction,
   onExport,
   statusFilter,
+  onStatusFilterChange,
   backendFilter,
   jobTypeFilter,
   durationFilter
@@ -34,9 +43,12 @@ const JobDataGrid = ({
       );
     }
 
-    // Apply status filter
+    // Apply status filter (handle 'done' as 'completed')
     if (statusFilter !== 'all') {
-      filtered = filtered?.filter(job => job?.status === statusFilter);
+      filtered = filtered?.filter(job => {
+        const s = (job?.status || '').toLowerCase();
+        return s === statusFilter || (statusFilter === 'completed' && s === 'done');
+      });
     }
 
     // Apply backend filter
@@ -166,7 +178,7 @@ const JobDataGrid = ({
 
   return (
     <div className="glass-card p-6 rounded-2xl">
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between mb-4">
         <h2 className="text-lg font-semibold text-foreground">Job Management</h2>
         <div className="flex items-center space-x-3">
           <span className="text-sm text-muted-foreground">
@@ -179,6 +191,49 @@ const JobDataGrid = ({
           )}
         </div>
       </div>
+
+      {/* Status navigation filter (from Live Feed) */}
+      {onStatusFilterChange && (
+        <motion.nav
+          className="flex mb-4 p-1 rounded-xl border border-slate-700/50 bg-slate-800/30 overflow-hidden"
+          initial={false}
+          transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+        >
+          <div className="relative flex flex-1 rounded-lg overflow-hidden">
+            {statusTabFilters.map((opt) => {
+              const isActive = statusFilter === opt.id;
+              return (
+                <motion.button
+                  key={opt.id}
+                  type="button"
+                  onClick={() => onStatusFilterChange(opt.id)}
+                  className="relative flex items-center justify-center space-x-1 sm:space-x-2 px-2 sm:px-4 py-2.5 rounded-lg text-xs font-bold uppercase tracking-wider flex-1 min-w-0 z-[1] overflow-hidden"
+                  whileTap={{ scale: 0.98 }}
+                  transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+                >
+                  {isActive && (
+                    <motion.div
+                      layoutId="jobManagementTabIndicator"
+                      className="absolute inset-0 rounded-lg bg-accent/20 border border-accent/50 shadow-[0_0_12px_rgba(6,182,212,0.15)]"
+                      transition={{ type: 'spring', stiffness: 380, damping: 30 }}
+                      style={{ zIndex: 0 }}
+                    />
+                  )}
+                  <span
+                    className={`relative z-10 flex items-center gap-1 sm:gap-2 transition-colors duration-200 truncate ${
+                      isActive ? 'text-foreground' : 'text-muted-foreground hover:text-foreground'
+                    }`}
+                  >
+                    <Icon name={opt.icon} size={12} className={`flex-shrink-0 ${isActive ? 'text-accent' : ''}`} />
+                    <span className="truncate">{opt.label}</span>
+                  </span>
+                </motion.button>
+              );
+            })}
+          </div>
+        </motion.nav>
+      )}
+
       {/* Search Bar */}
       <div className="mb-6">
         <Input

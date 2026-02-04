@@ -6,7 +6,6 @@ import { LineChart, BarChart, PieChart } from 'lucide-react';
 import Modal from '../../components/ui/Modal';
 import KPICard from './components/KPICard';
 import JobLifecycleFlow from './components/JobLifecycleFlow';
-import LiveJobFeed from './components/LiveJobFeed';
 import JobDataGrid from './components/JobDataGrid';
 import JobSubmissionModal from './components/JobSubmissionModal';
 import FilterPanel from './components/FilterPanel';
@@ -620,11 +619,6 @@ const QuantumOperationsCommandCenter = () => {
               <JobLifecycleFlow jobs={jobs} />
             </div>
 
-            {/* Live Job Feed */}
-            <div className="mb-6 sm:mb-8">
-              <LiveJobFeed jobs={jobs} onJobAction={handleJobAction} />
-            </div>
-
             {/* Job Data Grid */}
             <div className="w-full overflow-x-auto scrollbar-hide">
             <JobDataGrid
@@ -632,6 +626,7 @@ const QuantumOperationsCommandCenter = () => {
               onJobAction={handleJobAction}
               onExport={handleExport}
               statusFilter={statusFilter}
+              onStatusFilterChange={setStatusFilter}
               backendFilter={backendFilter}
               jobTypeFilter={jobTypeFilter}
               durationFilter={durationFilter}
