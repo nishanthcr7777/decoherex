@@ -8,11 +8,11 @@ const PerformanceDataGrid = ({ data }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10);
 
-  const filteredData = data?.filter(item =>
+  const filteredData = (data && Array.isArray(data) && data.length > 0) ? data?.filter(item =>
     item?.jobId?.toLowerCase()?.includes(searchTerm?.toLowerCase()) ||
     item?.backend?.toLowerCase()?.includes(searchTerm?.toLowerCase()) ||
     item?.jobType?.toLowerCase()?.includes(searchTerm?.toLowerCase())
-  );
+  ) : [];
 
   const totalPages = Math.ceil(filteredData?.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;

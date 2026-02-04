@@ -15,7 +15,7 @@ const BackendRankingTable = ({ data }) => {
     }
   };
 
-  const sortedData = [...data]?.sort((a, b) => {
+  const sortedData = (data && Array.isArray(data) && data.length > 0) ? [...data]?.sort((a, b) => {
     const aVal = a?.[sortBy];
     const bVal = b?.[sortBy];
     
@@ -23,7 +23,7 @@ const BackendRankingTable = ({ data }) => {
       return aVal - bVal;
     }
     return bVal - aVal;
-  });
+  }) : [];
 
   const getScoreColor = (score) => {
     if (score >= 90) return 'text-success';
