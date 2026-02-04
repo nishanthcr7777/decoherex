@@ -298,7 +298,7 @@ const PerformanceAnalyticsInsightsDashboard = () => {
                     <span className="font-medium sm:hidden">Live</span>
                   </div>
                   <Button variant="ghost" size="icon" onClick={() => fetchBackends()} disabled={loadingBackends}>
-                    <RefreshCw className={loadingBackends ? "animate-spin" : ""} size={18} className="sm:w-5 sm:h-5" />
+                    <RefreshCw className={`${loadingBackends ? "animate-spin" : ""} sm:w-5 sm:h-5`} size={18} />
                   </Button>
                 </div>
               </div>
