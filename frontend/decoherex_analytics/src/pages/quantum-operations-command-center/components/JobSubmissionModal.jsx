@@ -120,6 +120,123 @@ const JobSubmissionModal = ({ isOpen, onClose, onSubmit }) => {
     showToast(`Loaded "${circuit.name}"`, 'info');
   };
 
+  // Predict State
+  const [isPredicting, setIsPredicting] = useState(false);
+  const [predictionData, setPredictionData] = useState(null);
+  const [isAnalysisOpen, setIsAnalysisOpen] = useState(false);
+
+  const handlePredict = async () => {
+    if (!formData.customCode) {
+      showToast("Please enter some code first.", 'error');
+      return;
+    }
+
+    setIsPredicting(true);
+    try {
+      const res = await fetch('http://localhost:5001/api/ai/predict', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          code: formData.customCode,
+          backend_options: BACKEND_OPTIONS.map(b => b.value)
+        })
+      });
+      const data = await res.json();
+      setPredictionData(data);
+      setIsAnalysisOpen(true);
+      showToast("Analysis Complete", 'success');
+    } catch (e) {
+      console.error(e);
+      showToast("Prediction Service Failed", 'error');
+    } finally {
+      setIsPredicting(false);
+    }
+  };
+
+  const AnalysisModal = () => (
+    <Modal
+      isOpen={isAnalysisOpen}
+      onClose={() => setIsAnalysisOpen(false)}
+      title={
+        <div className="flex items-center gap-2">
+          <Icon name="Sparkles" size={20} className="text-purple-400" />
+          <span className="bg-gradient-to-r from-purple-400 to-accent bg-clip-text text-transparent font-bold">
+            AI Pre-flight Analysis
+          </span>
+        </div>
+      }
+      contentClassName="bg-slate-900/95 border border-purple-500/30 backdrop-blur-xl rounded-xl shadow-2xl w-full max-w-lg p-6"
+    >
+      {predictionData && (
+        <div className="space-y-6">
+          {/* Traffic Light, Error Prob & Time */}
+          <div className="flex gap-4">
+            <div className="flex-1 p-4 rounded-xl bg-slate-800/50 border border-slate-700/50 flex flex-col items-center justify-center gap-2">
+              <span className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">Failure Risk</span>
+              <div className={`px-4 py-1.5 rounded-full text-sm font-bold border ${predictionData.failure_risk === 'Low' ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/50' :
+                predictionData.failure_risk === 'Medium' ? 'bg-yellow-500/20 text-yellow-400 border-yellow-500/50' :
+                  'bg-red-500/20 text-red-400 border-red-500/50'
+                }`}>
+                {predictionData.failure_risk}
+              </div>
+            </div>
+            <div className="flex-1 p-4 rounded-xl bg-slate-800/50 border border-slate-700/50 flex flex-col items-center justify-center gap-2">
+              <span className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">Error Prob.</span>
+              <span className="text-xl font-mono text-pink-200">{predictionData.error_probability || "~10%"}</span>
+            </div>
+            <div className="flex-1 p-4 rounded-xl bg-slate-800/50 border border-slate-700/50 flex flex-col items-center justify-center gap-2">
+              <span className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">Est. Time</span>
+              <span className="text-xl font-mono text-blue-200">{predictionData.estimated_time || "N/A"}</span>
+            </div>
+          </div>
+
+          {/* Recommendation */}
+          <div className="p-4 rounded-xl bg-gradient-to-br from-purple-500/10 to-blue-500/10 border border-purple-500/20 relative overflow-hidden">
+            <div className="absolute top-0 right-0 p-2 opacity-20"><Icon name="Cpu" size={48} /></div>
+            <h4 className="text-sm font-medium text-purple-300 mb-1">Recommended Backend</h4>
+            <div className="text-lg font-bold text-white mb-2 flex items-center gap-2">
+              {predictionData.recommended_backend}
+              <button
+                className="text-[10px] bg-white/10 hover:bg-white/20 px-2 py-0.5 rounded transition-colors"
+                onClick={() => {
+                  handleInputChange('backend', predictionData.recommended_backend);
+                  showToast("Backend auto-selected!", 'success');
+                }}
+              >
+                Apply
+              </button>
+            </div>
+            <p className="text-xs text-slate-300 leading-relaxed max-w-[90%]">
+              {predictionData.reasoning}
+            </p>
+          </div>
+
+          {/* Warnings */}
+          {predictionData.warnings && predictionData.warnings.length > 0 && (
+            <div className="p-4 rounded-xl bg-red-500/5 border border-red-500/20">
+              <h4 className="text-xs font-semibold text-red-400 mb-2 flex items-center gap-2">
+                <Icon name="AlertTriangle" size={14} /> Potential Issues
+              </h4>
+              <ul className="space-y-1">
+                {predictionData.warnings.map((w, i) => (
+                  <li key={i} className="text-xs text-red-300/80 pl-4 relative before:content-['•'] before:absolute before:left-1 before:text-red-500">
+                    {w}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          <div className="flex justify-end pt-2">
+            <Button onClick={() => setIsAnalysisOpen(false)} className="w-full">
+              Close Report
+            </Button>
+          </div>
+        </div>
+      )}
+    </Modal>
+  );
+
   return (
     <>
       <Modal
@@ -224,13 +341,24 @@ const JobSubmissionModal = ({ isOpen, onClose, onSubmit }) => {
                   value={formData.customCode}
                   onChange={(e) => handleInputChange('customCode', e.target.value)}
                 />
-                <div className="absolute top-2 right-2 text-[10px] text-muted-foreground bg-black/40 px-2 py-1 rounded backdrop-blur-sm pointer-events-none">
-                  Python / Qiskit
+                <div className="absolute top-2 right-2 flex gap-4 pointer-events-none">
+                  <span className="text-[10px] text-muted-foreground bg-black/40 px-2 py-1 rounded backdrop-blur-sm">Python / Qiskit</span>
                 </div>
               </div>
 
-              <div className="text-xs text-muted-foreground">
-                Requirement: Define <code className="px-1.5 py-0.5 rounded bg-slate-800 text-accent">qc = QuantumCircuit(...)</code> in your code.
+              <div className="flex justify-between items-center text-xs text-muted-foreground">
+                <span>Requirement: Define <code className="px-1.5 py-0.5 rounded bg-slate-800 text-accent">qc = QuantumCircuit(...)</code></span>
+
+                {/* PREDICT BUTTON added here */}
+                <button
+                  type="button"
+                  onClick={handlePredict}
+                  disabled={isPredicting || !formData.customCode}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gradient-to-r from-purple-500/20 to-blue-500/20 border border-purple-500/30 text-purple-300 hover:text-white hover:border-purple-500/50 transition-all disabled:opacity-50"
+                >
+                  {isPredicting ? <Icon name="Loader" size={14} className="animate-spin" /> : <Icon name="Sparkles" size={14} />}
+                  {isPredicting ? "Analyzing..." : "Predict Details"}
+                </button>
               </div>
               {errors.customCode && <p className="text-sm text-destructive">{errors.customCode}</p>}
             </div>
@@ -260,6 +388,9 @@ const JobSubmissionModal = ({ isOpen, onClose, onSubmit }) => {
           </div>
         </form>
       </Modal>
+
+      {/* ADDED Analysis Modal Component */}
+      <AnalysisModal />
 
       <SavedCircuitsList
         isOpen={isLibraryOpen}
