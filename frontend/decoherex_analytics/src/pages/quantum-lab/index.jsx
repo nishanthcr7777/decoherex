@@ -8,6 +8,7 @@ import Button from '../../components/ui/Button';
 import Snackbar from '../../components/ui/Snackbar';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import SavedCircuitsList from '../quantum-operations-command-center/components/SavedCircuitsList';
+import TeacherPanel from './components/TeacherPanel';
 
 const QuantumLab = () => {
     const [prompt, setPrompt] = useState('');
@@ -29,6 +30,32 @@ const QuantumLab = () => {
 
     const showToast = (msg, type = 'success') => {
         setToast({ open: true, msg, type });
+    };
+
+    // Teacher Mode State
+    const [isTeacherOpen, setIsTeacherOpen] = useState(false);
+    const [explanation, setExplanation] = useState(null);
+    const [isExplaining, setIsExplaining] = useState(false);
+
+    const handleExplain = async () => {
+        setIsTeacherOpen(true);
+        if (!code) return;
+
+        setIsExplaining(true);
+        try {
+            const res = await fetch('http://localhost:5001/api/ai/explain', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ code })
+            });
+            const data = await res.json();
+            setExplanation(data.markdown);
+        } catch (e) {
+            console.error("Explanation failed", e);
+            setExplanation("### ❌ Error\n\nFailed to reach the AI Teacher. Please try again.");
+        } finally {
+            setIsExplaining(false);
+        }
     };
 
     const handleGenerate = async () => {
@@ -197,6 +224,14 @@ const QuantumLab = () => {
                                             <button onClick={openSaveModal} className="text-xs flex items-center gap-1 text-green-400 hover:underline" title="Save Code">
                                                 <Icon name="Save" size={12} /> Save
                                             </button>
+                                            <div className="h-4 w-px bg-slate-700/50 mx-1"></div>
+                                            <button
+                                                onClick={handleExplain}
+                                                className="text-xs flex items-center gap-1 text-purple-400 hover:text-purple-300 transition-colors"
+                                                title="Explain with AI Teacher"
+                                            >
+                                                <Icon name="GraduationCap" size={14} /> Explain
+                                            </button>
                                             <div className="flex space-x-1.5 sm:space-x-2 ml-2">
                                                 <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-red-500/20 border border-red-500/50" />
                                                 <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-yellow-500/20 border border-yellow-500/50" />
@@ -328,6 +363,13 @@ const QuantumLab = () => {
                 message={toast.msg}
                 type={toast.type}
                 onClose={() => setToast(prev => ({ ...prev, open: false }))}
+            />
+
+            <TeacherPanel
+                isOpen={isTeacherOpen}
+                onClose={() => setIsTeacherOpen(false)}
+                markdownContent={explanation}
+                isLoading={isExplaining}
             />
         </div>
     );
