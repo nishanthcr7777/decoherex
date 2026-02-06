@@ -5,13 +5,22 @@ import Icon from '../../../components/AppIcon';
 const BackendComparisonMatrix = ({ backends, selectedBackends, onBackendSelect }) => {
   const [viewMode, setViewMode] = useState('radar'); // 'radar' or 'table'
 
-  const radarData = [
-    { metric: 'Speed', ...selectedBackends?.reduce((acc, backend) => ({ ...acc, [backend?.name]: backend?.speedScore }), {}) },
-    { metric: 'Accuracy', ...selectedBackends?.reduce((acc, backend) => ({ ...acc, [backend?.name]: backend?.accuracyScore }), {}) },
-    { metric: 'Availability', ...selectedBackends?.reduce((acc, backend) => ({ ...acc, [backend?.name]: backend?.availabilityScore }), {}) },
-    { metric: 'Queue Efficiency', ...selectedBackends?.reduce((acc, backend) => ({ ...acc, [backend?.name]: backend?.queueEfficiency }), {}) },
-    { metric: 'Reliability', ...selectedBackends?.reduce((acc, backend) => ({ ...acc, [backend?.name]: backend?.reliabilityScore }), {}) }
-  ];
+  // Radar visual uses actual backend data: suitabilityScore, successProbability, aiConfidence, queueLength, predictedWaitTime
+  const getRadarValue = (backend, metricKey) => {
+    switch (metricKey) {
+      case 'Suitability': return backend?.suitabilityScore ?? 0;
+      case 'Success Rate': return backend?.successProbability ?? 0;
+      case 'AI Confidence': return backend?.aiConfidence ?? 0;
+      case 'Queue Efficiency': return backend?.queueLength != null ? Math.max(0, 100 - Math.min(backend.queueLength * 15, 100)) : 0;
+      case 'Speed': return backend?.predictedWaitTime != null ? Math.max(0, 100 - Math.min(backend.predictedWaitTime * 3, 100)) : 0;
+      default: return 0;
+    }
+  };
+  const radarMetrics = ['Suitability', 'Success Rate', 'AI Confidence', 'Queue Efficiency', 'Speed'];
+  const radarData = radarMetrics.map(metric => ({
+    metric,
+    ...selectedBackends?.reduce((acc, backend) => ({ ...acc, [backend?.name]: getRadarValue(backend, metric) }), {})
+  }));
 
   const colors = ['#06b6d4', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'];
 
@@ -154,23 +163,26 @@ const BackendComparisonMatrix = ({ backends, selectedBackends, onBackendSelect }
                 </thead>
                 <tbody>
                   {[
-                    { key: 'speedScore', label: 'Speed Score' },
-                    { key: 'accuracyScore', label: 'Accuracy Score' },
-                    { key: 'availabilityScore', label: 'Availability Score' },
-                    { key: 'queueEfficiency', label: 'Queue Efficiency' },
-                    { key: 'reliabilityScore', label: 'Reliability Score' }
+                    { key: 'suitabilityScore', label: 'Suitability' },
+                    { key: 'successProbability', label: 'Success Rate' },
+                    { key: 'aiConfidence', label: 'AI Confidence' },
+                    { key: 'queueLength', label: 'Queue Length', inverse: true },
+                    { key: 'predictedWaitTime', label: 'Wait Time (min)', inverse: true }
                   ]?.map((metric) => (
                     <tr key={metric?.key} className="border-b border-slate-700/30">
                       <td className="py-3 px-4 text-sm text-muted-foreground">
                         {metric?.label}
                       </td>
-                      {selectedBackends?.map((backend, index) => (
-                        <td key={`${backend?.id}-${index}`} className="text-center py-3 px-4">
-                          <span className={`text-sm font-medium ${getScoreColor(backend?.[metric?.key])}`}>
-                            {backend?.[metric?.key]}
-                          </span>
-                        </td>
-                      ))}
+                      {selectedBackends?.map((backend, index) => {
+                        const val = backend?.[metric?.key];
+                        return (
+                          <td key={`${backend?.id}-${index}`} className="text-center py-3 px-4">
+                            <span className={`text-sm font-medium ${metric?.inverse ? 'text-foreground' : getScoreColor(val)}`}>
+                              {val != null ? val : '-'}
+                            </span>
+                          </td>
+                        );
+                      })}
                     </tr>
                   ))}
                 </tbody>

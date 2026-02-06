@@ -277,13 +277,13 @@ const PerformanceAnalyticsInsightsDashboard = () => {
           {/* Full Width Backend Ranking Table - USING CSV DATA */}
           <div className="w-full overflow-x-auto scrollbar-hide">
             <h3 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4 text-foreground">Top Performing Backends (Historical Analysis)</h3>
-            {loadingDashboard ? <p className="text-sm text-muted-foreground">Loading...</p> : <BackendRankingTable data={backendRankingData} />}
+            <BackendRankingTable data={loadingDashboard ? [] : backendRankingData} />
           </div>
 
           {/* Full Width Performance Data Grid - USING CSV DATA */}
           <div className="w-full overflow-x-auto scrollbar-hide">
             <h3 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4 text-foreground">Recent Job Executions</h3>
-            {loadingDashboard ? <p className="text-sm text-muted-foreground">Loading...</p> : <PerformanceDataGrid data={performanceGridData} />}
+            <PerformanceDataGrid data={loadingDashboard ? [] : performanceGridData} />
           </div>
 
           {/* Live Backend Statistics (Keep original 'backends' usage for Real-Time comparison) */}
@@ -298,13 +298,11 @@ const PerformanceAnalyticsInsightsDashboard = () => {
                     <span className="font-medium sm:hidden">Live</span>
                   </div>
                   <Button variant="ghost" size="icon" onClick={() => fetchBackends()} disabled={loadingBackends}>
-                    <RefreshCw className={loadingBackends ? "animate-spin" : ""} size={18} className="sm:w-5 sm:h-5" />
+                    <RefreshCw className={`${loadingBackends ? "animate-spin" : ""} sm:w-5 sm:h-5`} size={18} />
                   </Button>
                 </div>
               </div>
-              {loadingBackends ? (
-                <p className="text-sm text-muted-foreground">Loading backend statistics...</p>
-              ) : errorBackends ? (
+              {errorBackends ? (
                 <p className="text-sm text-red-500">{errorBackends}</p>
               ) : (
                 <div className="overflow-x-auto scrollbar-hide">
@@ -325,7 +323,14 @@ const PerformanceAnalyticsInsightsDashboard = () => {
                       </tr>
                     </thead>
                     <tbody>
-                      {backends.map((backend) => (
+                      {loadingBackends ? (
+                        <tr>
+                          <td colSpan="11" className="py-8 px-2 text-center text-sm text-muted-foreground">
+                            Loading backend statistics...
+                          </td>
+                        </tr>
+                      ) : (
+                        backends.map((backend) => (
                         <tr key={backend.name} className="border-b border-slate-700/30 hover:bg-muted/20">
                           <td className="py-4 px-2 font-medium text-foreground">{backend.name}</td>
                           <td className="py-4 px-2">
@@ -353,7 +358,8 @@ const PerformanceAnalyticsInsightsDashboard = () => {
                             {backend.name === 'ibm_torino' ? '210K CLOPS' : backend.name === 'ibm_brisbane' ? '180K CLOPS' : 'N/A'}
                           </td>
                         </tr>
-                      ))}
+                        ))
+                      )}
                     </tbody>
                   </table>
                 </div>

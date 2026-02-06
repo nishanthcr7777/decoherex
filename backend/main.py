@@ -1157,7 +1157,7 @@ async def simulate_circuit(request: SimulateRequest):
             qc, 
             simulator, 
             optimization_level=1, 
-            basis_gates=["cx", "sx", "x", "rz", "measure", "h", "z", "y", "id", "barrier", "reset"]
+            basis_gates=["cx", "sx", "x", "rz", "measure", "h", "z", "y", "id", "reset"]
         )
         
         job = simulator.run(transpiled_qc, shots=1024)

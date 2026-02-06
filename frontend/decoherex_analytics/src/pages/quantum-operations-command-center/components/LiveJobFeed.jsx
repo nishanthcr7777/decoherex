@@ -118,8 +118,8 @@ const LiveJobFeed = ({ jobs, onJobAction }) => {
         </div>
       </motion.nav>
 
-      {/* Quantum Job List */}
-      <div className="flex-1 sm:flex-1 max-h-[450px] sm:max-h-none overflow-y-auto space-y-4 pr-2 scrollbar-hide sm:[scrollbar-width:auto] sm:[&::-webkit-scrollbar]:block custom-scrollbar relative z-10">
+      {/* Quantum Job List - 3 rows visible, scroll with hidden scrollbar (same as job management) */}
+      <div className="flex-1 min-h-0 max-h-[21rem] overflow-y-auto overflow-x-hidden space-y-4 pr-2 scrollbar-hide relative z-10">
         {sortedJobs.map((job) => {
           const statusStyle = getStatusColor(job.status);
           const type = job.circuit_type || job.type || 'Custom Circuit';
