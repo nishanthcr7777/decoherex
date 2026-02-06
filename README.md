@@ -151,7 +151,7 @@
 - **Real-time**: WebSocket for live job updates
 
 #### AI/ML Components
-- **Backend Recommender**: Random Forest classifier trained on 1M+ job records
+- **Backend Recommender**: Random Forest classifier trained on 10k+ job records
 - **Feature Engineering**: Multi-dimensional encoding (backend, job type, circuit depth, qubits)
 - **Prediction Accuracy**: 94% confidence on test dataset
 - **Model Size**: 122.34 MB (optimized for production)
@@ -481,9 +481,8 @@ Developed for **Amaravathi Quantum Valley Hackathon 2025**
 
 ### Contact
 
-- **Email**: team@decoherex.dev
+- **Email**: bnishanthtpm06@gmail.com
 - **GitHub**: [github.com/decoherex](https://github.com/decoherex)
-- **Documentation**: [docs.decoherex.dev](https://docs.decoherex.dev)
 
 ---
 
