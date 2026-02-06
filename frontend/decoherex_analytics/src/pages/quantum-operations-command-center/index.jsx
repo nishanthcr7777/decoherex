@@ -584,8 +584,20 @@ const QuantumOperationsCommandCenter = () => {
             {/* KPI Cards - Single row */}
             <div className="flex flex-nowrap gap-3 sm:gap-4 mb-4 sm:mb-6 overflow-x-auto scrollbar-hide pb-1">
               {[
-                { key: 'ActiveJobs', title: 'Active Jobs', icon: 'Activity', fallback: liveJobsKpiData.find(x => x.title === 'Active Jobs') },
-                { key: 'QueueLength', title: 'Queue Length', icon: 'Clock', fallback: liveJobsKpiData.find(x => x.title === 'Queue Length') },
+                {
+                  key: 'ActiveJobs',
+                  title: 'Active Jobs',
+                  icon: 'Activity',
+                  fallback: liveJobsKpiData.find(x => x.title === 'Active Jobs'),
+                  overrideValue: jobs?.filter(j => (j.status || '').toUpperCase() === 'RUNNING').length.toString()
+                },
+                {
+                  key: 'QueueLength',
+                  title: 'Queue Length',
+                  icon: 'Clock',
+                  fallback: liveJobsKpiData.find(x => x.title === 'Queue Length'),
+                  overrideValue: jobs?.filter(j => ['QUEUED', 'PENDING'].includes((j.status || '').toUpperCase()) || !j.status).length.toString()
+                },
                 { key: 'SuccessRate', title: 'Success Rate', icon: 'CheckCircle', fallback: liveJobsKpiData.find(x => x.title === 'Success Rate') },
                 { key: 'AvgWaitTime', title: 'Avg Wait Time', icon: 'Timer', fallback: liveJobsKpiData.find(x => x.title === 'Avg Wait Time') },
                 { key: 'BackendAvailability', title: 'System Availability', icon: 'Server', fallback: liveJobsKpiData.find(x => x.title === 'Backend Availability') },
@@ -594,8 +606,14 @@ const QuantumOperationsCommandCenter = () => {
               ].map((metric) => {
                 const apiData = kpiData[metric.key];
                 const useApi = apiData && apiData.value !== 'N/A' && apiData.value !== undefined;
-                const displayData = useApi ? apiData : metric.fallback;
-                if (!displayData || displayData.value === 'N/A') return null;
+                let displayData = useApi ? { ...apiData } : { ...metric.fallback };
+
+                // Override with local state counts for Active Jobs and Queue Length
+                if (metric.overrideValue !== undefined) {
+                  displayData.value = metric.overrideValue;
+                }
+
+                if (!displayData || displayData.value === 'N/A' || displayData.value === undefined) return null;
 
                 return (
                   <div key={metric.key} className="flex-shrink-0 min-w-[140px] sm:min-w-[160px]">
@@ -614,6 +632,7 @@ const QuantumOperationsCommandCenter = () => {
               })}
             </div>
 
+
             {/* Job Lifecycle Flow */}
             <div className="mb-4 sm:mb-6 overflow-x-auto scrollbar-hide">
               <JobLifecycleFlow jobs={jobs} />
@@ -621,16 +640,16 @@ const QuantumOperationsCommandCenter = () => {
 
             {/* Job Data Grid */}
             <div className="w-full overflow-x-auto scrollbar-hide">
-            <JobDataGrid
-              jobs={jobs}
-              onJobAction={handleJobAction}
-              onExport={handleExport}
-              statusFilter={statusFilter}
-              onStatusFilterChange={setStatusFilter}
-              backendFilter={backendFilter}
-              jobTypeFilter={jobTypeFilter}
-              durationFilter={durationFilter}
-            />
+              <JobDataGrid
+                jobs={jobs}
+                onJobAction={handleJobAction}
+                onExport={handleExport}
+                statusFilter={statusFilter}
+                onStatusFilterChange={setStatusFilter}
+                backendFilter={backendFilter}
+                jobTypeFilter={jobTypeFilter}
+                durationFilter={durationFilter}
+              />
             </div>
           </div>
         </div>

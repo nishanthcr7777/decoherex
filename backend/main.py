@@ -20,6 +20,7 @@ from qiskit_aer import AerSimulator
 from qiskit import transpile
 from qiskit.visualization import circuit_drawer
 from groq import Groq
+import numpy as np
 
 from supabase import create_client, Client
 
@@ -1350,18 +1351,33 @@ async def get_dashboard_data():
                     "avgExecutionTime": int(row['clops']) if row['clops'] else 0
                 })
 
+        # ----------------------------------------------------------------
+        # F. GLOBAL STATISTICS (DERIVED FROM CSV FOR REALISM)
+        # ----------------------------------------------------------------
+        global_stats = {
+            "totalVolume": len(backend_df),
+            "avgExecutionTime": int(backend_df['wait_time'].mean()), # in seconds or ms? Let's say s for consistency with Trends which uses ms? 
+            # Wait, the trends use ms. 250s is 250,000ms. 
+            # Let's use ms to match the index.jsx logic.
+            "avgExecutionTimeMs": int(backend_df['wait_time'].mean() * 1000), 
+            "successRate": round(backend_df['success_rate'].mean() * 100, 1),
+            "utilization": round(backend_df['queue'].mean() / 400.0 * 100, 1) # Normalized to max queue 400
+        }
+
         return {
             "trends": trends_data,
             "volume": volume_data,
             "capacity": capacity_data,
             "errors": error_data,
             "ranking": ranking_data,
-            "jobs": jobs_data # Raw jobs list for the table
+            "jobs": jobs_data,
+            "global_stats": global_stats
         }
 
     except Exception as e:
         print(f"Error serving dashboard data: {e}")
         return {"error": str(e)}
+
 
 # ----------------------------
 # 8️⃣ Chatbot / AI Assistant

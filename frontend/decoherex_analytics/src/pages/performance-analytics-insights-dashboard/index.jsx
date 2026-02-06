@@ -95,9 +95,11 @@ const PerformanceAnalyticsInsightsDashboard = () => {
   const kpiData = [
     {
       title: "Total Job Volume",
-      value: (dashboardData?.volume && Array.isArray(dashboardData.volume))
-        ? dashboardData.volume.reduce((acc, curr) => acc + (curr.BellState || 0) + (curr.Grover || 0) + (curr.QAOA || 0) + (curr.QuantumFourier || 0) + (curr.VQE || 0), 0).toString()
-        : "...",
+      value: (dashboardData?.global_stats?.totalVolume)
+        ? dashboardData.global_stats.totalVolume.toLocaleString()
+        : (dashboardData?.volume && Array.isArray(dashboardData.volume))
+          ? dashboardData.volume.reduce((acc, curr) => acc + (curr.BellState || 0) + (curr.Grover || 0) + (curr.QAOA || 0) + (curr.QuantumFourier || 0) + (curr.VQE || 0), 0).toString()
+          : "...",
       change: "+8.2%",
       trend: "up",
       icon: "Activity",
@@ -105,9 +107,11 @@ const PerformanceAnalyticsInsightsDashboard = () => {
     },
     {
       title: "Avg Execution Time",
-      value: (dashboardData?.trends && Array.isArray(dashboardData.trends) && dashboardData.trends.length > 0)
-        ? `${dashboardData.trends[dashboardData.trends.length - 1]?.avgExecutionTime}ms`
-        : "...",
+      value: (dashboardData?.global_stats?.avgExecutionTimeMs)
+        ? `${dashboardData.global_stats.avgExecutionTimeMs}ms`
+        : (dashboardData?.trends && Array.isArray(dashboardData.trends) && dashboardData.trends.length > 0)
+          ? `${dashboardData.trends[dashboardData.trends.length - 1]?.avgExecutionTime}ms`
+          : "...",
       change: "-12.5%",
       trend: "down",
       icon: "Clock",
@@ -115,9 +119,11 @@ const PerformanceAnalyticsInsightsDashboard = () => {
     },
     {
       title: "Success Rate",
-      value: (dashboardData?.trends && Array.isArray(dashboardData.trends) && dashboardData.trends.length > 0)
-        ? `${dashboardData.trends[dashboardData.trends.length - 1]?.successRate}%`
-        : "...",
+      value: (dashboardData?.global_stats?.successRate)
+        ? `${dashboardData.global_stats.successRate}%`
+        : (dashboardData?.trends && Array.isArray(dashboardData.trends) && dashboardData.trends.length > 0)
+          ? `${dashboardData.trends[dashboardData.trends.length - 1]?.successRate}%`
+          : "...",
       change: "+2.1%",
       trend: "up",
       icon: "CheckCircle",
@@ -125,9 +131,11 @@ const PerformanceAnalyticsInsightsDashboard = () => {
     },
     {
       title: "Backend Utilization",
-      value: (dashboardData?.capacity && Array.isArray(dashboardData.capacity) && dashboardData.capacity.length > 0)
-        ? `${dashboardData.capacity[dashboardData.capacity.length - 1]?.current}%`
-        : "...",
+      value: (dashboardData?.global_stats?.utilization)
+        ? `${dashboardData.global_stats.utilization}%`
+        : (dashboardData?.capacity && Array.isArray(dashboardData.capacity) && dashboardData.capacity.length > 0)
+          ? `${dashboardData.capacity[dashboardData.capacity.length - 1]?.current}%`
+          : "...",
       change: "+5.4%",
       trend: "up",
       icon: "Server",
@@ -331,33 +339,33 @@ const PerformanceAnalyticsInsightsDashboard = () => {
                         </tr>
                       ) : (
                         backends.map((backend) => (
-                        <tr key={backend.name} className="border-b border-slate-700/30 hover:bg-muted/20">
-                          <td className="py-4 px-2 font-medium text-foreground">{backend.name}</td>
-                          <td className="py-4 px-2">
-                            <Badge variant={backend.status === 'active' ? 'default' : 'destructive'}>
-                              {backend.status}
-                            </Badge>
-                          </td>
-                          <td className="py-4 px-2 text-sm text-foreground">{backend.total_pending_jobs !== undefined ? backend.total_pending_jobs : 'N/A'}</td>
-                          <td className="py-4 px-2 text-sm text-foreground">{backend.total_pending_jobs !== undefined ? backend.total_pending_jobs : 'N/A'}</td>
-                          <td className="py-4 px-2 text-sm text-foreground">{backend.version || 'N/A'}</td>
-                          <td className="py-4 px-2 text-sm text-foreground">{backend.qubits || 'N/A'}</td>
-                          <td className="py-4 px-2">
-                            <Badge variant={backend.operational ? 'default' : 'destructive'}>
-                              {backend.operational ? 'Yes' : 'No'}
-                            </Badge>
-                          </td>
-                          <td className="py-4 px-2 text-sm text-foreground">{backend.processor_type || 'N/A'}</td>
-                          <td className="py-4 px-2 text-sm text-foreground">
-                            {backend.two_q_error_best ? Number(backend.two_q_error_best).toFixed(6) : 'N/A'}
-                          </td>
-                          <td className="py-4 px-2 text-sm text-foreground">
-                            {backend.two_q_error_layered ? Number(backend.two_q_error_layered).toFixed(6) : 'N/A'}
-                          </td>
-                          <td className="py-4 px-2 text-sm text-foreground">
-                            {backend.name === 'ibm_torino' ? '210K CLOPS' : backend.name === 'ibm_brisbane' ? '180K CLOPS' : 'N/A'}
-                          </td>
-                        </tr>
+                          <tr key={backend.name} className="border-b border-slate-700/30 hover:bg-muted/20">
+                            <td className="py-4 px-2 font-medium text-foreground">{backend.name}</td>
+                            <td className="py-4 px-2">
+                              <Badge variant={backend.status === 'active' ? 'default' : 'destructive'}>
+                                {backend.status}
+                              </Badge>
+                            </td>
+                            <td className="py-4 px-2 text-sm text-foreground">{backend.total_pending_jobs !== undefined ? backend.total_pending_jobs : 'N/A'}</td>
+                            <td className="py-4 px-2 text-sm text-foreground">{backend.total_pending_jobs !== undefined ? backend.total_pending_jobs : 'N/A'}</td>
+                            <td className="py-4 px-2 text-sm text-foreground">{backend.version || 'N/A'}</td>
+                            <td className="py-4 px-2 text-sm text-foreground">{backend.qubits || 'N/A'}</td>
+                            <td className="py-4 px-2">
+                              <Badge variant={backend.operational ? 'default' : 'destructive'}>
+                                {backend.operational ? 'Yes' : 'No'}
+                              </Badge>
+                            </td>
+                            <td className="py-4 px-2 text-sm text-foreground">{backend.processor_type || 'N/A'}</td>
+                            <td className="py-4 px-2 text-sm text-foreground">
+                              {backend.two_q_error_best ? Number(backend.two_q_error_best).toFixed(6) : 'N/A'}
+                            </td>
+                            <td className="py-4 px-2 text-sm text-foreground">
+                              {backend.two_q_error_layered ? Number(backend.two_q_error_layered).toFixed(6) : 'N/A'}
+                            </td>
+                            <td className="py-4 px-2 text-sm text-foreground">
+                              {backend.name === 'ibm_torino' ? '210K CLOPS' : backend.name === 'ibm_brisbane' ? '180K CLOPS' : 'N/A'}
+                            </td>
+                          </tr>
                         ))
                       )}
                     </tbody>

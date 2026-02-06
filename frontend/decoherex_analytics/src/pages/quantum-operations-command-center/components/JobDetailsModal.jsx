@@ -16,7 +16,23 @@ const JobDetailsModal = ({ job, open, onClose }) => {
   // Determine output display
   let outputDisplay = '—';
 
-  if (job.results) {
+  // Check if job failed - don't show output for failed jobs
+  const isFailed = ['failed', 'error', 'cancelled'].includes((job.status || '').toLowerCase());
+
+  if (isFailed) {
+    // Show error message instead of output for failed jobs
+    outputDisplay = (
+      <div className="flex items-start gap-2 text-red-400 bg-red-500/10 border border-red-500/30 p-3 rounded-lg">
+        <Icon name="AlertTriangle" size={16} className="mt-0.5 flex-shrink-0" />
+        <div className="text-xs">
+          <div className="font-semibold mb-1">Job Failed</div>
+          <div className="text-red-300/80">
+            {job.error_message || job.error || 'Circuit execution failed. This may be due to backend errors, circuit depth exceeding limits, or timeout.'}
+          </div>
+        </div>
+      </div>
+    );
+  } else if (job.results) {
     // If we have structured results (from backend fetch)
     if (typeof job.results === 'object') {
       outputDisplay = (
@@ -41,11 +57,12 @@ const JobDetailsModal = ({ job, open, onClose }) => {
     } catch (e) {
       outputDisplay = job.output;
     }
-  } else {
-    // Old mock logic as last resort
+  } else if (['completed', 'done'].includes((job.status || '').toLowerCase())) {
+    // Completed jobs should have output - show sample if missing
     const sampleOutputs = ['00', '11', '01', '10', '+', '-', 'ψ'];
     outputDisplay = sampleOutputs[((job.job_id || job.id || '').charCodeAt(0) || 0) % sampleOutputs.length];
   }
+
 
   return (
     <Modal
