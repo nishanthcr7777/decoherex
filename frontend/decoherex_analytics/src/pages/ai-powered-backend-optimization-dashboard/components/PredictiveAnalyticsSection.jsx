@@ -157,7 +157,7 @@ const PredictiveAnalyticsSection = ({ constraints }) => {
                 <span className="text-[9px] sm:text-sm font-semibold text-foreground text-center sm:text-left leading-tight">Avg Wait Reduction</span>
               </div>
               <p className="text-lg sm:text-2xl font-bold text-warning mb-0.5 sm:mb-1 text-center sm:text-left">42%</p>
-              <p className="text-[9px] sm:text-xs text-muted-foreground text-center sm:text-left leading-tight">With AI optimization</p>
+              <p className="text-[9px] sm:text-xs text-muted-foreground text-center sm:text-left leading-tight">With AI recommendation</p>
             </div>
 
             <div className="p-2.5 sm:p-4 bg-gradient-to-br from-success/10 to-success/5 rounded-xl border border-success/20 shadow-lg">
@@ -208,7 +208,7 @@ const PredictiveAnalyticsSection = ({ constraints }) => {
                     <p className="text-[10px] sm:text-sm text-muted-foreground truncate">{rec?.backend}</p>
                   </div>
                 </div>
-                
+
                 <div className="text-right flex-shrink-0">
                   <div className={`text-xs sm:text-sm font-medium ${getConfidenceColor(rec?.confidence)}`}>
                     {rec?.confidence}%
@@ -237,7 +237,7 @@ const PredictiveAnalyticsSection = ({ constraints }) => {
               <div className="text-xs sm:text-sm min-w-0 flex-1">
                 <p className="text-foreground font-bold mb-1.5 text-sm sm:text-sm">Smart Scheduling Tip</p>
                 <p className="text-muted-foreground leading-relaxed">
-                  Based on your circuit depth of {constraints?.circuitDepth || 10} and error tolerance of {constraints?.errorTolerance || 0.01}, 
+                  Based on your circuit depth of {constraints?.circuitDepth || 10} and error tolerance of {constraints?.errorTolerance || 0.01},
                   the first recommendation offers the best balance of speed and accuracy.
                 </p>
               </div>
@@ -278,7 +278,7 @@ const PredictiveAnalyticsSection = ({ constraints }) => {
                   </div>
                   <span className="text-xs sm:text-sm font-medium text-success flex-shrink-0 ml-2">Sunday 38%</span>
                 </div>
-                
+
                 <div className="flex items-center justify-between p-2.5 sm:p-3 bg-muted/20 rounded-lg">
                   <div className="flex items-center space-x-1.5 sm:space-x-2 min-w-0 flex-1">
                     <Icon name="TrendingUp" size={12} className="sm:w-4 sm:h-4 text-error flex-shrink-0" />
@@ -286,7 +286,7 @@ const PredictiveAnalyticsSection = ({ constraints }) => {
                   </div>
                   <span className="text-xs sm:text-sm font-medium text-error flex-shrink-0 ml-2">Thursday 91%</span>
                 </div>
-                
+
                 <div className="flex items-center justify-between p-2.5 sm:p-3 bg-muted/20 rounded-lg">
                   <div className="flex items-center space-x-1.5 sm:space-x-2 min-w-0 flex-1">
                     <Icon name="Target" size={12} className="sm:w-4 sm:h-4 text-warning flex-shrink-0" />
@@ -309,7 +309,7 @@ const PredictiveAnalyticsSection = ({ constraints }) => {
                     </div>
                   </div>
                 </div>
-                
+
                 <div className="p-2.5 sm:p-3 bg-success/10 border border-success/30 rounded-lg">
                   <div className="flex items-start space-x-1.5 sm:space-x-2">
                     <Icon name="CheckCircle" size={12} className="sm:w-4 sm:h-4 text-success mt-0.5 flex-shrink-0" />

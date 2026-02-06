@@ -84,7 +84,7 @@ const JobConstraintPanel = ({ onConstraintsChange, isRefreshing }) => {
             <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">Configure quantum job parameters for optimal backend matching</p>
           </div>
         </div>
-        
+
         <div className="flex items-center gap-2.5 flex-shrink-0 flex-wrap w-full sm:w-auto">
           {isRefreshing && (
             <motion.div
@@ -202,9 +202,9 @@ const JobConstraintPanel = ({ onConstraintsChange, isRefreshing }) => {
             <Icon name="Lightbulb" size={16} className="sm:w-4 sm:h-4 text-warning" />
           </div>
           <div className="text-xs sm:text-sm min-w-0 flex-1">
-            <p className="text-foreground font-bold mb-1.5 text-sm sm:text-sm">AI Optimization Tips</p>
+            <p className="text-foreground font-bold mb-1.5 text-sm sm:text-sm">AI Recommendation Tips</p>
             <p className="text-muted-foreground leading-relaxed">
-              Lower error tolerance and circuit depth improve backend matching accuracy. 
+              Lower error tolerance and circuit depth improve backend matching accuracy.
               High priority jobs may have longer wait times on premium backends.
             </p>
           </div>

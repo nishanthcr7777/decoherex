@@ -121,7 +121,7 @@ const AIBackendOptimizationDashboard = () => {
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 sm:gap-4 mb-6 sm:mb-8">
             <div className="flex-1 min-w-0">
               <h1 className="text-2xl sm:text-3xl font-bold text-foreground bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text tracking-tight">
-                AI-Powered Backend Optimization
+                AI-Powered Backend Recommendation
               </h1>
               <p className="text-sm sm:text-base text-muted-foreground mt-2 leading-relaxed">
                 Intelligent quantum backend recommendations powered by machine learning

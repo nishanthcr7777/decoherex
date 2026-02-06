@@ -18,7 +18,7 @@ const Header = () => {
       description: 'Real-time quantum job monitoring and system health oversight'
     },
     {
-      label: 'Optimization',
+      label: 'Recommendation',
       path: '/ai-powered-backend-optimization-dashboard',
       description: 'AI-powered backend recommendations and intelligent job scheduling'
     },
