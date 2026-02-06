@@ -105,9 +105,8 @@ const LiveJobFeed = ({ jobs, onJobAction }) => {
                   />
                 )}
                 <span
-                  className={`relative z-10 flex items-center gap-1 sm:gap-2 transition-colors duration-200 truncate ${
-                    isActive ? 'text-foreground' : 'text-muted-foreground hover:text-foreground'
-                  }`}
+                  className={`relative z-10 flex items-center gap-1 sm:gap-2 transition-colors duration-200 truncate ${isActive ? 'text-foreground' : 'text-muted-foreground hover:text-foreground'
+                    }`}
                 >
                   <Icon name={opt.icon} size={12} className={`flex-shrink-0 ${isActive ? 'text-accent' : ''}`} />
                   <span className="truncate">{opt.label}</span>
@@ -121,12 +120,16 @@ const LiveJobFeed = ({ jobs, onJobAction }) => {
       {/* Quantum Job List - 3 rows visible, scroll with hidden scrollbar (same as job management) */}
       <div className="flex-1 min-h-0 max-h-[21rem] overflow-y-auto overflow-x-hidden space-y-4 pr-2 scrollbar-hide relative z-10">
         {sortedJobs.map((job) => {
-          const statusStyle = getStatusColor(job.status);
-          const type = job.circuit_type || job.type || 'Custom Circuit';
+          const status = (job?.status || 'queued').toLowerCase();
+          const statusStyle = getStatusColor(status);
+          const type = job.circuit_type || job.type || job.jobType || 'Custom Circuit';
+          const id = job.job_id || job.id || 'N/A';
+          const backend = job.backend || job.backend_name || 'Unknown Backend';
+          const qubits = job.qubits || job.n_qubits || 'N/A';
 
           return (
             <div
-              key={job.job_id || job.id}
+              key={id}
               className="group relative p-4 rounded-xl border border-slate-700/50 bg-transparent hover:bg-white/5 hover:border-accent/40 hover:shadow-[0_0_0_1px_rgba(6,182,212,0.4),0_0_8px_rgba(6,182,212,0.12)] focus-visible:outline-none focus-visible:border-accent/40 focus-visible:shadow-[0_0_0_1px_rgba(6,182,212,0.4),0_0_8px_rgba(6,182,212,0.12)] transition-all duration-300 cursor-pointer overflow-hidden"
             >
               <div className={`absolute left-0 top-0 bottom-0 w-1 ${statusStyle.split(' ')[1].replace('text-', 'bg-').replace('border-', 'bg-')}`} />
@@ -135,14 +138,14 @@ const LiveJobFeed = ({ jobs, onJobAction }) => {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-3 mb-2">
                     <span className={`flex items-center justify-center w-6 h-6 rounded-full border ${statusStyle.split(' ').filter(c => c.startsWith('border')).join(' ')} ${statusStyle.split(' ').filter(c => c.startsWith('bg')).join(' ')}`}>
-                      <Icon name={getStatusIcon(job.status)} size={12} className={statusStyle.split(' ')[0]} />
+                      <Icon name={getStatusIcon(status)} size={12} className={statusStyle.split(' ')[0]} />
                     </span>
                     <span className="font-mono text-xs text-cyan-500/70 tracking-tight">
-                      {(job.job_id || job.id || '').slice(0, 8)}...
+                      {id.slice(0, 8)}...
                     </span>
                     <span className="text-xs text-gray-500 flex items-center gap-1">
                       <Icon name="Server" size={10} />
-                      {job.backend}
+                      {backend}
                     </span>
                   </div>
 
@@ -154,7 +157,7 @@ const LiveJobFeed = ({ jobs, onJobAction }) => {
                   <div className="flex items-center gap-4 text-[10px] font-medium text-gray-500 uppercase tracking-wider">
                     <span className="flex items-center gap-1">
                       <Icon name="Cpu" size={10} />
-                      {job.qubits || 'N/A'} Qubits
+                      {qubits} Qubits
                     </span>
                     <span className="flex items-center gap-1">
                       <Icon name="Clock" size={10} />
@@ -169,13 +172,13 @@ const LiveJobFeed = ({ jobs, onJobAction }) => {
                   <Button
                     variant="ghost"
                     size="xs"
-                    onClick={() => onJobAction('view', job.job_id || job.id)}
+                    onClick={() => onJobAction('view', id)}
                     className="hover:bg-cyan-500/10 hover:text-cyan-400"
                   >
                     <Icon name="Eye" size={14} />
                   </Button>
 
-                  {(job.status === 'failed' || (job.error_message)) && (
+                  {(status === 'failed' || (job.error_message)) && (
                     <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-red-500/20 text-red-400 border border-red-500/20">
                       ERROR
                     </span>

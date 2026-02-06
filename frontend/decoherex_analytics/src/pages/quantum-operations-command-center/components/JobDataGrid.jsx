@@ -220,9 +220,8 @@ const JobDataGrid = ({
                     />
                   )}
                   <span
-                    className={`relative z-10 flex items-center gap-1 sm:gap-2 transition-colors duration-200 truncate ${
-                      isActive ? 'text-foreground' : 'text-muted-foreground hover:text-foreground'
-                    }`}
+                    className={`relative z-10 flex items-center gap-1 sm:gap-2 transition-colors duration-200 truncate ${isActive ? 'text-foreground' : 'text-muted-foreground hover:text-foreground'
+                      }`}
                   >
                     <Icon name={opt.icon} size={12} className={`flex-shrink-0 ${isActive ? 'text-accent' : ''}`} />
                     <span className="truncate">{opt.label}</span>
@@ -345,82 +344,92 @@ const JobDataGrid = ({
             </tr>
           </thead>
           <tbody>
-            {filteredAndSortedJobs?.map((job) => (
-              <tr
-                key={job?.id || job?.job_id}
-                className="border-b border-slate-700/30 hover:bg-muted/20 transition-colors"
-              >
-                <td className="py-4 px-2">
-                  <input
-                    type="checkbox"
-                    checked={selectedJobs?.has(job?.job_id || job?.id)}
-                    onChange={() => handleSelectJob(job?.job_id || job?.id)}
-                    className="rounded border-border/50 bg-input text-accent focus:ring-2 focus:ring-ring"
-                  />
-                </td>
-                {/* Job Name */}
-                <td className="py-4 px-2">
-                  <span className="text-sm text-foreground">{job?.job_name || `Job-${(job?.job_id || job?.id)?.slice(-4)}`}</span>
-                </td>
-                {/* Job ID */}
-                <td className="py-4 px-2">
-                  <span className="text-sm font-mono text-accent">{(job?.job_id || job?.id)?.slice(0, 8)}...</span>
-                </td>
-                {/* Backend */}
-                <td className="py-4 px-2">
-                  <span className="text-sm text-foreground">{job?.backend}</span>
-                </td>
-                {/* Circuit */}
-                <td className="py-4 px-2">
-                  <span className="text-sm text-foreground">{job?.circuit}</span>
-                </td>
-                {/* Status */}
-                <td className="py-4 px-2">
-                  {getStatusBadge(job?.status)}
-                </td>
-                {/* Progress */}
-                <td className="py-4 px-2 w-32">
-                  <div className="w-full bg-border rounded-full h-2">
-                    <div className={`h-2 rounded-full bg-accent transition-all`} style={{ width: `${job?.progress || (job?.status === 'completed' || job?.status === 'DONE' ? 100 : 0)}%` }} />
-                  </div>
-                </td>
-                {/* Submitted At */}
-                <td className="py-4 px-2">
-                  <span className="text-sm text-muted-foreground">{formatTimestamp(job?.submitted_at || job?.timestamp)}</span>
-                </td>
-                {/* Actions */}
-                <td className="py-4 px-2">
-                  <div className="flex items-center space-x-1">
-                    <Button
-                      variant="ghost"
-                      size="xs"
-                      iconName="Eye"
-                      onClick={() => onJobAction('view', job?.job_id || job?.id)}
-                      title="View details"
-                      className="active:bg-transparent active:shadow-[0_0_12px_rgba(6,182,212,0.5)] active:ring-2 active:ring-accent/50 active:ring-offset-1"
+            {filteredAndSortedJobs?.map((job) => {
+              const id = job?.job_id || job?.id || 'N/A';
+              const name = job?.job_name || job?.name || `Job-${id.slice(-4)}`;
+              const backend = job?.backend || job?.backend_name || 'Unknown';
+              const circuit = job?.circuit || job?.circuit_type || job?.type || 'Custom';
+              const status = (job?.status || 'queued').toLowerCase();
+              const progress = job?.progress || (status === 'completed' || status === 'done' ? 100 : 0);
+              const timestamp = job?.submitted_at || job?.created_at || job?.timestamp;
+
+              return (
+                <tr
+                  key={id}
+                  className="border-b border-slate-700/30 hover:bg-muted/20 transition-colors"
+                >
+                  <td className="py-4 px-2">
+                    <input
+                      type="checkbox"
+                      checked={selectedJobs?.has(id)}
+                      onChange={() => handleSelectJob(id)}
+                      className="rounded border-border/50 bg-input text-accent focus:ring-2 focus:ring-ring"
                     />
-                    {job?.status === 'failed' && (
+                  </td>
+                  {/* Job Name */}
+                  <td className="py-4 px-2">
+                    <span className="text-sm text-foreground">{name}</span>
+                  </td>
+                  {/* Job ID */}
+                  <td className="py-4 px-2">
+                    <span className="text-sm font-mono text-accent">{id.slice(0, 8)}...</span>
+                  </td>
+                  {/* Backend */}
+                  <td className="py-4 px-2">
+                    <span className="text-sm text-foreground">{backend}</span>
+                  </td>
+                  {/* Circuit */}
+                  <td className="py-4 px-2">
+                    <span className="text-sm text-foreground">{circuit}</span>
+                  </td>
+                  {/* Status */}
+                  <td className="py-4 px-2">
+                    {getStatusBadge(status)}
+                  </td>
+                  {/* Progress */}
+                  <td className="py-4 px-2 w-32">
+                    <div className="w-full bg-border rounded-full h-2">
+                      <div className={`h-2 rounded-full bg-accent transition-all`} style={{ width: `${progress}%` }} />
+                    </div>
+                  </td>
+                  {/* Submitted At */}
+                  <td className="py-4 px-2">
+                    <span className="text-sm text-muted-foreground">{formatTimestamp(timestamp)}</span>
+                  </td>
+                  {/* Actions */}
+                  <td className="py-4 px-2">
+                    <div className="flex items-center space-x-1">
                       <Button
                         variant="ghost"
                         size="xs"
-                        iconName="RotateCcw"
-                        onClick={() => onJobAction('retry', job?.job_id || job?.id)}
-                        title="Retry job"
+                        iconName="Eye"
+                        onClick={() => onJobAction('view', id)}
+                        title="View details"
                         className="active:bg-transparent active:shadow-[0_0_12px_rgba(6,182,212,0.5)] active:ring-2 active:ring-accent/50 active:ring-offset-1"
                       />
-                    )}
-                    <Button
-                      variant="ghost"
-                      size="xs"
-                      iconName="MoreHorizontal"
-                      onClick={() => onJobAction('menu', job?.job_id || job?.id)}
-                      title="More actions"
-                      className="active:bg-transparent active:shadow-[0_0_12px_rgba(6,182,212,0.5)] active:ring-2 active:ring-accent/50 active:ring-offset-1"
-                    />
-                  </div>
-                </td>
-              </tr>
-            ))}
+                      {status === 'failed' && (
+                        <Button
+                          variant="ghost"
+                          size="xs"
+                          iconName="RotateCcw"
+                          onClick={() => onJobAction('retry', id)}
+                          title="Retry job"
+                          className="active:bg-transparent active:shadow-[0_0_12px_rgba(6,182,212,0.5)] active:ring-2 active:ring-accent/50 active:ring-offset-1"
+                        />
+                      )}
+                      <Button
+                        variant="ghost"
+                        size="xs"
+                        iconName="MoreHorizontal"
+                        onClick={() => onJobAction('menu', id)}
+                        title="More actions"
+                        className="active:bg-transparent active:shadow-[0_0_12px_rgba(6,182,212,0.5)] active:ring-2 active:ring-accent/50 active:ring-offset-1"
+                      />
+                    </div>
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
 

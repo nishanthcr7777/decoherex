@@ -105,50 +105,58 @@ const JobLifecycleFlow = ({ jobs }) => {
                 </div>
                 {/* Job Cards */}
                 <div className="flex-1 space-y-2 overflow-y-auto max-h-[300px] sm:max-h-96 scrollbar-hide">
-                  {stageJobs?.map((job) => (
-                    <div
-                      key={job?.job_id || job?.id}
-                      onClick={() => {
-                        setSelectedJob(job);
-                        setIsDetailsOpen(true);
-                      }}
-                      className={`
+                  {stageJobs?.map((job) => {
+                    const id = job?.job_id || job?.id || 'N/A';
+                    const backend = job?.backend || job?.backend_name || 'Unknown Backend';
+                    const type = job?.jobType || job?.type || job?.circuit_type || 'Custom Circuit';
+                    const duration = job?.duration || job?.execution_time || job?.executionTime || job?.waitTime || job?.queue_time || 0;
+                    const qubits = job?.qubits || job?.n_qubits || 'N/A';
+
+                    return (
+                      <div
+                        key={id}
+                        onClick={() => {
+                          setSelectedJob(job);
+                          setIsDetailsOpen(true);
+                        }}
+                        className={`
                         p-2.5 sm:p-3 rounded-lg border border-slate-700/50 ${getJobCardBgColor(stage?.id)}
                         hover:bg-white/5 hover:border-accent/40 hover:shadow-[0_0_0_1px_rgba(6,182,212,0.4),0_0_8px_rgba(6,182,212,0.12)]
                         focus-visible:outline-none focus-visible:border-accent/40 focus-visible:shadow-[0_0_0_1px_rgba(6,182,212,0.4),0_0_8px_rgba(6,182,212,0.12)]
                         transition-all duration-200 cursor-pointer
                       `}
-                      title={`Job ${job?.id} - ${job?.type} on ${job?.backend}`}
-                    >
-                      <div className="flex items-center justify-between mb-1.5 sm:mb-2 gap-2">
-                        <span className="text-[10px] sm:text-xs font-mono text-accent truncate flex-1">
-                          #{(job?.job_id || job?.id)?.slice(-6)}
-                        </span>
-                        <span className="text-[10px] sm:text-xs text-muted-foreground truncate">
-                          {job?.backend}
-                        </span>
-                      </div>
-
-                      <div className="text-[10px] sm:text-xs text-foreground mb-1 truncate">
-                        {job?.type || 'N/A'}
-                      </div>
-
-                      <div className="flex items-center justify-between text-[10px] sm:text-xs text-muted-foreground gap-2">
-                        <span className="truncate">{job?.qubits || 'N/A'} qubits</span>
-                        <span className="truncate">{job?.duration || job?.waitTime || 'N/A'}</span>
-                      </div>
-
-                      {/* Progress bar for running jobs */}
-                      {stage?.id === 'running' && (
-                        <div className="mt-2 w-full bg-muted/30 rounded-full h-1">
-                          <div
-                            className="bg-warning h-1 rounded-full transition-all duration-1000"
-                            style={{ width: `${job?.progress || 0}%` }}
-                          />
+                        title={`Job ${id} - ${type} on ${backend}`}
+                      >
+                        <div className="flex items-center justify-between mb-1.5 sm:mb-2 gap-2">
+                          <span className="text-[10px] sm:text-xs font-mono text-accent truncate flex-1">
+                            #{id.slice(-6)}
+                          </span>
+                          <span className="text-[10px] sm:text-xs text-muted-foreground truncate">
+                            {backend}
+                          </span>
                         </div>
-                      )}
-                    </div>
-                  ))}
+
+                        <div className="text-[10px] sm:text-xs text-foreground mb-1 truncate">
+                          {type}
+                        </div>
+
+                        <div className="flex items-center justify-between text-[10px] sm:text-xs text-muted-foreground gap-2">
+                          <span className="truncate">{qubits} qubits</span>
+                          <span className="truncate">{duration ? `${Math.round(duration)}ms` : 'N/A'}</span>
+                        </div>
+
+                        {/* Progress bar for running jobs */}
+                        {stage?.id === 'running' && (
+                          <div className="mt-2 w-full bg-muted/30 rounded-full h-1">
+                            <div
+                              className="bg-warning h-1 rounded-full transition-all duration-1000"
+                              style={{ width: `${job?.progress || 0}%` }}
+                            />
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
 
                   {stageJobs?.length === 0 && (
                     <div className="flex items-center justify-center h-16 sm:h-20 text-muted-foreground">
